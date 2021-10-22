@@ -4,6 +4,9 @@ library("DESeq2")
 MAGNet_DCMvsHCM_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsHCM_GeneTonic.rds")
 MAGNet_DCMvsNFD_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsNFD_GeneTonic.rds")
 MAGNet_HCMvsNFD_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_HCMvsNFD_GeneTonic.rds")
+MAGNet_DCMvsHCM_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_dcm_vs_hcm.RData"))
+MAGNet_DCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_dcm_vs_nfd.RData"))
+MAGNet_HCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_hcm_vs_nfd.RData"))
 
 library(shinycssloaders)
 options(spinner.type = 6)
@@ -95,6 +98,10 @@ all_gtls <- list(
   )
 )
 
+all_igraph <- list(DCMvsHCM = MAGNet_DCMvsHCM_igraph,
+                   DCMvsNFD = MAGNet_DCMvsNFD_igraph,
+                   HCMvsNFD = MAGNet_HCMvsNFD_igraph)
+
 rm(MAGNet_DCMvsHCM_GeneTonic,
    MAGNet_DCMvsNFD_GeneTonic,
    MAGNet_HCMvsNFD_GeneTonic)
@@ -108,6 +115,10 @@ rm(gtl_DCMvsHCM_BP,
    gtl_HCMvsNFD_BP,
    gtl_HCMvsNFD_MF,
    gtl_HCMvsNFD_CC)
+
+rm(MAGNet_DCMvsHCM_igraph,
+   MAGNet_DCMvsNFD_igraph,
+   MAGNet_HCMvsNFD_igraph)
 
 library("shiny")
 library("visNetwork")
@@ -147,6 +158,14 @@ ui <- fluidPage(
         plotOutput("emap_signature")
       )
         
+    ),
+    fluidRow(
+      column(
+        width = 8,
+        withSpinner(
+          visNetworkOutput("visnet_igraph")
+        )
+      )
     )
     
   )
@@ -157,6 +176,7 @@ server <- function(input, output, session) {
   
   rvalues <- reactiveValues()
   rvalues$mygtl <- NULL
+  rvalues$myigraph <- NULL
   
   # observeEvent(input$button_loadgtl, {
     
@@ -178,6 +198,10 @@ server <- function(input, output, session) {
       # }
     })
   # })
+    
+    rvalues$myigraph <- reactive({
+      all_igraph[[input$selected_contrast]]
+    })
   
   # selected_gtl <- reactive({
   #   message(input$selected_contrast)
@@ -329,6 +353,24 @@ server <- function(input, output, session) {
         name = "ggs_network",
         type = "png",
         label = "Save ggs graph"
+      )
+  })
+  
+  output$visnet_igraph <- renderVisNetwork({
+    
+    visNetwork::visIgraph(rvalues$myigraph()) %>%
+      visOptions(
+        highlightNearest = list(
+          enabled = TRUE,
+          degree = 1,
+          hover = TRUE
+        ),
+        nodesIdSelection = TRUE
+      ) %>%
+      visExport(
+        name = "igraph",
+        type = "png",
+        label = "Save igraph graph"
       )
   })
 }
