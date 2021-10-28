@@ -8,7 +8,7 @@ library(stringr)
 library(scales)
 
 #' GTF file used for plotting the gene structure
-gtf <- rtracklayer::import.gff2("/biodb/genomes/homo_sapiens/GRCh38_102/GRCh38.102.gtf")
+gtf <- rtracklayer::import.gff2("GRCh38.102.gtf")
 
 group_colors <- c("steelblue", "gold", "forestgreen")
 
