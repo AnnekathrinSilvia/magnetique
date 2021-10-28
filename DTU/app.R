@@ -1,24 +1,10 @@
 library(shiny)
 
-
-#' Summarized experiment for MAGnet dataset
-#' Results from DRIMSeq
-#' Each row is a transcript
-#' There are three assays:
-#' - counts: read counts per transcript
-#' - proportions: proportions of reads per gene
-#' - fit_full: fitted proportions
-#' colData has the sample information
-#' rowData has the transcript annotation
-#' Modelling results are accesible via rowData:
-#' rowData "DRIMSeq_HCM_vs_NFD"
-#' rowData "DRIMSeq_DCM_vs_NFD"
-#' rowData "DRIMSeq_DCM_vs_HCM"
+source("../plots_with_se_obj.R")
 se <- readRDS("/beegfs/prj/MAGE/analysis/DTU/summarized_experiment.RDS")
 
 gene_names <- unique(rowData(se)[["gene_name"]])
 
-source("../plots_with_se_obj.R")
 
 ui <- fluidPage(
   titlePanel("MAGnet DTU prototype"),
