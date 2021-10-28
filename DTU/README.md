@@ -5,7 +5,7 @@ Here I describe the process to plot the DTU results.
 The annotation we use is here: http://ftp.ensembl.org/pub/release-102/gff3/homo_sapiens/Homo_sapiens.GRCh38.102.gff3.gz
 
 The summarized experiment object for DRIMseq results with the MAGnet dataset goes here: https://data.dieterichlab.org/s/dMzSgF98DRQ7yYc. 
-These should be in this directory (DTU/).
+These files  should be in the data directory `DTU/data/`.
 
 Each row is in the object is a transcript, and it has three assays:
 - counts: read counts per transcript

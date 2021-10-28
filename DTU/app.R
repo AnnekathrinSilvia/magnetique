@@ -1,7 +1,7 @@
 library(shiny)
 
 source("plots_with_se_obj.R")
-se <- readRDS("summarized_experiment.RDS")
+se <- readRDS("data/summarized_experiment.RDS")
 
 gene_names <- unique(rowData(se)[["gene_name"]])
 
