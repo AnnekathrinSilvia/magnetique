@@ -129,13 +129,14 @@ volcano_plot <- function(res_de,
   
   
   # adding labels to the significant points
-  p <- p + geom_text_repel(
-    data = subset(volcano_df, filter),
-    aes_string(label = "gene_names"),
-    size = 4,
-    max.overlaps = volcano_labels
-  )
-  
+  if (volcano_labels > 0) {
+    p <- p + geom_text_repel(
+      data = subset(volcano_df, filter),
+      aes_string(label = "gene_names"),
+      size = 4,
+      max.overlaps = volcano_labels
+    )
+  }  
   
   # handling the title
   p <- p + ggtitle(title)
