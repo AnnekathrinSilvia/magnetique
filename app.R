@@ -286,7 +286,8 @@ magnetique_server <- function(input, output, session) {
   output$de_table <- DT::renderDataTable({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    DT::datatable(as.data.frame(myde))
+    
+    DT::datatable(GeneTonic::deseqresult2df(myde), options = list(scrollX = TRUE))
   })
   
   output$de_volcano <- renderPlot({
