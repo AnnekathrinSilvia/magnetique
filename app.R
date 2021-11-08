@@ -123,54 +123,176 @@ rm(MAGNet_DCMvsHCM_igraph,
 library("shiny")
 library("visNetwork")
 
-ui <- fluidPage(
-  fluidRow(
-    column(
-      width = 8,
-      selectInput("selected_contrast", label = "Contrast id", choices = c("DCMvsHCM", "DCMvsNFD", "HCMvsNFD")),
-      selectInput("selected_ontology", label = "Ontology", choices = c("BP", "MF", "CC")),
-      
-      actionButton("button_loadgtl", "load gtl data"),
-      
-      plotOutput("de_volcano"),
-      
-      verbatimTextOutput("gtl_loaded")
-    ),
-    column(
-      width = 4,
-      numericInput("number_genesets", "Number of genesets", value = 15, min = 0),
-      selectInput("color_by", "Color by", choices = c("z_score", "gs_pvalue"), 
-                  selected = "z_score")
-    ),
-    
-    fluidRow(
-      column(
-        width = 8,
-        withSpinner(
-          visNetworkOutput("visnet_em")
-        ) # ,
-        # withSpinner(
-        #   visNetworkOutput("visnet_ggs")
-        # )
+
+magnetique_ui <- bs4Dash::bs4DashPage(
+  title = "magnetique",
+  dark = NULL,
+  header = bs4Dash::bs4DashNavbar(),
+  sidebar = bs4Dash::bs4DashSidebar(
+    title = HTML("<small>magnetique</small>"),
+    #src = "GeneTonic/GeneTonic.png",
+    #skin = "dark",
+    #status = "primary",
+    #brandColor = NULL,
+    #url = "https://bioconductor.org/packages/GeneTonic",
+    collapsed = TRUE,
+    elevation = 1,
+    opacity = 0.8,
+    bs4SidebarMenu(
+      id = "magnetique_tabs",
+      bs4SidebarMenuItem(
+        "Welcome!",
+        tabName = "tab_welcome"
+        #icon = icon("home")
       ),
-      column(
-        width = 4,
-        plotOutput("emap_signature")
-      )
-        
-    ),
-    fluidRow(
-      column(
-        width = 8,
-        withSpinner(
-          visNetworkOutput("visnet_igraph")
-        )
+      bs4SidebarMenuItem(
+        "Differential Expression",
+        tabName = "tab_de"
+        #icon = icon("share-alt-square")
+      ),
+      bs4SidebarMenuItem(
+        "Enrichment Map",
+        tabName = "tab_emap"
+        #icon = icon("project-diagram")
+      ),
+      bs4SidebarMenuItem(
+        "Differential transcript usage",
+        tabName = "tab_dtu"
+        #icon = icon("share-alt-square")
+      ),
+      bs4SidebarMenuItem(
+        "Carnival",
+        tabName = "tab_carnival"
+        #icon = icon("images")
       )
     )
-    
-  )
+  ),
   
+  body = bs4DashBody(
+    
+    bs4TabItems(
+      # ui panel welcome -----------------------------------------------------------
+      bs4TabItem(
+        tabName = "tab_welcome",
+        fluidRow(
+          #column(
+          #  width = 11
+          #),
+          # column(
+          #  width = 1,
+          # actionButton(
+          #    label = "", icon = icon("question-circle"),
+          #    style = .helpbutton_biocstyle
+          #)
+          #  )
+        ),
+        fluidRow(
+          h2("Overview on the provided input")
+        )
+      ),
+      
+      # ui panel differential expression ---------------------------------------------------
+      bs4TabItem(
+        tabName = "tab_de",
+        fluidRow(
+          #column(
+          #  width = 11
+          #),
+          #column(
+          #  width = 1,
+          #  actionButton(
+          #    label = "", icon = icon("question-circle"),
+          #    style = .helpbutton_biocstyle
+          #  )
+          # )
+        )
+      ),
+      
+      bs4TabItem(
+        tabName = "tab_emap",
+        #fluidRow(
+        #column(
+        # width = 11
+        #),
+        #column(
+        #  width = 1,
+        #  actionButton(,
+        #    label = "", icon = icon("question-circle"),
+        #    style = .helpbutton_biocstyle
+        #  )
+        #)
+        # ),
+        fluidRow(
+          column(
+            width = 8,
+            withSpinner(
+              visNetworkOutput("visnet_em")
+            ) # ,
+            # withSpinner(
+            #   visNetworkOutput("visnet_ggs")
+            # )
+          ),
+          column(
+            width = 4,
+            plotOutput("emap_signature")
+          )
+        )
+      ),
+      
+      bs4TabItem(
+        tabName = "tab_dtu",
+        fluidRow(
+          #column(
+          #  width = 11
+          #),
+          # column(
+          #    width = 1,
+          #    actionButton(,
+          #     label = "", icon = icon("question-circle"),
+          #    style = .helpbutton_biocstyle
+          # )
+          #  )
+        )
+      ),
+      
+      bs4TabItem(
+        tabName = "tab_carnival",
+        fluidRow(
+          column(
+            width = 8,
+            withSpinner(
+              visNetworkOutput("visnet_igraph")
+            )
+          )
+        )
+      )
+    ),
+    # controlbar definition ---------------------------------------------------
+    controlbar = bs4Dash::bs4DashControlbar(
+      collapsed = TRUE,
+      selectInput("selected_contrast",
+                  label = "Contrast id",
+                  choices = c("DCMvsHCM", 
+                              "DCMvsNFD", 
+                              "HCMvsNFD"),
+                  selected = "DCMvsHCM"),
+      selectInput("selected_ontology",
+                  label = "Ontology",
+                  choices = c("BP", "MF", "CC"),
+                  selected = "BP"),
+      numericInput("number_genesets", 
+                   "Number of genesets",
+                   value = 15,
+                   min = 0),
+      selectInput("color_by",
+                  "Color by",
+                  choices = c("z_score",
+                              "gs_pvalue"), 
+                  selected = "z_score")
+    )
+  )
 )
+
 
 server <- function(input, output, session) {
   
@@ -178,69 +300,20 @@ server <- function(input, output, session) {
   rvalues$mygtl <- NULL
   rvalues$myigraph <- NULL
   
-  # observeEvent(input$button_loadgtl, {
+  rvalues$mygtl <- reactive({
     
-    rvalues$mygtl <- reactive({
-      
-      message(input$selected_contrast)
-      message(input$selected_ontology)
-      
-      all_gtls[[input$selected_contrast]][[input$selected_ontology]]
-      
-      # if(input$selected_contrast == "DCMvsHCM") {
-      #   if(input$selected_ontology == "BP") {
-      #     gtl_DCMvsHCM_BP
-      #   } else if(input$selected_ontology == "MF") {
-      #     gtl_DCMvsHCM_MF
-      #   } else if(input$selected_ontology == "CC") {
-      #     gtl_DCMvsHCM_CC
-      #   }
-      # }
-    })
-  # })
+    message(input$selected_contrast)
+    message(input$selected_ontology)
     
-    rvalues$myigraph <- reactive({
-      all_igraph[[input$selected_contrast]]
-    })
+    #all_gtls[[input$selected_contrast]][[input$selected_ontology]]
+    all_gtls[["DCMvsHCM"]][["BP"]]
+  })
   
-  # selected_gtl <- reactive({
-  #   message(input$selected_contrast)
-  #   message(input$selected_ontology)
-  #   
-  #   mygtl <- 
-  #     {
-  #       if(input$selected_contrast == "DCMvsHCM") {
-  #         if(input$selected_ontology == "BP") {
-  #           gtl_DCMvsHCM_BP
-  #         } else if(input$selected_ontology == "MF") {
-  #           gtl_DCMvsHCM_MF
-  #         } else if(input$selected_ontology == "CC") {
-  #           gtl_DCMvsHCM_CC
-  #         }
-  #       }
-  #       
-  #       if(input$selected_contrast == "DCMvsNFD") {
-  #         if(input$selected_ontology == "BP") {
-  #           gtl_DCMvsNFD_BP
-  #         } else if(input$selected_ontology == "MF") {
-  #           gtl_DCMvsNFD_MF
-  #         } else if(input$selected_ontology == "CC") {
-  #           gtl_DCMvsNFD_CC
-  #         }
-  #       }
-  #       
-  #       if(input$selected_contrast == "HCMvsNFD") {
-  #         if(input$selected_ontology == "BP") {
-  #           gtl_HCMvsNFD_BP
-  #         } else if(input$selected_ontology == "MF") {
-  #           gtl_HCMvsNFD_MF
-  #         } else if(input$selected_ontology == "CC") {
-  #           gtl_HCMvsNFD_CC
-  #         }
-  #       }
-  #     }
-  #   return(mygtl)
-  # })
+  rvalues$myigraph <- reactive({
+    #all_igraph[[input$selected_contrast]]
+    all_igraph[["DCMvsHCM"]]
+  })
+  
   
   output$de_volcano <- renderPlot({
     signature_volcano(gtl = rvalues$mygtl(),
@@ -292,19 +365,19 @@ server <- function(input, output, session) {
     
     
     # if (!is.null(input$exp_condition)) {
-      # message(cur_gsid)
-      gs_heatmap(
-        se = vst(rvalues$mygtl()$dds) ,
-        gtl = rvalues$mygtl(),
-        geneset_id = cur_gsid,
-        FDR = 0.05,
-        de_only = FALSE,
-        cluster_rows = TRUE,
-        cluster_columns = TRUE,
-        center_mean = TRUE,
-        scale_row = TRUE,
-        anno_col_info = "Etiology"
-      )
+    # message(cur_gsid)
+    gs_heatmap(
+      se = vst(rvalues$mygtl()$dds) ,
+      gtl = rvalues$mygtl(),
+      geneset_id = cur_gsid,
+      FDR = 0.05,
+      de_only = FALSE,
+      cluster_rows = TRUE,
+      cluster_columns = TRUE,
+      center_mean = TRUE,
+      scale_row = TRUE,
+      anno_col_info = "Etiology"
+    )
     # } else {
     #   gs_heatmap(
     #     myvst,
@@ -375,28 +448,10 @@ server <- function(input, output, session) {
   })
 }
 
-shinyApp(ui, server)
+shinyApp(magnetique_ui, server)
 
 # same for the diff exp things (but they are anyway in the GTL)
 
 # do compute the z score or so for the res_enrich
 
 ## and then have some emap interactive/ggs interactive on that? we need then a numericinput for the nr of genesets
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
