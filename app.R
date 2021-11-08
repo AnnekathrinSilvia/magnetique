@@ -120,108 +120,89 @@ rm(MAGNet_DCMvsHCM_igraph,
    MAGNet_DCMvsNFD_igraph,
    MAGNet_HCMvsNFD_igraph)
 
+
+# loading libraries -------------------------------------------------------
+
 library("shiny")
 library("visNetwork")
+library("bs4Dash")
+library("shinydashboard")
+library("ggplot2")
+library("ggrepel")
+library("igraph")
 
 
-magnetique_ui <- bs4Dash::bs4DashPage(
+# sourcing external files -------------------------------------------------
+
+source("volcano_plot.R")
+source("DTU/plots_with_se_obj.R")
+
+
+
+# ui definition -----------------------------------------------------------
+
+magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
-  dark = NULL,
-  header = bs4Dash::bs4DashNavbar(),
-  sidebar = bs4Dash::bs4DashSidebar(
-    title = HTML("<small>magnetique</small>"),
-    #src = "GeneTonic/GeneTonic.png",
-    #skin = "dark",
-    #status = "primary",
-    #brandColor = NULL,
-    #url = "https://bioconductor.org/packages/GeneTonic",
-    collapsed = TRUE,
-    elevation = 1,
-    opacity = 0.8,
-    bs4SidebarMenu(
-      id = "magnetique_tabs",
-      bs4SidebarMenuItem(
-        "Welcome!",
-        tabName = "tab_welcome"
-        #icon = icon("home")
-      ),
-      bs4SidebarMenuItem(
-        "Differential Expression",
-        tabName = "tab_de"
-        #icon = icon("share-alt-square")
-      ),
-      bs4SidebarMenuItem(
-        "Enrichment Map",
-        tabName = "tab_emap"
-        #icon = icon("project-diagram")
-      ),
-      bs4SidebarMenuItem(
-        "Differential transcript usage",
-        tabName = "tab_dtu"
-        #icon = icon("share-alt-square")
-      ),
-      bs4SidebarMenuItem(
-        "Carnival",
-        tabName = "tab_carnival"
-        #icon = icon("images")
-      )
-    )
-  ),
   
-  body = bs4DashBody(
+  header = shinydashboard::dashboardHeader(title = "the title"),
+  # header = bs4Dash::bs4DashNavbar(
+    # controlbarIcon = icon("cogs")
+  # ),
+
+  # sidebar definition ------------------------------------------------------
+  sidebar = shinydashboard::dashboardSidebar(
+    title = "Options",
     
-    bs4TabItems(
-      # ui panel welcome -----------------------------------------------------------
-      bs4TabItem(
-        tabName = "tab_welcome",
-        fluidRow(
-          #column(
-          #  width = 11
-          #),
-          # column(
-          #  width = 1,
-          # actionButton(
-          #    label = "", icon = icon("question-circle"),
-          #    style = .helpbutton_biocstyle
-          #)
-          #  )
-        ),
+    selectInput("selected_contrast",
+                label = "Contrast id",
+                choices = c("DCMvsHCM", 
+                            "DCMvsNFD", 
+                            "HCMvsNFD"),
+                selected = "DCMvsHCM"),
+    selectInput("selected_ontology",
+                label = "Ontology",
+                choices = c("BP", "MF", "CC"),
+                selected = "BP"),
+    numericInput("number_genesets", 
+                 "Number of genesets",
+                 value = 15,
+                 min = 0),
+    selectInput("color_by",
+                "Color by",
+                choices = c("z_score",
+                            "gs_pvalue"), 
+                selected = "z_score")
+    
+  ),
+    
+
+  # body definition ---------------------------------------------------------
+  body = shinydashboard::dashboardBody(
+    tabBox(
+      width = 12,
+      tabPanel(
+        title = "Welcome!", icon = icon("home"), value = "tab-welcome",
         fluidRow(
           h2("Overview on the provided input")
         )
       ),
-      
-      # ui panel differential expression ---------------------------------------------------
-      bs4TabItem(
-        tabName = "tab_de",
+      tabPanel(
+        title = "DE!", icon = icon("home"), value = "tab-de",
         fluidRow(
-          #column(
-          #  width = 11
-          #),
-          #column(
-          #  width = 1,
-          #  actionButton(
-          #    label = "", icon = icon("question-circle"),
-          #    style = .helpbutton_biocstyle
-          #  )
-          # )
+          column(
+            width = 8,
+            DT::dataTableOutput("de_table")
+          ),
+          column(
+            width = 4,
+            plotOutput("de_volcano")
+          )
+          
         )
+          
       ),
-      
-      bs4TabItem(
-        tabName = "tab_emap",
-        #fluidRow(
-        #column(
-        # width = 11
-        #),
-        #column(
-        #  width = 1,
-        #  actionButton(,
-        #    label = "", icon = icon("question-circle"),
-        #    style = .helpbutton_biocstyle
-        #  )
-        #)
-        # ),
+      tabPanel(
+        title = "Enrichment map!", icon = icon("home"), value = "tab-emap",
         fluidRow(
           column(
             width = 8,
@@ -238,94 +219,82 @@ magnetique_ui <- bs4Dash::bs4DashPage(
           )
         )
       ),
-      
-      bs4TabItem(
-        tabName = "tab_dtu",
+      tabPanel(
+        title = "DTU!", icon = icon("home"), value = "tab-dtu",
         fluidRow(
-          #column(
-          #  width = 11
-          #),
-          # column(
-          #    width = 1,
-          #    actionButton(,
-          #     label = "", icon = icon("question-circle"),
-          #    style = .helpbutton_biocstyle
-          # )
-          #  )
+          column(
+            width = 8,
+            withSpinner(
+              visNetworkOutput("ggs_dtu")
+            )
+          ),
+          column(
+            width = 4,
+            plotOutput("dtu_gene"),
+            plotOutput("dtu_counts"),
+            uiOutput("ui_dtu_infogene"),
+            plotOutput("dtu_geneset")
+          )
         )
       ),
-      
-      bs4TabItem(
-        tabName = "tab_carnival",
+      tabPanel(
+        title = "Carnival!", icon = icon("home"), value = "tab-carnival",
         fluidRow(
           column(
             width = 8,
             withSpinner(
               visNetworkOutput("visnet_igraph")
             )
+          ),
+          column(
+            width = 4,
+            plotOutput("carnival_counts")
           )
         )
       )
-    ),
-    # controlbar definition ---------------------------------------------------
-    controlbar = bs4Dash::bs4DashControlbar(
-      collapsed = TRUE,
-      selectInput("selected_contrast",
-                  label = "Contrast id",
-                  choices = c("DCMvsHCM", 
-                              "DCMvsNFD", 
-                              "HCMvsNFD"),
-                  selected = "DCMvsHCM"),
-      selectInput("selected_ontology",
-                  label = "Ontology",
-                  choices = c("BP", "MF", "CC"),
-                  selected = "BP"),
-      numericInput("number_genesets", 
-                   "Number of genesets",
-                   value = 15,
-                   min = 0),
-      selectInput("color_by",
-                  "Color by",
-                  choices = c("z_score",
-                              "gs_pvalue"), 
-                  selected = "z_score")
     )
   )
 )
 
 
-server <- function(input, output, session) {
+# server definition -------------------------------------------------------
+
+magnetique_server <- function(input, output, session) {
   
   rvalues <- reactiveValues()
   rvalues$mygtl <- NULL
   rvalues$myigraph <- NULL
   
+
+  # selector of gtl object --------------------------------------------------
   rvalues$mygtl <- reactive({
     
     message(input$selected_contrast)
     message(input$selected_ontology)
     
-    #all_gtls[[input$selected_contrast]][[input$selected_ontology]]
-    all_gtls[["DCMvsHCM"]][["BP"]]
+    all_gtls[[input$selected_contrast]][[input$selected_ontology]]
+    # all_gtls[["DCMvsHCM"]][["BP"]]
   })
   
   rvalues$myigraph <- reactive({
-    #all_igraph[[input$selected_contrast]]
-    all_igraph[["DCMvsHCM"]]
+    all_igraph[[input$selected_contrast]]
+    # all_igraph[["DCMvsHCM"]]
   })
   
+  # DE related content ---------------------------------------------------------
+  output$de_table <- DT::renderDataTable({
+    mygtl <- rvalues$mygtl()
+    myde <- mygtl$res_de
+    DT::datatable(as.data.frame(myde))
+  })
   
   output$de_volcano <- renderPlot({
-    signature_volcano(gtl = rvalues$mygtl(),
-                      FDR = 0.05)
+    mygtl <- rvalues$mygtl()
+    myde <- mygtl$res_de
+    volcano_plot(myde, mygtl$annotation_obj, volcano_labels = 0)
   })
   
-  
-  output$gtl_loaded <- renderText({
-    describe_gtl(gtl = rvalues$mygtl())
-  })
-  
-  # emap section ------------------------------------------------------------
+  # enrichment map related content ---------------------------------------------
   emap_graph <- reactive({
     emg <- enrichment_map(
       gtl = rvalues$mygtl(),
@@ -363,7 +332,6 @@ server <- function(input, output, session) {
                   message = "Please select a gene set from the Enrichment Map."
     ))
     
-    
     # if (!is.null(input$exp_condition)) {
     # message(cur_gsid)
     gs_heatmap(
@@ -396,20 +364,26 @@ server <- function(input, output, session) {
   })
   
   
-  # ggs graph section -------------------------------------------------------
-  # myggs_graph <- reactive({
-  #   g <- ggs_graph(
-  #     gtl = rvalues$mygtl(),
-  #     n_gs = input$number_genesets,
-  #     prettify = TRUE,
-  #     geneset_graph_color = "gold"
-  #   )
-  #   # rank_gs <- rank(V(g)$name[V(g)$nodetype == "GeneSet"])
-  #   # rank_feats <- rank(V(g)$name[V(g)$nodetype == "Feature"]) +
-  #   #   length(rank_gs) # to keep the GeneSets first
-  #   # g <- permute.vertices(g, c(rank_gs, rank_feats))
-  #   # return(g)
-  # })
+  # DTU related content --------------------------------------------------------
+  
+  myggs_graph <- reactive({
+    
+    # to artificially remove the too broad terms - TODO: cleanup!
+    mygtl <- rvalues$mygtl()
+    mygtl$res_enrich <- mygtl$res_enrich[mygtl$res_enrich$gs_bg_count < 1000, ]
+    
+    g <- ggs_graph(
+      gtl = mygtl,
+      n_gs = input$number_genesets,
+      prettify = TRUE,
+      geneset_graph_color = "gold"
+    )
+    # rank_gs <- rank(V(g)$name[V(g)$nodetype == "GeneSet"])
+    # rank_feats <- rank(V(g)$name[V(g)$nodetype == "Feature"]) +
+    #   length(rank_gs) # to keep the GeneSets first
+    # g <- permute.vertices(g, c(rank_gs, rank_feats))
+    # return(g)
+  })
   
   output$visnet_ggs <- renderVisNetwork({
     
@@ -428,6 +402,108 @@ server <- function(input, output, session) {
         label = "Save ggs graph"
       )
   })
+
+  output$ggs_dtu <- visNetwork::renderVisNetwork({
+    visNetwork::visIgraph(myggs_graph()) %>%
+      visOptions(
+        highlightNearest = list(
+          enabled = TRUE,
+          degree = 1,
+          hover = TRUE
+        ),
+        nodesIdSelection = TRUE
+      ) %>%
+      visExport(
+        name = "ggs_dtu",
+        type = "png",
+        label = "Save ggs graph"
+      )    
+  })
+  
+  output$dtu_gene <- renderPlot({
+    mygtl <- rvalues$mygtl()
+    
+    # cur_geneid <- TODO: pick it correctly, a la ggs + gene info
+    # cur_geneid <- "ABCA2"
+    # cur_geneid <- "ENSG00000107331"
+    
+    g <- myggs_graph()
+    cur_sel <- input$ggs_dtu_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    validate(need(cur_nodetype == "Feature",
+                  message = "" # "Please select a gene/feature."
+    ))
+    # validate(need(input$exp_condition != "",
+    #               message = "Please select a group for the experimental condition."
+    # ))
+    
+    cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
+    
+    # TODO: use that gene id to call the DTU plotting function
+    
+  })
+  
+  output$dtu_counts <- renderPlot({
+    mygtl <- rvalues$mygtl()
+    
+    # cur_geneid <- TODO: pick it correctly, a la ggs + gene info
+    # cur_geneid <- "ABCA2"
+    # cur_geneid <- "ENSG00000107331"
+    
+    g <- myggs_graph()
+    cur_sel <- input$ggs_dtu_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    validate(need(cur_nodetype == "Feature",
+                  message = "" # "Please select a gene/feature."
+    ))
+    # validate(need(input$exp_condition != "",
+    #               message = "Please select a group for the experimental condition."
+    # ))
+    
+    cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
+    
+    # validate(need(!is.na(cur_gsid),
+    # message = "Please select a gene set from the Enrichment Map."
+    # ))
+    
+    gene_plot(gtl = mygtl, gene = cur_geneid, 
+              intgroup = "Etiology")
+    
+  })
+  
+  output$dtu_geneset <- renderPlot({
+    
+  })
+  
+  output$ui_dtu_infogene <- renderUI({
+    mygtl <- rvalues$mygtl()
+    
+    g <- myggs_graph()
+    cur_sel <- input$ggs_dtu_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    validate(need(cur_nodetype == "Feature",
+                  message = "" # "Please select a gene/feature."
+    ))
+    # validate(need(input$exp_condition != "",
+    #               message = "Please select a group for the experimental condition."
+    # ))
+    
+    # cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
+    cur_geneid <- cur_sel
+    
+    
+    geneinfo_2_html(gene_id = cur_geneid, res_de = mygtl$res_de)
+  })
+  
+  
+  # carnival-related content ---------------------------------------------------
+  output$carnival_counts <- renderPlot({
+    
+  })
+  
   
   output$visnet_igraph <- renderVisNetwork({
     
@@ -446,9 +522,22 @@ server <- function(input, output, session) {
         label = "Save igraph graph"
       )
   })
+  
+  # Other content --------------------------------------------------------------
+  output$de_volcano_signature <- renderPlot({
+    signature_volcano(gtl = rvalues$mygtl(),
+                      FDR = 0.05)
+  })
+  
+  
+  output$gtl_loaded <- renderText({
+    describe_gtl(gtl = rvalues$mygtl())
+  })
+  
+  
 }
 
-shinyApp(magnetique_ui, server)
+shinyApp(magnetique_ui, magnetique_server)
 
 # same for the diff exp things (but they are anyway in the GTL)
 
