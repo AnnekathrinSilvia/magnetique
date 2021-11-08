@@ -224,13 +224,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "DTU!", icon = icon("home"), value = "tab-dtu",
         fluidRow(
           column(
-            width = 8,
+            width = 6,
             withSpinner(
               visNetworkOutput("ggs_dtu")
             )
           ),
           column(
-            width = 4,
+            width = 6,
             plotOutput("dtu_gene"),
             plotOutput("dtu_counts"),
             uiOutput("ui_dtu_infogene"),
