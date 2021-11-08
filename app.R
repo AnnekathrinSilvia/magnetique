@@ -182,13 +182,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
     tabBox(
       width = 12,
       tabPanel(
-        title = "Welcome!", icon = icon("home"), value = "tab-welcome",
+        title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
         fluidRow(
           h2("Overview on the provided input")
         )
       ),
       tabPanel(
-        title = "DE!", icon = icon("home"), value = "tab-de",
+        title = "DE!", icon = icon("heartbeat"), value = "tab-de",
         fluidRow(
           column(
             width = 8,
@@ -203,7 +203,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           
       ),
       tabPanel(
-        title = "Enrichment map!", icon = icon("home"), value = "tab-emap",
+        title = "Enrichment map!", icon = icon("project-diagram"), value = "tab-emap",
         fluidRow(
           column(
             width = 8,
@@ -221,7 +221,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       ),
       tabPanel(
-        title = "DTU!", icon = icon("home"), value = "tab-dtu",
+        title = "DTU!", icon = icon("flask"), value = "tab-dtu",
         fluidRow(
           column(
             width = 6,
@@ -239,7 +239,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       ),
       tabPanel(
-        title = "Carnival!", icon = icon("home"), value = "tab-carnival",
+        title = "Carnival!", icon = icon("sitemap"), value = "tab-carnival",
         fluidRow(
           column(
             width = 8,
