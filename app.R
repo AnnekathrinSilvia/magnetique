@@ -443,6 +443,11 @@ magnetique_server <- function(input, output, session) {
     
     message(cur_geneid)
     
+    genes_dtu <- unique(rowData(se)$gene_id)
+    validate(need(cur_geneid %in% genes_dtu,
+                  message = "Please select a gene where a DTU effect is present" 
+    ))
+    
     plot_dtu(cur_geneid, 
              dataset = se,
              .gtf = gtf)
@@ -471,6 +476,11 @@ magnetique_server <- function(input, output, session) {
     
     # validate(need(!is.na(cur_gsid),
     # message = "Please select a gene set from the Enrichment Map."
+    # ))
+    
+    # genes_dtu <- unique(rowData(se)$gene_id)
+    # validate(need(cur_geneid %in% genes_dtu,
+    #               message = "Please select a gene where a DTU effect is present" 
     # ))
     
     gene_plot(gtl = mygtl, gene = cur_geneid, 
