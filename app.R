@@ -137,6 +137,7 @@ library("igraph")
 source("volcano_plot.R")
 source("DTU/plots_with_se_obj.R")
 
+se <- readRDS("MAGNetApp_cloud_data/data/summarized_experiment.RDS")
 
 
 # ui definition -----------------------------------------------------------
@@ -440,7 +441,11 @@ magnetique_server <- function(input, output, session) {
     
     cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
     
-    # TODO: use that gene id to call the DTU plotting function
+    message(cur_geneid)
+    
+    plot_dtu(cur_geneid, 
+             dataset = se,
+             .gtf = gtf)
     
   })
   
@@ -537,6 +542,7 @@ magnetique_server <- function(input, output, session) {
   
 }
 
+# Launching magnetique! --------------------------------------------------------
 shinyApp(magnetique_ui, magnetique_server)
 
 # same for the diff exp things (but they are anyway in the GTL)
