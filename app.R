@@ -517,7 +517,32 @@ magnetique_server <- function(input, output, session) {
   
   # carnival-related content ---------------------------------------------------
   output$carnival_counts <- renderPlot({
+    mygtl <- rvalues$mygtl()
     
+    g <- rvalues$myigraph()
+    cur_sel <- input$visnet_igraph_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    # validate(need(cur_nodetype == "Feature",
+    #               message = "" # "Please select a gene/feature."
+    # ))
+    
+    validate(need(cur_sel != "",
+                  message = "Please select a node from the graph to plot the expression values."
+    ))
+    
+    cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
+    
+    message(length(cur_sel))
+    message(cur_geneid)
+    
+    genes_exp <- rownames(mygtl$dds)
+    validate(need(cur_geneid %in% genes_exp,
+                  message = "gene not found in expression matrix" 
+    ))
+    
+    gene_plot(gtl = mygtl, gene = cur_geneid, 
+              intgroup = "Etiology")
   })
   
   
