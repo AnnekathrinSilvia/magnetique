@@ -311,6 +311,7 @@ magnetique_server <- function(input, output, session) {
     return(emg)
   })
   
+
   output$visnet_em <- renderVisNetwork({
     visNetwork::visIgraph(emap_graph()) %>%
       visOptions(
@@ -557,7 +558,9 @@ magnetique_server <- function(input, output, session) {
         ),
         nodesIdSelection = TRUE
       ) %>%
-      visExport(
+      visHierarchicalLayout(levelSeparation = 100, nodeSpacing = 500,
+        shakeTowards = "leaves") # same as visLayout(hierarchical = TRUE) 
+      %>% visExport(
         name = "igraph",
         type = "png",
         label = "Save igraph graph"
