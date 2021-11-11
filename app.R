@@ -130,6 +130,7 @@ library("shinydashboard")
 library("ggplot2")
 library("ggrepel")
 library("igraph")
+library("plotly")
 
 
 # sourcing external files -------------------------------------------------
@@ -196,7 +197,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           ),
           column(
             width = 4,
-            plotOutput("de_volcano")
+            plotlyOutput("de_volcano")
           )
           
         )
@@ -294,10 +295,11 @@ magnetique_server <- function(input, output, session) {
       DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
   })
   
-  output$de_volcano <- renderPlot({
+  output$de_volcano <- renderPlotly({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    volcano_plot(myde, mygtl$annotation_obj, volcano_labels = 0)
+    p <- volcano_plot(myde, mygtl$annotation_obj, volcano_labels = 0)
+    plotly::ggplotly(p, tooltip = "text")
   })
   
   # enrichment map related content ---------------------------------------------
