@@ -101,11 +101,19 @@ volcano_plot <- function(res_de,
     title <- plot_title
   }
   
+  # handling the tooltips (works if plotlyfied)
+  volcano_df$gene_info <- paste0(
+    "<b>",volcano_df$gene_names, "</b>",
+    "<br><i>GeneID</i>: ", volcano_df$genes,
+    "<br><i>Log2FC</i> = ", format(round(volcano_df$log2FoldChange, 2), nsmall = 2),
+    "<br><i>p-value (adjusted)</i> = ", format(res_de$padj))
   
   # Plot data
   p <- ggplot(
     volcano_df,
-    aes_string(x = "log2FoldChange", y = "logTransformedpvalue")
+    aes_string(x = "log2FoldChange", 
+               y = "logTransformedpvalue",
+               text = "gene_info")
   ) +
     geom_point(aes_string(
       color = "significant",
