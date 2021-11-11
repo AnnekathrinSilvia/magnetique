@@ -9,7 +9,7 @@ library(scales)
 
 #' GTF file used for plotting the gene structure
 #' plots_with_se_obj.R
-gtf <- rtracklayer::import.gff2("data/GRCh38_96/GRCh38.96.gtf")
+gtf <- rtracklayer::import.gff2("data/GRCh38.96.gtf.gz")
 
 group_colors <- c("steelblue", "gold", "forestgreen")
 
