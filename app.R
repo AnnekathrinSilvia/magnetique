@@ -136,7 +136,7 @@ library("igraph")
 
 source("volcano_plot.R")
 source("DTU/plots_with_se_obj.R")
-
+source("utils.R")
 se <- readRDS("MAGNetApp_cloud_data/data/summarized_experiment.RDS")
 
 
@@ -145,7 +145,7 @@ se <- readRDS("MAGNetApp_cloud_data/data/summarized_experiment.RDS")
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
   
-  header = shinydashboard::dashboardHeader(title = "the title"),
+  header = shinydashboard::dashboardHeader(title = "magnetique"),
   # header = bs4Dash::bs4DashNavbar(
     # controlbarIcon = icon("cogs")
   # ),
@@ -286,8 +286,12 @@ magnetique_server <- function(input, output, session) {
   output$de_table <- DT::renderDataTable({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    
-    DT::datatable(GeneTonic::deseqresult2df(myde), options = list(scrollX = TRUE))
+    myde <- GeneTonic::deseqresult2df(myde)
+    ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
+    rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
+    myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
+    DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE))  %>% 
+      DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
   })
   
   output$de_volcano <- renderPlot({
@@ -559,8 +563,8 @@ magnetique_server <- function(input, output, session) {
         nodesIdSelection = TRUE
       ) %>%
       visHierarchicalLayout(levelSeparation = 100, nodeSpacing = 500,
-        shakeTowards = "leaves") # same as visLayout(hierarchical = TRUE) 
-      %>% visExport(
+        shakeTowards = "leaves") %>% # same as visLayout(hierarchical = TRUE) 
+      visExport(
         name = "igraph",
         type = "png",
         label = "Save igraph graph"
