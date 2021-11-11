@@ -59,6 +59,7 @@ volcano_plot <- function(res_de,
                               annotation_obj,
                               FDR = 0.05,
                               color = "#1a81c2",
+                              alpha = 0.10,
                               volcano_labels = 25,
                               plot_title = NULL) {
   
@@ -117,7 +118,7 @@ volcano_plot <- function(res_de,
   ) +
     geom_point(aes_string(
       color = "significant",
-    )) +
+    ), alpha=alpha) +
     labs(
       x = "log2 Fold Change",
       y = "-log10 p-value",
