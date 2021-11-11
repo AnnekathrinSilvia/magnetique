@@ -225,17 +225,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "DTU!", icon = icon("flask"), value = "tab-dtu",
         fluidRow(
           column(
-            width = 6,
-            withSpinner(
-              visNetworkOutput("ggs_dtu")
-            )
-          ),
-          column(
-            width = 6,
-            plotOutput("dtu_gene"),
-            plotOutput("dtu_counts"),
-            uiOutput("ui_dtu_infogene"),
-            plotOutput("dtu_geneset")
+            width = 12,
+            selectizeInput(
+                "gene_name", "Choose one gene:", choices = NULL
+              ),
+            plotOutput("dtu_plot"),
+            tableOutput("dtu_table")
           )
         )
       ),
@@ -374,153 +369,25 @@ magnetique_server <- function(input, output, session) {
   
   
   # DTU related content --------------------------------------------------------
+  genes_dtu <- unique(rowData(se)$gene_name)
+  updateSelectizeInput(
+    session, "gene_name",
+    choices = genes_dtu, server = TRUE, selected=NULL
+  )
   
-  myggs_graph <- reactive({
-    
-    # to artificially remove the too broad terms - TODO: cleanup!
-    mygtl <- rvalues$mygtl()
-    mygtl$res_enrich <- mygtl$res_enrich[mygtl$res_enrich$gs_bg_count < 1000, ]
-    
-    g <- ggs_graph(
-      gtl = mygtl,
-      n_gs = input$number_genesets,
-      prettify = TRUE,
-      geneset_graph_color = "gold"
-    )
-    # rank_gs <- rank(V(g)$name[V(g)$nodetype == "GeneSet"])
-    # rank_feats <- rank(V(g)$name[V(g)$nodetype == "Feature"]) +
-    #   length(rank_gs) # to keep the GeneSets first
-    # g <- permute.vertices(g, c(rank_gs, rank_feats))
-    # return(g)
-  })
-  
-  output$visnet_ggs <- renderVisNetwork({
-    
-    visNetwork::visIgraph(myggs_graph()) %>%
-      visOptions(
-        highlightNearest = list(
-          enabled = TRUE,
-          degree = 1,
-          hover = TRUE
-        ),
-        nodesIdSelection = TRUE
-      ) %>%
-      visExport(
-        name = "ggs_network",
-        type = "png",
-        label = "Save ggs graph"
-      )
-  })
-
-  output$ggs_dtu <- visNetwork::renderVisNetwork({
-    visNetwork::visIgraph(myggs_graph()) %>%
-      visOptions(
-        highlightNearest = list(
-          enabled = TRUE,
-          degree = 1,
-          hover = TRUE
-        ),
-        nodesIdSelection = TRUE
-      ) %>%
-      visExport(
-        name = "ggs_dtu",
-        type = "png",
-        label = "Save ggs graph"
-      )    
-  })
-  
-  output$dtu_gene <- renderPlot({
-    mygtl <- rvalues$mygtl()
-    
-    # cur_geneid <- TODO: pick it correctly, a la ggs + gene info
-    # cur_geneid <- "ABCA2"
-    # cur_geneid <- "ENSG00000107331"
-    
-    g <- myggs_graph()
-    cur_sel <- input$ggs_dtu_selected
-    cur_node <- match(cur_sel, V(g)$name)
-    cur_nodetype <- V(g)$nodetype[cur_node]
-    validate(need(cur_nodetype == "Feature",
-                  message = "" # "Please select a gene/feature."
-    ))
-    # validate(need(input$exp_condition != "",
-    #               message = "Please select a group for the experimental condition."
-    # ))
-    
-    cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
-    
-    message(cur_geneid)
-    
-    genes_dtu <- unique(rowData(se)$gene_id)
-    validate(need(cur_geneid %in% genes_dtu,
-                  message = "Please select a gene where a DTU effect is present" 
-    ))
-    
-    plot_dtu(cur_geneid, 
-             dataset = se,
-             .gtf = gtf)
+  output$dtu_plot <- renderPlot({
+    req(input$gene_name)
+    gtf_gene <- subset(gtf, type == "gene" & gene_name == input$gene_name)
+    plot_dtu(mcols(gtf_gene)[["gene_id"]], se, gtf)
     
   })
   
-  output$dtu_counts <- renderPlot({
-    mygtl <- rvalues$mygtl()
-    
-    # cur_geneid <- TODO: pick it correctly, a la ggs + gene info
-    # cur_geneid <- "ABCA2"
-    # cur_geneid <- "ENSG00000107331"
-    
-    g <- myggs_graph()
-    cur_sel <- input$ggs_dtu_selected
-    cur_node <- match(cur_sel, V(g)$name)
-    cur_nodetype <- V(g)$nodetype[cur_node]
-    validate(need(cur_nodetype == "Feature",
-                  message = "" # "Please select a gene/feature."
-    ))
-    # validate(need(input$exp_condition != "",
-    #               message = "Please select a group for the experimental condition."
-    # ))
-    
-    cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
-    
-    # validate(need(!is.na(cur_gsid),
-    # message = "Please select a gene set from the Enrichment Map."
-    # ))
-    
-    # genes_dtu <- unique(rowData(se)$gene_id)
-    # validate(need(cur_geneid %in% genes_dtu,
-    #               message = "Please select a gene where a DTU effect is present" 
-    # ))
-    
-    gene_plot(gtl = mygtl, gene = cur_geneid, 
-              intgroup = "Etiology")
+  output$dtu_table <- renderTable({
+    req(input$gene_name)
+    gtf_gene <- subset(gtf, type == "gene" & gene_name == input$gene_name)
+    results_table(mcols(gtf_gene)[["gene_id"]], se) 
     
   })
-  
-  output$dtu_geneset <- renderPlot({
-    
-  })
-  
-  output$ui_dtu_infogene <- renderUI({
-    mygtl <- rvalues$mygtl()
-    
-    g <- myggs_graph()
-    cur_sel <- input$ggs_dtu_selected
-    cur_node <- match(cur_sel, V(g)$name)
-    cur_nodetype <- V(g)$nodetype[cur_node]
-    validate(need(cur_nodetype == "Feature",
-                  message = "" # "Please select a gene/feature."
-    ))
-    # validate(need(input$exp_condition != "",
-    #               message = "Please select a group for the experimental condition."
-    # ))
-    
-    # cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
-    cur_geneid <- cur_sel
-    
-    
-    geneinfo_2_html(gene_id = cur_geneid, res_de = mygtl$res_de)
-  })
-  
   
   # carnival-related content ---------------------------------------------------
   output$carnival_counts <- renderPlot({
