@@ -131,6 +131,7 @@ library("ggplot2")
 library("ggrepel")
 library("igraph")
 library("plotly")
+library("shinycssloaders")
 
 
 # sourcing external files -------------------------------------------------
@@ -197,7 +198,9 @@ magnetique_ui <- shinydashboard::dashboardPage(
           ),
           column(
             width = 4,
-            plotlyOutput("de_volcano")
+            withSpinner(
+              plotlyOutput("de_volcano")
+            )
           )
           
         )
