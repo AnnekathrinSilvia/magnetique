@@ -460,7 +460,7 @@ magnetique_server <- function(input, output, session) {
   })
   
   output$team_list <- renderTable({
-    team_df()
+    team_df
   })
   
   
