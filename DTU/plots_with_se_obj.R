@@ -156,10 +156,11 @@ plot_dtu <- function(gene, dataset, .gtf) {
 
 results_table <- function(gene, se) {
   x <- subset(rowData(se), gene_id == gene)
-  bind_rows(
-    list("DRIMSeq_DCM_vs_NFD" = x[["DRIMSeq_DCM_vs_NFD"]], 
-         "DRIMSeq_HCM_vs_NFD" = x[["DRIMSeq_HCM_vs_NFD"]], 
-         "DRIMSeq_DCM_vs_HCM" = x[["DRIMSeq_DCM_vs_HCM"]]),
+  x <- bind_rows(
+    list("DCM_vs_NFD" = x[["DRIMSeq_DCM_vs_NFD"]], 
+         "HCM_vs_NFD" = x[["DRIMSeq_HCM_vs_NFD"]], 
+         "DCM_vs_HCM" = x[["DRIMSeq_DCM_vs_HCM"]]),
     .id = 'comparison'
-    )
+    ) %>% 
+    select('comparison', 'gene_id', 'feature_id',	'lr', 'adj_pvalue')
 }
