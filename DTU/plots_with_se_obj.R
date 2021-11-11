@@ -8,7 +8,8 @@ library(stringr)
 library(scales)
 
 #' GTF file used for plotting the gene structure
-gtf <- rtracklayer::import("data/Homo_sapiens.GRCh38.102.gtf.gz")
+#' plots_with_se_obj.R
+gtf <- rtracklayer::import.gff2("data/GRCh38_96/GRCh38.96.gtf")
 
 group_colors <- c("steelblue", "gold", "forestgreen")
 
@@ -37,7 +38,7 @@ gene_counts <- function(gene, dataset = se) {
   x <- SummarizedExperiment::assays(dataset)[["counts"]][ind, ]
   x["transcript_id"] <- rownames(x)
 
-  x <- reshape2::melt(x)
+  x <- suppressMessages(reshape2::melt(x))
 
   colnames(x) <- c("transcript_id", "sample_id", "value")
 
@@ -60,7 +61,7 @@ gene_proportions <- function(gene, dataset, .type = "fit_full") {
   ) == colnames(x)))
 
   col_names <- rownames(x)
-  x <- reshape2::melt(x)
+  x <- suppressMessages(reshape2::melt(x))
   colnames(x) <- c("transcript_id", "sample_id", "value")
   x["group"] <- SummarizedExperiment::colData(dataset)[
     x[["sample_id"]], "Etiology"
@@ -132,21 +133,22 @@ plot_dtu <- function(gene, dataset, .gtf) {
     )
   
 
-  p3 <- ggplot() +
+  p3 <- suppressMessages({
+    ggplot() +
     geom_alignment(x_structure,
       fill = "black", cds.rect.h = .3, utr.rect.h = .2,
       exon.rect.h = .2, label = T
     ) +
     theme_minimal(20) +
     theme(plot.margin = margin()) +
-    labs(x = paste('chr', seqnames(x_structure[[1]])@values))
+    labs(x = paste('chr', seqnames(x_structure[[1]])@values))})
 
   p_final <- (p1 | p3 | p2) +
     # plot_layout(widths = c(1, 4), heights = c(1.5, 1)) +
     plot_annotation(
       theme = theme(plot.margin = margin()),
       title = stringr::str_glue("{geneid2name[gene]} - {gene} "),
-      caption = "Source: MAGNet / GRCh38.102"
+      caption = "Source: MAGNet / GRCh38.96"
     )
   return(p_final)
 }
