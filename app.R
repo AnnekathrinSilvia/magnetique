@@ -185,23 +185,21 @@ magnetique_ui <- shinydashboard::dashboardPage(
       shiny::tabPanel(
         title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
         fluidRow(
-          h2("Overview on the provided input")
-        )
-      ),
+          includeMarkdown("data/overview.md")
+          )
+        ),
       shiny::tabPanel(
         title = "DE!", icon = icon("heartbeat"), value = "tab-de",
         fluidRow(
           column(
-            width = 8,
+            width = 5,
             DT::dataTableOutput("de_table")
           ),
           column(
             width = 4,
             plotlyOutput("de_volcano")
           )
-          
         )
-          
       ),
       shiny::tabPanel(
         title = "Enrichment map!", icon = icon("project-diagram"), value = "tab-emap",
@@ -247,6 +245,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
             width = 4,
             plotOutput("carnival_counts")
           )
+        )
+      ),
+      shiny::tabPanel(
+        title = "About us", icon = icon("users"), value = "tab-aboutus",
+        fluidRow(
+          h2('Project members (alphabetical order)'),
+          tableOutput("team_list")
         )
       )
     )
