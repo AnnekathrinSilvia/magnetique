@@ -459,6 +459,10 @@ magnetique_server <- function(input, output, session) {
     describe_gtl(gtl = rvalues$mygtl())
   })
   
+  output$team_list <- renderTable({
+    team_df()
+  })
+  
   
 }
 
