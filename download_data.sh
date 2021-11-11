@@ -14,6 +14,6 @@ wget "https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb/download?path=%2Fdata%2Fne
 
 wget "https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb/download?path=%2Fdata%2Fnetworks&files=igraph_hcm_vs_nfd.RData" -O MAGNetApp_cloud_data/data/networks/igraph_hcm_vs_nfd.RData
 
-wget "https://data.dieterichlab.org/s/dMzSgF98DRQ7yYc/download/summarized_experiment.RDS" -O DTU/data/summarized_experiment.RDS
+wget "https://data.dieterichlab.org/s/dMzSgF98DRQ7yYc/download/summarized_experiment.RDS" -O MAGNetApp_cloud_data/data/summarized_experiment.RDS
 
-wget "http://ftp.ensembl.org/pub/release-102/gtf/homo_sapiens/Homo_sapiens.GRCh38.102.gtf.gz" -O DTU/data/GRCh38.102.gtf
+wget "http://ftp.ensembl.org/pub/release-96/gtf/homo_sapiens/Homo_sapiens.GRCh38.96.gtf.gz" -O data/GRCh38.96.gtf.gz
