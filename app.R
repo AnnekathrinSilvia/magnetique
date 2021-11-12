@@ -186,9 +186,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
       shiny::tabPanel(
         title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
         fluidRow(
-          includeMarkdown("data/overview.md")
+          column(
+            width = 12,
+            includeMarkdown("data/README.md")
           )
-        ),
+        )
+      ),
       shiny::tabPanel(
         title = "DE!", icon = icon("heartbeat"), value = "tab-de",
         fluidRow(
@@ -462,7 +465,7 @@ magnetique_server <- function(input, output, session) {
   })
   
   output$team_list <- renderTable({
-    team_df()
+    team_df
   })
   
   
