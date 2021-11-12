@@ -230,7 +230,9 @@ magnetique_ui <- shinydashboard::dashboardPage(
             selectizeInput(
                 "gene_name", "Choose one gene:", choices = NULL
               ),
-            plotOutput("dtu_plot"),
+            withSpinner(
+              plotOutput("dtu_plot")
+              ),
             tableOutput("dtu_table")
           )
         )
