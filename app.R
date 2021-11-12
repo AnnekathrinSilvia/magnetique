@@ -188,7 +188,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 12,
-            includeMarkdown("data/README.md")
+            includeMarkdown("data/overview.md")
           )
         )
       ),
@@ -258,8 +258,11 @@ magnetique_ui <- shinydashboard::dashboardPage(
       shiny::tabPanel(
         title = "About us", icon = icon("users"), value = "tab-aboutus",
         fluidRow(
-          h2('Project members (alphabetical order)'),
-          tableOutput("team_list")
+          column(
+            width = 12,
+            h2('Project members (alphabetical order)'),
+            tableOutput("team_list")
+          )
         )
       )
     )
