@@ -1,0 +1,3 @@
+## Overview of the magnetique application.
+
+We apply the most current genomic methods to the RNA-seq data from the Myocardial Applied Genomics Network [MAGNet](https://www.med.upenn.edu/magnet/index.shtml) consortium. The dataset consists of whole-transcriptomes of left ventricle (LV) tissues from end-stage heart failure (HF) patients and due to dilated cardiomyopathy (DCM, n=165) or hypertrophic cardiomyopathy (HCM, n=27) and from unmatched non-failing hearts from organ donors (NFD, n=162). We aim to identify novel molecular mechanisms associated with cardiomyopathies with potential diagnostics, prognosis and therapeutics values.
