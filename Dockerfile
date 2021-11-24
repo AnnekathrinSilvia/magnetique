@@ -25,6 +25,7 @@ RUN apt-get update \
         apt-transport-https \
         gsfonts \
         gnupg2 \
+        libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure default locale, see https://github.com/rocker-org/rocker/issues/19
