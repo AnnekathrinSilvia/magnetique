@@ -75,6 +75,7 @@ RUN apt-get update && apt-get install -y \
     libxt-dev \
     libssl-dev \
     libssh2-1-dev \
+    libfftw3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # install renv 
@@ -88,9 +89,11 @@ COPY Rprofile.site /usr/lib/R/etc/
 # setup app
 COPY . /root/magnetique/
 
-# setup data
+# fetch data
+ADD download_data.sh /root/magnetique/download_data.sh
 WORKDIR /root/magnetique/
-RUN download_data.sh
+RUN chmod +x download_data.sh
+RUN ./download_data.sh 
 
 # install R environment
 RUN R -e 'renv::restore()'
