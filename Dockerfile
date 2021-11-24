@@ -77,11 +77,11 @@ RUN apt-get update && apt-get install -y \
     libssh2-1-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# install r enviroment 
+# install renv 
 ENV RENV_VERSION 0.14.0
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
-RUN R -e 'renv::install(c("bs4Dash", "bioc::DESeq2", "DT", "bioc::GeneTonic", "ggplot2", "ggrepel", "igraph", "plotly",  "shinycssloaders", "shinydashboard", "visNetwork", "shiny", "bioc::BiocGenerics", "dplyr", "bioc::ggbio", "patchwork", "plyr", "reshape2", "scales", "stringr", "bioc::DRIMSeq", "bioc::rtracklayer", "bioc::SummarizedExperiment", "data.table", "ggrepel", "shiny", "tidyverse"))'
+
 # set options
 COPY Rprofile.site /usr/lib/R/etc/
 
@@ -91,6 +91,9 @@ COPY . /root/magnetique/
 # setup data
 WORKDIR /root/magnetique/
 RUN download_data.sh
+
+# install R environment
+RUN R -e 'renv::restore()'
 
 EXPOSE 3838
 
