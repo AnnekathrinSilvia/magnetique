@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 mkdir -p MAGNetApp_cloud_data/data/DGE
 
 wget "https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb/download?path=%2Fdata%2FDGE&files=MAGNet_DCMvsHCM_GeneTonic.rds&downloadStartSecret=ddvmnsspk96" -O MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsHCM_GeneTonic.rds 
@@ -18,3 +18,4 @@ wget "https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb/download?path=%2Fdata%2Fne
 wget "https://data.dieterichlab.org/s/dMzSgF98DRQ7yYc/download/summarized_experiment.RDS" -O MAGNetApp_cloud_data/data/summarized_experiment.RDS
 
 wget "http://ftp.ensembl.org/pub/release-96/gtf/homo_sapiens/Homo_sapiens.GRCh38.96.gtf.gz" -O data/GRCh38.96.gtf.gz
+
