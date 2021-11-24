@@ -1,3 +1,4 @@
+#!/bin/bash
 mkdir -p MAGNetApp_cloud_data/data/DGE
 
 wget "https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb/download?path=%2Fdata%2FDGE&files=MAGNet_DCMvsHCM_GeneTonic.rds&downloadStartSecret=ddvmnsspk96" -O MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsHCM_GeneTonic.rds 
