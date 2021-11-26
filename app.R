@@ -408,6 +408,42 @@ magnetique_server <- function(input, output, session) {
   })
   
   
+  # Observers ------------------------------------------------------------------
+  observeEvent(input$bookmarker, {
+    nodetype <- "gene" # or "geneset"
+    message(input$magnetique_tab)
+    
+    if (input$magnetique_tab == "tab-welcome") {
+      showNotification("Welcome to magnetique!")
+    } else if (input$magnetique_tab == "tab-de") {
+      
+      cur_sel_id <- "THIS_GENE"
+      # TODO: will be replaced with a meaningful way of selecting an id
+      
+      if (cur_sel_id %in% rvalues$mygenes) {
+        showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", cur_sel_id, cur_sel_id), type = "default")
+      } else {
+        # tab dependent? or context dependent
+        rvalues$mygenes <- unique(c(rvalues$mygenes, cur_sel_id))
+        showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", cur_sel_id, cur_sel_id, length(rvalues$mygenes)), type = "message")
+      }
+    } else if (input$magnetique_tab == "tab-emap") {
+      
+      cur_sel_id <- "THIS_GENESET"
+      # TODO: will be replaced with a meaningful way of selecting an id
+      
+      if (cur_sel_id %in% rvalues$mygenesets) {
+        showNotification(sprintf("The selected gene set %s (%s) is already in the set of the bookmarked genesets.", cur_sel_id, cur_sel_id), type = "default")
+      } else {
+        rvalues$mygenesets <- unique(c(rvalues$mygenesets, cur_sel_id))
+        showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", cur_sel_id, cur_sel_id, length(rvalues$mygenesets)), type = "message")
+      }
+    } else {
+      showNotification("bookmarking not supported for this tab")
+      message("bookmarking not supported for this tab")
+    }
+  })
+  
 }
 
 # Launching magnetique! --------------------------------------------------------
