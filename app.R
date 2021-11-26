@@ -359,6 +359,39 @@ magnetique_server <- function(input, output, session) {
       )
   })
   
+  # Bookmarker -----------------------------------------------------------------
+  output$ui_bookmarks <- renderUI({
+    tagList(
+      fluidRow(
+        column(
+          width = 6,
+          h5("Bookmarked genes"),
+          DT::dataTableOutput("bookmarks_genes")
+          
+        ),
+        column(
+          width = 6,
+          h5("Bookmarked genesets"),
+          DT::dataTableOutput("bookmarks_genesets")
+        )
+      )
+    )
+  })
+  
+  output$bookmarks_genes <- DT::renderDataTable({
+    book_df_genes <- data.frame(
+      gene_id = rvalues$mygenes,
+      gene_symbols = rvalues$mygenes)
+    DT::datatable(book_df_genes, rownames = FALSE)
+  })
+  output$bookmarks_genesets <- DT::renderDataTable({
+    book_df_genesets <- data.frame(
+      geneset_id = rvalues$mygenesets,
+      geneset_description = rvalues$mygenesets)
+    DT::datatable(book_df_genesets, rownames = FALSE)
+  })
+  
+  
   # Other content --------------------------------------------------------------
   output$de_volcano_signature <- renderPlot({
     signature_volcano(gtl = rvalues$mygtl(),
