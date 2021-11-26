@@ -150,6 +150,10 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       ),
       shiny::tabPanel(
+        title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
+        uiOutput("ui_bookmarks")
+      ),
+      shiny::tabPanel(
         title = "About us", icon = icon("users"), value = "tab-aboutus",
         fluidRow(
           column(
