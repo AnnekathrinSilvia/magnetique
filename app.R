@@ -54,15 +54,29 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 "Color by",
                 choices = c("z_score",
                             "gs_pvalue"), 
-                selected = "z_score")
-    
+                selected = "z_score"),
+    actionButton("bookmarker",
+                 label = "Bookmark", icon = icon("heart"),
+                 style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff")    
   ),
     
 
   # body definition ---------------------------------------------------------
   body = shinydashboard::dashboardBody(
+    shiny::tags$script(
+    HTML(
+      "$(function(){
+        $(document).keyup(function(e) {
+        if (e.which == 17) {
+          $('#bookmarker').click()
+        }
+        });
+        })"
+      )
+    ),
     tabBox(
       width = 12,
+      id = "magnetique_tab",
       shiny::tabPanel(
         title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
         fluidRow(
