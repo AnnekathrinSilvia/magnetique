@@ -288,7 +288,7 @@ magnetique_server <- function(input, output, session) {
   
   
   # DTU related content --------------------------------------------------------
-  genes_dtu <- unique(rowData(se)$gene_name)
+  genes_dtu <- unique(rowData(se_dtu)$gene_name)
   updateSelectizeInput(
     session, "gene_name",
     choices = genes_dtu, server = TRUE, selected=NULL
@@ -297,14 +297,14 @@ magnetique_server <- function(input, output, session) {
   output$dtu_plot <- renderPlot({
     req(input$gene_name)
     gtf_gene <- subset(gtf, type == "gene" & gene_name == input$gene_name)
-    plot_dtu(mcols(gtf_gene)[["gene_id"]], se, gtf)
+    plot_dtu(mcols(gtf_gene)[["gene_id"]], se_dtu, gtf)
     
   })
   
   output$dtu_table <- renderTable({
     req(input$gene_name)
     gtf_gene <- subset(gtf, type == "gene" & gene_name == input$gene_name)
-    results_table(mcols(gtf_gene)[["gene_id"]], se) 
+    results_table(mcols(gtf_gene)[["gene_id"]], se_dtu) 
     
   })
   
