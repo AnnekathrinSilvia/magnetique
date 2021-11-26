@@ -172,9 +172,14 @@ magnetique_ui <- shinydashboard::dashboardPage(
 
 magnetique_server <- function(input, output, session) {
   
+  # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
   rvalues$mygtl <- NULL
   rvalues$myigraph <- NULL
+  
+  rvalues$mygenes <- c()
+  rvalues$mygenesets <- c()
+  
   
 
   # selector of gtl object --------------------------------------------------
