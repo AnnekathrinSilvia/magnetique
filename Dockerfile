@@ -3,8 +3,6 @@
 # I have update the R version
 FROM ubuntu:20.04
 
-LABEL maintainer="Tobias Verbeke <tobias.verbeke@openanalytics.eu>"
-
 # Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
 RUN useradd docker \
     && mkdir /home/docker \
@@ -89,15 +87,9 @@ COPY Rprofile.site /usr/lib/R/etc/
 # setup app
 COPY . /root/magnetique/
 
-# fetch data
-ADD download_data.sh /root/magnetique/download_data.sh
-WORKDIR /root/magnetique/
-RUN chmod +x download_data.sh
-RUN ./download_data.sh 
-
 # install R environment
 RUN R -e 'renv::restore()'
-
+RUN R -e 'renv::install("markdown")'
 EXPOSE 3838
 
-CMD ["R", "-e", "shiny::runApp('root/magnetique/app.R')"]
+CMD ["R", "-e", "shiny::runApp('/root/magnetique/app.R')"]
