@@ -1,11 +1,11 @@
 # load in main objects ----------------------------------------------------
 
-MAGNet_DCMvsHCM_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsHCM_GeneTonic.rds")
-MAGNet_DCMvsNFD_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsNFD_GeneTonic.rds")
-MAGNet_HCMvsNFD_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_HCMvsNFD_GeneTonic.rds")
-MAGNet_DCMvsHCM_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_dcm_vs_hcm.RData"))
-MAGNet_DCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_dcm_vs_nfd.RData"))
-MAGNet_HCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_hcm_vs_nfd.RData"))
+MAGNet_DCMvsHCM_GeneTonic <- readRDS("MAGNetApp/data/DGE/MAGNet_DCMvsHCM_GeneTonic.rds")
+MAGNet_DCMvsNFD_GeneTonic <- readRDS("MAGNetApp/data/DGE/MAGNet_DCMvsNFD_GeneTonic.rds")
+MAGNet_HCMvsNFD_GeneTonic <- readRDS("MAGNetApp/data/DGE/MAGNet_HCMvsNFD_GeneTonic.rds")
+MAGNet_DCMvsHCM_igraph <- get(load("MAGNetApp/data/networks/igraph_dcm_vs_hcm.RData"))
+MAGNet_DCMvsNFD_igraph <- get(load("MAGNetApp/data/networks/igraph_dcm_vs_nfd.RData"))
+MAGNet_HCMvsNFD_igraph <- get(load("MAGNetApp/data/networks/igraph_hcm_vs_nfd.RData"))
 
 
 # DCM vs HCM --------------------------------------------------------------
@@ -119,8 +119,8 @@ rm(MAGNet_DCMvsHCM_igraph,
 
 # DTU data loading --------------------------------------------------------
 
-se_dtu <- readRDS("MAGNetApp_cloud_data/data/summarized_experiment.RDS")
-gtf <- rtracklayer::import.gff2("MAGNetApp_cloud_data/data/GRCh38.96.gtf.gz")
+se_dtu <- readRDS("MAGNetApp/data/DTU/summarized_experiment.RDS")
+gtf <- rtracklayer::import.gff2("MAGNetApp/data/DTU/gtf.RDS")
 
 
 # WGCNA data loading ------------------------------------------------------
