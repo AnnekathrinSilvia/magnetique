@@ -39,3 +39,8 @@ vignettes/*.pdf
 .Renviron
 **/*.RDS
 /shinyproxy.Rcheck
+<<<<<<< Updated upstream
+=======
+.vscode
+settings.json
+>>>>>>> Stashed changes
