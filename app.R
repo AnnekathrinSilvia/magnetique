@@ -21,7 +21,6 @@ source("utils.R")
 source("load_data_magnetique.R")
 
 # ui definition -----------------------------------------------------------
-
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
   
