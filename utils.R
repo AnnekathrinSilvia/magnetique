@@ -11,7 +11,7 @@ get_group_colors <- function(){
   group_colors  
 }
 
-
+#' Compute the mean proportion difference between groups
 get_gid2name <- function(gtf) {
   setNames(
     nm = gtf$gene_id,
@@ -19,18 +19,21 @@ get_gid2name <- function(gtf) {
 }
 
 
-team_df <- data.frame(
-  name = c(
-    "Annekathrin Ludt",
-    "Christoph Dieterich",
-    "Enio Gjerga",
-    "Etienne Boileau",
-    "Federico Marini",
-    "Thiago Britto-Borges")
+#' Produce table with team info
+make_team_df <- functio(){
+  data.frame(
+    name = c(
+      "Annekathrin Ludt",
+      "Christoph Dieterich",
+      "Enio Gjerga",
+      "Etienne Boileau",
+      "Federico Marini",
+      "Thiago Britto-Borges")
   # email
   # twitter
   # orcid etc
-)
+  )
+}
 
 #' Compute the mean proportion difference between groups
 #' @param gene selection
