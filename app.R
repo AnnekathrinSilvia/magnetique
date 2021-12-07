@@ -15,11 +15,9 @@ options(spinner.type = 6)
 
 # sourcing external files -------------------------------------------------
 source("volcano_plot.R")
-
-source("DTU/plots_with_se_obj.R") # this one takes long! promiseable?
 source("utils.R")
 
-# this one is for loading data, candidate to be `promise`d
+# this one is for loading data, candidate to be `promise`
 source("load_data_magnetique.R")
 
 # ui definition -----------------------------------------------------------
