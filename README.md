@@ -1,5 +1,6 @@
 # magnetique
 
+- Data is located at: https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb
 
 ## Detailing files
 - `Dockerfile`: contains the instructions to create the docker image
