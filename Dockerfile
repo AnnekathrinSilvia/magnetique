@@ -3,7 +3,7 @@
 # I have update the R version
 FROM ubuntu:20.04
 
-LABEL maintainer="Tobias Verbeke <tobias.verbeke@openanalytics.eu>"
+LABEL MAINTAINER Thiago Britto-Borges "thiago.brittoborges@uni-heidelberg.de"
 
 # Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
 RUN useradd docker \
@@ -15,17 +15,17 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        apt-utils \
-        ed \
-        less \
-        locales \
-        vim-tiny \
-        wget \
-        ca-certificates \
-        apt-transport-https \
-        gsfonts \
-        gnupg2 \
-        libxml2-dev \
+    apt-utils \
+    ed \
+    less \
+    locales \
+    vim-tiny \
+    wget \
+    ca-certificates \
+    apt-transport-https \
+    gsfonts \
+    gnupg2 \
+    libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure default locale, see https://github.com/rocker-org/rocker/issues/19
@@ -47,14 +47,14 @@ ENV R_BASE_VERSION 4.1.1
 # Also set a default CRAN repo, and make sure littler knows about it too
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        littler \
-                r-cran-littler \
-        r-base=${R_BASE_VERSION}* \
-                r-base-core=${R_BASE_VERSION}* \
-        r-base-dev=${R_BASE_VERSION}* \
-        r-recommended=${R_BASE_VERSION}* \
-        && echo 'options(repos = c(CRAN = "https://cloud.r-project.org/"), download.file.method = "libcurl")' >> /etc/R/Rprofile.site \
-        && echo 'source("/etc/R/Rprofile.site")' >> /etc/littler.r \
+    littler \
+    r-cran-littler \
+    r-base=${R_BASE_VERSION}* \
+    r-base-core=${R_BASE_VERSION}* \
+    r-base-dev=${R_BASE_VERSION}* \
+    r-recommended=${R_BASE_VERSION}* \
+    && echo 'options(repos = c(CRAN = "https://cloud.r-project.org/"), download.file.method = "libcurl")' >> /etc/R/Rprofile.site \
+    && echo 'source("/etc/R/Rprofile.site")' >> /etc/littler.r \
     && ln -s /usr/share/doc/littler/examples/install.r /usr/local/bin/install.r \
     && ln -s /usr/share/doc/littler/examples/install2.r /usr/local/bin/install2.r \
     && ln -s /usr/share/doc/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
@@ -64,7 +64,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 
-MAINTAINER Thiago Britto-Borges "thiago.brittoborges@uni-heidelberg.de"
 
 RUN apt-get update && apt-get install -y \
     sudo \
@@ -88,15 +87,15 @@ COPY Rprofile.site /usr/lib/R/etc/
 
 # setup app
 COPY . /root/magnetique/
-
-# fetch data
-ADD download_data.sh /root/magnetique/download_data.sh
 WORKDIR /root/magnetique/
-RUN chmod +x download_data.sh
-RUN ./download_data.sh 
 
 # install R environment
 RUN R -e 'renv::restore()'
+
+# fetch data
+ADD download_data.sh /root/magnetique/download_data.sh
+RUN chmod +x download_data.sh
+RUN ./download_data.sh 
 
 EXPOSE 3838
 
