@@ -20,7 +20,7 @@ get_gid2name <- function(gtf) {
 
 
 #' Produce table with team info
-make_team_df <- functio(){
+make_team_df <- function(){
   data.frame(
     name = c(
       "Annekathrin Ludt",
