@@ -12,21 +12,21 @@ MAGNet_HCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_hc
 # DCM vs HCM --------------------------------------------------------------
 gtl_DCMvsHCM_BP <- GeneTonic_list(
   dds = MAGNet_DCMvsHCM_GeneTonic$dds,
-  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de,
+  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de[order(MAGNet_DCMvsHCM_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_DCMvsHCM_GeneTonic$res_enrich$BP,
   annotation_obj = MAGNet_DCMvsHCM_GeneTonic$annotation_obj
 )
 
 gtl_DCMvsHCM_MF <- GeneTonic_list(
   dds = MAGNet_DCMvsHCM_GeneTonic$dds,
-  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de,
+  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de[order(MAGNet_DCMvsHCM_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_DCMvsHCM_GeneTonic$res_enrich$MF,
   annotation_obj = MAGNet_DCMvsHCM_GeneTonic$annotation_obj
 )
 
 gtl_DCMvsHCM_CC <- GeneTonic_list(
   dds = MAGNet_DCMvsHCM_GeneTonic$dds,
-  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de,
+  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de[order(MAGNet_DCMvsHCM_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_DCMvsHCM_GeneTonic$res_enrich$CC,
   annotation_obj = MAGNet_DCMvsHCM_GeneTonic$annotation_obj
 )
@@ -35,21 +35,21 @@ gtl_DCMvsHCM_CC <- GeneTonic_list(
 # DCM vs NFD --------------------------------------------------------------
 gtl_DCMvsNFD_BP <- GeneTonic_list(
   dds = MAGNet_DCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de,
+  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de[order(MAGNet_DCMvsNFD_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_DCMvsNFD_GeneTonic$res_enrich$BP,
   annotation_obj = MAGNet_DCMvsNFD_GeneTonic$annotation_obj
 )
 
 gtl_DCMvsNFD_MF <- GeneTonic_list(
   dds = MAGNet_DCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de,
+  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de[order(MAGNet_DCMvsNFD_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_DCMvsNFD_GeneTonic$res_enrich$MF,
   annotation_obj = MAGNet_DCMvsNFD_GeneTonic$annotation_obj
 )
 
 gtl_DCMvsNFD_CC <- GeneTonic_list(
   dds = MAGNet_DCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de,
+  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de[order(MAGNet_DCMvsNFD_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_DCMvsNFD_GeneTonic$res_enrich$CC,
   annotation_obj = MAGNet_DCMvsNFD_GeneTonic$annotation_obj
 )
@@ -58,21 +58,21 @@ gtl_DCMvsNFD_CC <- GeneTonic_list(
 # HCM vs NFD --------------------------------------------------------------
 gtl_HCMvsNFD_BP <- GeneTonic_list(
   dds = MAGNet_HCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de,
+  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de[order(MAGNet_HCMvsNFD_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_HCMvsNFD_GeneTonic$res_enrich$BP,
   annotation_obj = MAGNet_HCMvsNFD_GeneTonic$annotation_obj
 )
 
 gtl_HCMvsNFD_MF <- GeneTonic_list(
   dds = MAGNet_HCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de,
+  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de[order(MAGNet_HCMvsNFD_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_HCMvsNFD_GeneTonic$res_enrich$MF,
   annotation_obj = MAGNet_HCMvsNFD_GeneTonic$annotation_obj
 )
 
 gtl_HCMvsNFD_CC <- GeneTonic_list(
   dds = MAGNet_HCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de,
+  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de[order(MAGNet_HCMvsNFD_GeneTonic$res_de$padj), ],
   res_enrich = MAGNet_HCMvsNFD_GeneTonic$res_enrich$CC,
   annotation_obj = MAGNet_HCMvsNFD_GeneTonic$annotation_obj
 )
@@ -133,6 +133,7 @@ library("ggrepel")
 library("igraph")
 library("plotly")
 library("shinycssloaders")
+library("shinycustomloader")
 options(spinner.type = 6)
 
 
@@ -150,9 +151,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
   
   header = shinydashboard::dashboardHeader(title = "magnetique"),
-  # header = bs4Dash::bs4DashNavbar(
-  # controlbarIcon = icon("cogs")
-  # ),
   
   # sidebar definition ------------------------------------------------------
   sidebar = shinydashboard::dashboardSidebar(
@@ -184,6 +182,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
   # body definition ---------------------------------------------------------
   body = shinydashboard::dashboardBody(
     tabBox(
+      id = "tabs",
       width = 12,
       shiny::tabPanel(
         title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
@@ -198,29 +197,35 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "Gene View", icon = icon("heartbeat"), value = "tab-gene-view",
         fluidRow(
           column(
-            width = 5,
+            width = 4,
             DT::dataTableOutput("de_table")
           ),
           column(
             width = 4,
+            #withLoader(plotlyOutput("de_volcano"), type="image", loader="/heart.gif") # only works when starting app over RunApp Button (and doesn't look good)
             withSpinner(
               plotlyOutput("de_volcano")
+            )
+          ),
+          column(
+            width = 4,
+            withSpinner(
+              plotlyOutput("dtu_volcano")
             )
           )
         ),
         fluidRow(
           column(
             width = 12,
-            selectizeInput(
-              "gene_name", "Choose one gene:", choices = NULL
-            ),
             withSpinner(
               plotOutput("dtu_plot")
-            )
+            ),
+            uiOutput("carnival_launch")
           )
         )
       ),
       shiny::tabPanel(
+        id = "tab-geneset-view",
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
         fluidRow(
           column(
@@ -297,16 +302,31 @@ magnetique_server <- function(input, output, session) {
     ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
     rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
     myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
-    DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE))  %>% 
+    DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
       DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
-  },
-  selection = "single")
+  })
   
   
   output$de_volcano <- renderPlotly({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    p <- volcano_plot(myde, mygtl$annotation_obj, volcano_labels = 0)
+    p <- volcano_plot(myde,
+                      mygtl$annotation_obj, 
+                      volcano_labels = 0, 
+                      plot_title = "Volcano Plot - Differentially expressed genes")
+    plotly::ggplotly(p, tooltip = "text")
+  })
+  
+  output$dtu_volcano <- renderPlotly({
+    genes_dtu <- unique(rowData(se)$gene_id)
+    mygtl <- rvalues$mygtl()
+    my_de <- mygtl$res_de
+    filter <- rownames(my_de) %in% genes_dtu
+    my_de <- my_de[filter, ]
+    p <- volcano_plot(my_de, 
+                      mygtl$annotation_obj, 
+                      volcano_labels = 0,
+                      plot_title = "Volcano Plot - Differential Transcript Usage")
     plotly::ggplotly(p, tooltip = "text")
   })
   
@@ -357,8 +377,6 @@ magnetique_server <- function(input, output, session) {
                   message = "Please select a gene set from the Enrichment Map."
     ))
     
-    # if (!is.null(input$exp_condition)) {
-    # message(cur_gsid)
     gs_heatmap(
       se = rvalues$myvst() ,
       gtl = rvalues$mygtl(),
@@ -383,34 +401,56 @@ magnetique_server <- function(input, output, session) {
   
   
   # DTU related content --------------------------------------------------------
-  genes_dtu <- unique(rowData(se)$gene_name)
-  updateSelectizeInput(
-    session, "gene_name",
-    choices = genes_dtu, server = TRUE, selected=NULL
-  )
+  genes_dtu <- unique(rowData(se)$gene_id)
   
   output$dtu_plot <- renderPlot({
-    req(input$gene_name)
-    gtf_gene <- subset(gtf, type == "gene" & gene_name == input$gene_name)
-    plot_dtu(mcols(gtf_gene)[["gene_id"]], se, gtf)
+    row <- input$de_table_rows_selected
+    validate(need(!is.na(row),
+                  message = "Please select an entry from the table."
+    ))
+    mygtl <- rvalues$mygtl()
+    res_de <- mygtl$res_de
+    entry <- rownames(res_de)[[row]]
     
+    validate(need(entry %in% genes_dtu,
+                  message = paste("The gene you selected, ", entry, ", is not a DTU gene. Please select another gene from the table")
+    ))
+    #gtf_gene <- subset(gtf, type == "gene" & gene_id == entry)
+    #plot_dtu(mcols(gtf_gene)[["gene_id"]], se, gtf)
+    plot_dtu(entry, se, gtf)
+  })
+  
+  output$carnival_launch <- renderUI({
+    tagList(
+      actionButton(
+        inputId = "btn_show_carnival",
+        icon = icon("flask"),
+        label = "Show Carnival View of selected DTU gene", style = .actionbutton_biocstyle
+      ),
+      actionButton(
+        inputId = "btn_switch_emap",
+        icon = icon("project-diagram"),
+        label = "Jump to Enrichtment Map",
+        style = .actionbutton_biocstyle
+      )
+    )
   })
   
   
   # carnival-related content ---------------------------------------------------
-  # output$carnival_counts <- renderPlot({
-  #    mygtl <- rvalues$mygtl()
-  #   
-  #  g <- rvalues$myigraph()
-  # cur_sel <- input$visnet_igraph_selected
+  #output$carnival_counts <- renderPlot({
+  #mygtl <- rvalues$mygtl()
+  
+  #g <- rvalues$myigraph()
+  #cur_sel <- input$visnet_igraph_selected
   #cur_node <- match(cur_sel, V(g)$name)
   #cur_nodetype <- V(g)$nodetype[cur_node]
-  # validate(need(cur_nodetype == "Feature",
-  #               message = "" # "Please select a gene/feature."
-  # ))
+  #validate(need(cur_nodetype == "Feature",
+  #              message = "" # "Please select a gene/feature."
+  #))
   
   #validate(need(cur_sel != "",
-  #              message = "Please select a node from the graph to plot the expression values."
+  #             message = "Please select a node from the graph to plot the expression values."
   #))
   
   #cur_geneid <- mygtl$annotation_obj$gene_id[match(cur_sel, mygtl$annotation_obj$gene_name)]
@@ -418,35 +458,34 @@ magnetique_server <- function(input, output, session) {
   #message(length(cur_sel))
   #message(cur_geneid)
   
-  #  genes_exp <- rownames(mygtl$dds)
-  # validate(need(cur_geneid %in% genes_exp,
+  #genes_exp <- rownames(mygtl$dds)
+  #validate(need(cur_geneid %in% genes_exp,
   #              message = "gene not found in expression matrix" 
   #))
   
   #gene_plot(gtl = mygtl, gene = cur_geneid, 
-  #          intgroup = "Etiology")
+  #           intgroup = "Etiology")
   #})
   
   
-  # output$visnet_igraph <- renderVisNetwork({
-  
-  #    visNetwork::visIgraph(rvalues$myigraph()) %>%
-  #     visOptions(
-  #      highlightNearest = list(
-  #       enabled = TRUE,
-  #      degree = 1,
-  #     hover = TRUE
-  #  ),
-  #  nodesIdSelection = TRUE
-  #) %>%
-  #visHierarchicalLayout(levelSeparation = 100, nodeSpacing = 500,
-  #                      shakeTowards = "leaves") %>% # same as visLayout(hierarchical = TRUE) 
-  #visExport(
-  #  name = "igraph",
-  #  type = "png",
-  #  label = "Save igraph graph"
-  #)
-  # })
+  output$visnet_igraph <- renderVisNetwork({
+    visNetwork::visIgraph(rvalues$myigraph()) %>%
+      visOptions(
+        highlightNearest = list(
+          enabled = TRUE,
+          degree = 1,
+          hover = TRUE
+        ),
+        nodesIdSelection = TRUE
+      ) %>%
+      visHierarchicalLayout(levelSeparation = 100, nodeSpacing = 500,
+                            shakeTowards = "leaves") %>% # same as visLayout(hierarchical = TRUE) 
+      visExport(
+        name = "igraph",
+        type = "png",
+        label = "Save igraph graph"
+      )
+  })
   
   # Other content --------------------------------------------------------------
   output$de_volcano_signature <- renderPlot({
@@ -463,8 +502,26 @@ magnetique_server <- function(input, output, session) {
     team_df
   })
   
+  observeEvent(input$btn_show_carnival, {
+    showModal(
+      modalDialog(
+        title = "Carnival View", size = "l", fade = TRUE,
+        footer = NULL, easyClose = TRUE,
+        visNetworkOutput("visnet_igraph"),
+        #plotOutput("carnival_counts")
+      )
+    )
+  })
+  
+  observeEvent(input$btn_switch_emap,{
+    updateTabsetPanel(session, "tabs",selected = "tab-geneset-view")
+  })
+  
+  .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
+  
   
 }
 
 # Launching magnetique! --------------------------------------------------------
 shinyApp(magnetique_ui, magnetique_server)
+
