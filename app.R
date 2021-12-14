@@ -314,7 +314,8 @@ magnetique_server <- function(input, output, session) {
                       mygtl$annotation_obj, 
                       volcano_labels = 0, 
                       plot_title = "Volcano Plot - Differentially expressed genes")
-    plotly::ggplotly(p, tooltip = "text")
+    plotly::ggplotly(p, tooltip = "text") %>% 
+    toWebGL() 
   })
   
   output$dtu_volcano <- renderPlotly({
@@ -327,7 +328,8 @@ magnetique_server <- function(input, output, session) {
                       mygtl$annotation_obj, 
                       volcano_labels = 0,
                       plot_title = "Volcano Plot - Differential Transcript Usage")
-    plotly::ggplotly(p, tooltip = "text")
+    plotly::ggplotly(p, tooltip = "text") %>%
+    toWebGL() 
   })
   
   # enrichment map related content ---------------------------------------------
