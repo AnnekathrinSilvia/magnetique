@@ -229,13 +229,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
         fluidRow(
           column(
-            width = 4,
-            DT::dataTableOutput("de_table2")
+            width = 5,
+            DT::dataTableOutput("enrich_table")
           ),
           column(
             width = 7,
             withSpinner(
-              plotOutput("enriched_funcres")
+              plotlyOutput("enriched_funcres")
             )
           )
         ),
@@ -331,15 +331,18 @@ magnetique_server <- function(input, output, session) {
   })
   
   # enrichment map related content ---------------------------------------------
-  output$de_table2 <- DT::renderDataTable({
+  output$enrich_table <- DT::renderDataTable({
     mygtl <- rvalues$mygtl()
-    myde <- mygtl$res_de
-    myde <- GeneTonic::deseqresult2df(myde)
-    ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
-    rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
-    myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
-    DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE))  %>% 
-      DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
+    myres_enrich <- mygtl$res_enrich
+    df <- data.frame(description = myres_enrich$gs_description,
+                     obs = myres_enrich$DE_count,
+                     exp = myres_enrich$Expected,
+                     padj = myres_enrich$gs_pvalue)
+    df <- df[order(df$obs, decreasing = T), ]
+    rownames(df) <- myres_enrich$gs_id
+    colnames(df) <- c("Description", "Observed", "Expected", "padj")
+    DT::datatable(df, escape = FALSE, options = list(scrollX = TRUE))  %>% 
+      DT::formatRound(columns=c('padj'), digits=3)
   })
   
   emap_graph <- reactive({
@@ -391,14 +394,15 @@ magnetique_server <- function(input, output, session) {
     )
   })
   
-  output$enriched_funcres <- renderPlot({
+  output$enriched_funcres  <- renderPlotly({
     gtl <- rvalues$mygtl()
-    enhance_table(gtl$res_enrich, gtl$res_de,
-                  annotation_obj = gtl$annotation_obj,
-                  n_gs = input$number_genesets
-    )
+    ggplotly(enhance_table(gtl$res_enrich,
+                           gtl$res_de,
+                           annotation_obj = gtl$annotation_obj,
+                           n_gs = input$number_genesets,
+                           chars_limit = 50
+    ))
   })
-  
   
   # DTU related content --------------------------------------------------------
   genes_dtu <- unique(rowData(se)$gene_id)
