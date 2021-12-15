@@ -103,6 +103,7 @@ all_vst <- list(DCMvsHCM = vst(all_gtls[["DCMvsHCM"]][["BP"]]$dds),
                 DCMvsNFD = vst(all_gtls[["DCMvsNFD"]][["BP"]]$dds),
                 HCMvsNFD = vst(all_gtls[["HCMvsNFD"]][["BP"]]$dds))
 
+
 rm(MAGNet_DCMvsHCM_GeneTonic,
    MAGNet_DCMvsNFD_GeneTonic,
    MAGNet_HCMvsNFD_GeneTonic)
@@ -298,12 +299,20 @@ magnetique_server <- function(input, output, session) {
   output$de_table <- DT::renderDataTable({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    myde <- GeneTonic::deseqresult2df(myde)
+    #name <- paste0("DRIMSeq_", substr(input$selected_contrast, 1, 3), "_vs_",substr(input$selected_contrast, 6, 8) )
+    #dtu_usage_dcm_vs_hcm <- rowData(se)[[name]]['lr']
+    #dtu_padj_dcm_vs_hcm <- rowData(se)[[name]]['adj_pvalue']
+    #message(head(dtu_padj))
+    df <- data.frame(symbol = myde$SYMBOL,
+                     log2 = myde$log2FoldChange,
+                     padj = myde$padj)
+    #                dtuusage = dtu_usage,
+    #               dtupadj = dtu_padj)
     ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
-    rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
-    myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
-    DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
-      DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
+    rownames(df) <- lapply(rownames(df), function(x) format_url(ensembl_url, x))
+    colnames(df) <- c("SYMBOL", "log2FoldChange", "DGE padj")
+    DT::datatable(df, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
+      DT::formatRound(columns=c('log2FoldChange', 'DGE padj'), digits=3)
   })
   
   
@@ -315,7 +324,7 @@ magnetique_server <- function(input, output, session) {
                       volcano_labels = 0, 
                       plot_title = "Volcano Plot - Differentially expressed genes")
     plotly::ggplotly(p, tooltip = "text") %>% 
-    toWebGL() 
+      toWebGL() 
   })
   
   output$dtu_volcano <- renderPlotly({
@@ -329,7 +338,7 @@ magnetique_server <- function(input, output, session) {
                       volcano_labels = 0,
                       plot_title = "Volcano Plot - Differential Transcript Usage")
     plotly::ggplotly(p, tooltip = "text") %>%
-    toWebGL() 
+      toWebGL() 
   })
   
   # enrichment map related content ---------------------------------------------
@@ -427,6 +436,14 @@ magnetique_server <- function(input, output, session) {
   })
   
   output$carnival_launch <- renderUI({
+    row <- input$de_table_rows_selected
+    if(is.null(row)) return()
+    mygtl <- rvalues$mygtl()
+    res_de <- mygtl$res_de
+    entry <- rownames(res_de)[[row]]
+    
+    if(!(entry %in% genes_dtu)) return()
+    
     tagList(
       actionButton(
         inputId = "btn_show_carnival",
