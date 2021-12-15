@@ -322,6 +322,8 @@ magnetique_server <- function(input, output, session) {
     p <- volcano_plot(myde,
                       mygtl$annotation_obj, 
                       volcano_labels = 0, 
+                      color = "steelblue",
+                      alpha = 0.3,
                       plot_title = "Volcano Plot - Differentially expressed genes")
     plotly::ggplotly(p, tooltip = "text") %>% 
       toWebGL() 
@@ -336,6 +338,8 @@ magnetique_server <- function(input, output, session) {
     p <- volcano_plot(my_de, 
                       mygtl$annotation_obj, 
                       volcano_labels = 0,
+                      color = "steelblue",
+                      alpha = 0.3,
                       plot_title = "Volcano Plot - Differential Transcript Usage")
     plotly::ggplotly(p, tooltip = "text") %>%
       toWebGL() 
@@ -530,8 +534,7 @@ magnetique_server <- function(input, output, session) {
       modalDialog(
         title = "Carnival View", size = "l", fade = TRUE,
         footer = NULL, easyClose = TRUE,
-        visNetworkOutput("visnet_igraph"),
-        #plotOutput("carnival_counts")
+        visNetworkOutput("visnet_igraph")
       )
     )
   })
