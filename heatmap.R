@@ -165,7 +165,7 @@ heatmap <- function(se,
   
   anno_col_info <- anno_col_info[anno_col_info %in% colnames(colData(se))]
   sample_decoration <- as.data.frame(colData(se))[, anno_col_info, drop = FALSE]
-  anns_colors <- list(Etiology = c(DCM = "steelblue", HCM = "gold", NFD = "forestgreen"))
+  anns_colors <- list(Etiology = c(DCM = "gold", HCM = "forestgreen", NFD = "steelblue"))
 
   
   p <- ComplexHeatmap::pheatmap(mydata_sig,
