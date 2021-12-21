@@ -1,130 +1,6 @@
+# loading libraries -------------------------------------------------------
 library("GeneTonic")
 library("DESeq2")
-
-MAGNet_DCMvsHCM_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsHCM_GeneTonic.rds")
-MAGNet_DCMvsNFD_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_DCMvsNFD_GeneTonic.rds")
-MAGNet_HCMvsNFD_GeneTonic <- readRDS("MAGNetApp_cloud_data/data/DGE/MAGNet_HCMvsNFD_GeneTonic.rds")
-MAGNet_DCMvsHCM_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_dcm_vs_hcm.RData"))
-MAGNet_DCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_dcm_vs_nfd.RData"))
-MAGNet_HCMvsNFD_igraph <- get(load("MAGNetApp_cloud_data/data/networks/igraph_hcm_vs_nfd.RData"))
-
-
-# DCM vs HCM --------------------------------------------------------------
-gtl_DCMvsHCM_BP <- GeneTonic_list(
-  dds = MAGNet_DCMvsHCM_GeneTonic$dds,
-  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de[order(MAGNet_DCMvsHCM_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_DCMvsHCM_GeneTonic$res_enrich$BP,
-  annotation_obj = MAGNet_DCMvsHCM_GeneTonic$annotation_obj
-)
-
-gtl_DCMvsHCM_MF <- GeneTonic_list(
-  dds = MAGNet_DCMvsHCM_GeneTonic$dds,
-  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de[order(MAGNet_DCMvsHCM_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_DCMvsHCM_GeneTonic$res_enrich$MF,
-  annotation_obj = MAGNet_DCMvsHCM_GeneTonic$annotation_obj
-)
-
-gtl_DCMvsHCM_CC <- GeneTonic_list(
-  dds = MAGNet_DCMvsHCM_GeneTonic$dds,
-  res_de = MAGNet_DCMvsHCM_GeneTonic$res_de[order(MAGNet_DCMvsHCM_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_DCMvsHCM_GeneTonic$res_enrich$CC,
-  annotation_obj = MAGNet_DCMvsHCM_GeneTonic$annotation_obj
-)
-
-
-# DCM vs NFD --------------------------------------------------------------
-gtl_DCMvsNFD_BP <- GeneTonic_list(
-  dds = MAGNet_DCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de[order(MAGNet_DCMvsNFD_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_DCMvsNFD_GeneTonic$res_enrich$BP,
-  annotation_obj = MAGNet_DCMvsNFD_GeneTonic$annotation_obj
-)
-
-gtl_DCMvsNFD_MF <- GeneTonic_list(
-  dds = MAGNet_DCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de[order(MAGNet_DCMvsNFD_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_DCMvsNFD_GeneTonic$res_enrich$MF,
-  annotation_obj = MAGNet_DCMvsNFD_GeneTonic$annotation_obj
-)
-
-gtl_DCMvsNFD_CC <- GeneTonic_list(
-  dds = MAGNet_DCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_DCMvsNFD_GeneTonic$res_de[order(MAGNet_DCMvsNFD_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_DCMvsNFD_GeneTonic$res_enrich$CC,
-  annotation_obj = MAGNet_DCMvsNFD_GeneTonic$annotation_obj
-)
-
-
-# HCM vs NFD --------------------------------------------------------------
-gtl_HCMvsNFD_BP <- GeneTonic_list(
-  dds = MAGNet_HCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de[order(MAGNet_HCMvsNFD_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_HCMvsNFD_GeneTonic$res_enrich$BP,
-  annotation_obj = MAGNet_HCMvsNFD_GeneTonic$annotation_obj
-)
-
-gtl_HCMvsNFD_MF <- GeneTonic_list(
-  dds = MAGNet_HCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de[order(MAGNet_HCMvsNFD_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_HCMvsNFD_GeneTonic$res_enrich$MF,
-  annotation_obj = MAGNet_HCMvsNFD_GeneTonic$annotation_obj
-)
-
-gtl_HCMvsNFD_CC <- GeneTonic_list(
-  dds = MAGNet_HCMvsNFD_GeneTonic$dds,
-  res_de = MAGNet_HCMvsNFD_GeneTonic$res_de[order(MAGNet_HCMvsNFD_GeneTonic$res_de$padj), ],
-  res_enrich = MAGNet_HCMvsNFD_GeneTonic$res_enrich$CC,
-  annotation_obj = MAGNet_HCMvsNFD_GeneTonic$annotation_obj
-)
-
-all_gtls <- list(
-  DCMvsHCM = list(
-    BP = gtl_DCMvsHCM_BP,
-    MF = gtl_DCMvsHCM_MF,
-    CC = gtl_DCMvsHCM_CC
-  ),
-  DCMvsNFD = list(
-    BP = gtl_DCMvsNFD_BP,
-    MF = gtl_DCMvsNFD_MF,
-    CC = gtl_DCMvsNFD_CC
-  ),
-  HCMvsNFD = list(
-    BP = gtl_HCMvsNFD_BP,
-    MF = gtl_HCMvsNFD_MF,
-    CC = gtl_HCMvsNFD_CC
-  )
-)
-
-all_igraph <- list(DCMvsHCM = MAGNet_DCMvsHCM_igraph,
-                   DCMvsNFD = MAGNet_DCMvsNFD_igraph,
-                   HCMvsNFD = MAGNet_HCMvsNFD_igraph)
-
-all_vst <- list(DCMvsHCM = vst(all_gtls[["DCMvsHCM"]][["BP"]]$dds),
-                DCMvsNFD = vst(all_gtls[["DCMvsNFD"]][["BP"]]$dds),
-                HCMvsNFD = vst(all_gtls[["HCMvsNFD"]][["BP"]]$dds))
-
-
-rm(MAGNet_DCMvsHCM_GeneTonic,
-   MAGNet_DCMvsNFD_GeneTonic,
-   MAGNet_HCMvsNFD_GeneTonic)
-
-rm(gtl_DCMvsHCM_BP,
-   gtl_DCMvsHCM_MF,
-   gtl_DCMvsHCM_CC,
-   gtl_DCMvsNFD_BP,
-   gtl_DCMvsNFD_MF,
-   gtl_DCMvsNFD_CC,
-   gtl_HCMvsNFD_BP,
-   gtl_HCMvsNFD_MF,
-   gtl_HCMvsNFD_CC)
-
-rm(MAGNet_DCMvsHCM_igraph,
-   MAGNet_DCMvsNFD_igraph,
-   MAGNet_HCMvsNFD_igraph)
-
-
-# loading libraries -------------------------------------------------------
-
 library("shiny")
 library("visNetwork")
 library("bs4Dash")
@@ -135,22 +11,24 @@ library("igraph")
 library("plotly")
 library("shinycssloaders")
 library("shinycustomloader")
+library("RColorBrewer")
+library("pheatmap")
+library("ComplexHeatmap")
 options(spinner.type = 6)
 
 
 # sourcing external files -------------------------------------------------
-
 source("volcano_plot.R")
 source("DTU/plots_with_se_obj.R")
 source("utils.R")
+source("data_preparation.R")
+source("heatmap.R")
 se <- readRDS("MAGNetApp_cloud_data/data/summarized_experiment.RDS")
 
 
 # ui definition -----------------------------------------------------------
-
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
-  
   header = shinydashboard::dashboardHeader(title = "magnetique"),
   
   # sidebar definition ------------------------------------------------------
@@ -178,7 +56,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 selected = "z_score")
     
   ),
-  
   
   # body definition ---------------------------------------------------------
   body = shinydashboard::dashboardBody(
@@ -242,13 +119,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         fluidRow(
           column(
-            width = 5,
+            width = 6,
             withSpinner(
               visNetworkOutput("visnet_em")
             ) 
           ),
           column(
-            width = 4,
+            width = 6,
             plotOutput("emap_signature")
           )
         )
@@ -267,9 +144,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
   )
 )
 
-
 # server definition -------------------------------------------------------
-
 magnetique_server <- function(input, output, session) {
   
   rvalues <- reactiveValues()
@@ -280,7 +155,6 @@ magnetique_server <- function(input, output, session) {
   
   # selector of gtl object --------------------------------------------------
   rvalues$mygtl <- reactive({
-    
     message(input$selected_contrast)
     message(input$selected_ontology)
     
@@ -299,20 +173,15 @@ magnetique_server <- function(input, output, session) {
   output$de_table <- DT::renderDataTable({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    #name <- paste0("DRIMSeq_", substr(input$selected_contrast, 1, 3), "_vs_",substr(input$selected_contrast, 6, 8) )
-    #dtu_usage_dcm_vs_hcm <- rowData(se)[[name]]['lr']
-    #dtu_padj_dcm_vs_hcm <- rowData(se)[[name]]['adj_pvalue']
-    #message(head(dtu_padj))
-    df <- data.frame(symbol = myde$SYMBOL,
-                     log2 = myde$log2FoldChange,
-                     padj = myde$padj)
-    #                dtuusage = dtu_usage,
-    #               dtupadj = dtu_padj)
+    #contrast <- paste0(substr(input$selected_contrast, 1, 3), "_vs_",substr(input$selected_contrast, 6, 8))
+    #df <- prepareDataTable(se, myde, contrast)
+    myde <- GeneTonic::deseqresult2df(myde)
     ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
-    rownames(df) <- lapply(rownames(df), function(x) format_url(ensembl_url, x))
-    colnames(df) <- c("SYMBOL", "log2FoldChange", "DGE padj")
-    DT::datatable(df, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
-      DT::formatRound(columns=c('log2FoldChange', 'DGE padj'), digits=3)
+    rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
+    #colnames(df) <- c("SYMBOL", "log2FoldChange", "DGE padj", "DTU usage", "DTU_padj")
+    myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
+    DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
+      DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
   })
   
   
@@ -371,7 +240,6 @@ magnetique_server <- function(input, output, session) {
     return(emg)
   })
   
-  
   output$visnet_em <- renderVisNetwork({
     visNetwork::visIgraph(emap_graph()) %>%
       visOptions(
@@ -394,8 +262,7 @@ magnetique_server <- function(input, output, session) {
     validate(need(!is.na(cur_gsid),
                   message = "Please select a gene set from the Enrichment Map."
     ))
-    
-    gs_heatmap(
+    heatmap(
       se = rvalues$myvst() ,
       gtl = rvalues$mygtl(),
       geneset_id = cur_gsid,
@@ -434,8 +301,6 @@ magnetique_server <- function(input, output, session) {
     validate(need(entry %in% genes_dtu,
                   message = paste("The gene you selected, ", entry, ", is not a DTU gene. Please select another gene from the table")
     ))
-    #gtf_gene <- subset(gtf, type == "gene" & gene_id == entry)
-    #plot_dtu(mcols(gtf_gene)[["gene_id"]], se, gtf)
     plot_dtu(entry, se, gtf)
   })
   
@@ -447,7 +312,6 @@ magnetique_server <- function(input, output, session) {
     entry <- rownames(res_de)[[row]]
     
     if(!(entry %in% genes_dtu)) return()
-    
     tagList(
       actionButton(
         inputId = "btn_show_carnival",
@@ -493,7 +357,6 @@ magnetique_server <- function(input, output, session) {
   #gene_plot(gtl = mygtl, gene = cur_geneid, 
   #           intgroup = "Etiology")
   #})
-  
   
   output$visnet_igraph <- renderVisNetwork({
     visNetwork::visIgraph(rvalues$myigraph()) %>%
@@ -544,8 +407,6 @@ magnetique_server <- function(input, output, session) {
   })
   
   .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
-  
-  
 }
 
 # Launching magnetique! --------------------------------------------------------
