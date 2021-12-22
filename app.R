@@ -173,15 +173,15 @@ magnetique_server <- function(input, output, session) {
   output$de_table <- DT::renderDataTable({
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
-    #contrast <- paste0(substr(input$selected_contrast, 1, 3), "_vs_",substr(input$selected_contrast, 6, 8))
-    #df <- prepareDataTable(se, myde, contrast)
-    myde <- GeneTonic::deseqresult2df(myde)
+    contrast <- paste0(substr(input$selected_contrast, 1, 3), "_vs_",substr(input$selected_contrast, 6, 8))
+    myde <- prepareDataTable(se, myde, contrast)
+    #myde <- GeneTonic::deseqresult2df(myde)
     ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
     rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
-    #colnames(df) <- c("SYMBOL", "log2FoldChange", "DGE padj", "DTU usage", "DTU_padj")
-    myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
+    colnames(myde) <- c("SYMBOL", "log2FoldChange", "DGE padj", "DTU usage", "DTU padj")
+    #myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
     DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
-      DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
+      DT::formatRound(columns=c('log2FoldChange', 'DGE padj', 'DTU usage', 'DTU padj'), digits=3)
   })
   
   
