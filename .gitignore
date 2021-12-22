@@ -39,8 +39,10 @@ vignettes/*.pdf
 .Renviron
 **/*.RDS
 /shinyproxy.Rcheck
-<<<<<<< Updated upstream
-=======
 .vscode
 settings.json
->>>>>>> Stashed changes
+*.pdf
+*.gz
+*.zip
+MAGNetApp/*
+MAGNetApp_cloud_data/data/*
