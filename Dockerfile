@@ -91,11 +91,9 @@ WORKDIR /root/magnetique/
 
 # install R environment
 RUN R -e 'renv::restore()'
+RUN R -e 'renv::install("markdown")'
+RUN R -e 'renv::install("future")'
 
-# fetch data
-ADD download_data.sh /root/magnetique/download_data.sh
-RUN chmod +x download_data.sh
-RUN ./download_data.sh 
 
 EXPOSE 3838
 
