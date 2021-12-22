@@ -120,7 +120,7 @@ rm(MAGNet_DCMvsHCM_igraph,
 # DTU data loading --------------------------------------------------------
 
 se_dtu <- readRDS("MAGNetApp/data/DTU/summarized_experiment.RDS")
-gtf <- rtracklayer::import.gff2("MAGNetApp/data/DTU/gtf.RDS")
+gtf <- readRDS("MAGNetApp/data/DTU/gtf.RDS")
 
 
 # WGCNA data loading ------------------------------------------------------
