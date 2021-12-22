@@ -11,6 +11,8 @@ get_group_colors <- function(){
   group_colors  
 }
 
+group_colors <- get_group_colors()
+
 #' Compute the mean proportion difference between groups
 get_gid2name <- function(gtf) {
   setNames(
@@ -90,8 +92,8 @@ gene_proportions <- function(gene, dataset, .type = "fit_full") {
 #' @param dataset SummarizedExperiment object with the dataset
 #' @param gtf GRanges with gene structure
 #' @export
-gene_structure <- function(gene, .gtf, dataset) {
-  x <- BiocGenerics::subset(.gtf, gene_id %in% c(gene))
+gene_structure <- function(gene, gtf, dataset) {
+  x <- BiocGenerics::subset(gtf, gene_id %in% c(gene))
   x <- BiocGenerics::subset(x, transcript_id %in% rownames(dataset))
   x$type <- plyr::revalue(
     x$type, c("five_prime_utr" = "utr", "three_prime_utr" = "utr")
@@ -105,21 +107,21 @@ gene_structure <- function(gene, .gtf, dataset) {
 #' @param dataset SummarizedExperiment object with the dataset
 #' @param gtf GRanges with gene structure
 #' @export
-plot_dtu <- function(gene, dataset, .gtf) {
+plot_dtu <- function(gene, dataset, geneid2name, gtf) {
   x_gene <- gene_counts(gene, dataset)
   x_tx <- gene_proportions(gene, dataset)
-  x_structure <- gene_structure(gene, .gtf, dataset)
+  x_structure <- gene_structure(gene, gtf, dataset)
 
   p1 <- x_gene %>%
     dplyr::group_by(sample_id) %>%
-    dplyr::summarise(value = sum(value), group = first(group)) %>%
+    dplyr::summarise(value = sum(value), group = dplyr::first(group)) %>%
     ggplot() +
     geom_boxplot(aes(x = group, y = value, fill = group, color = group),
       alpha = 0.4, lwd = 0.5, show.legend = F
     ) +
     scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", math_format(10^.x))
+      labels = scales::trans_format("log10", scales::math_format(10^.x))
     ) +
     scale_fill_manual(name = "group", values = group_colors) +
     scale_colour_manual(name = "group", values = group_colors) +
@@ -151,13 +153,13 @@ plot_dtu <- function(gene, dataset, .gtf) {
 
   p3 <- suppressMessages({
     ggplot() +
-    geom_alignment(x_structure,
+    ggbio::geom_alignment(x_structure,
       fill = "black", cds.rect.h = .3, utr.rect.h = .2,
       exon.rect.h = .2, label = T
     ) +
     theme_minimal(20) +
-    theme(plot.margin = margin()) +
-    labs(x = paste('chr', seqnames(x_structure[[1]])@values))})
+    theme(plot.margin = margin())
+    })
 
   p_final <- (p1 | p3 | p2) +
     # plot_layout(widths = c(1, 4), heights = c(1.5, 1)) +
@@ -172,7 +174,7 @@ plot_dtu <- function(gene, dataset, .gtf) {
 
 results_table <- function(gene, se) {
   x <- subset(rowData(se), gene_id == gene)
-  x <- bind_rows(
+  x <- dplyr::bind_rows(
     list("DCM_vs_NFD" = x[["DRIMSeq_DCM_vs_NFD"]], 
          "HCM_vs_NFD" = x[["DRIMSeq_HCM_vs_NFD"]], 
          "DCM_vs_HCM" = x[["DRIMSeq_DCM_vs_HCM"]]),
