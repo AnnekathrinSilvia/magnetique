@@ -1,24 +1,30 @@
+message('start', Sys.time())
+
 # loading libraries -------------------------------------------------------
 library("GeneTonic")
 library("DESeq2")
-library("shiny")
-library("shinydashboard")
-library("shinycssloaders")
-library("visNetwork")
-library("bs4Dash")
-library("ggplot2")
-library("ggrepel")
-library("igraph")
-library("plotly")
+library("shiny", warn.conflicts = FALSE )
+library("shinydashboard", warn.conflicts = FALSE)
+library("shinycssloaders", warn.conflicts = FALSE)
+library("visNetwork", warn.conflicts = FALSE)
+library("bs4Dash", warn.conflicts = FALSE)
+library("ggplot2", warn.conflicts = FALSE)
+library("ggrepel", warn.conflicts = FALSE)
+library("igraph", warn.conflicts = FALSE)
+library("plotly", warn.conflicts = FALSE)
+library("patchwork", warn.conflicts = FALSE)
+message('loaded libs', Sys.time())
 
 options(spinner.type = 6)
 
 # sourcing external files -------------------------------------------------
 source("volcano_plot.R")
 source("utils.R")
-
+message('sourced scripts', Sys.time())
 # this one is for loading data, candidate to be `promise`
 source("load_data_magnetique.R")
+message('loaded data', Sys.time())
+geneid2name <- get_gid2name(gtf)
 
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
@@ -294,8 +300,8 @@ magnetique_server <- function(input, output, session) {
   output$dtu_plot <- renderPlot({
     req(input$gene_name)
     gtf_gene <- subset(gtf, type == "gene" & gene_name == input$gene_name)
-    plot_dtu(mcols(gtf_gene)[["gene_id"]], se_dtu, gtf)
-    
+    plot_dtu(mcols(gtf_gene)[["gene_id"]], se_dtu, geneid2name, gtf)
+
   })
   
   output$dtu_table <- renderTable({
@@ -401,7 +407,7 @@ magnetique_server <- function(input, output, session) {
   })
   
   output$team_list <- renderTable({
-    team_df
+    make_team_df()
   })
   
   
@@ -442,7 +448,7 @@ magnetique_server <- function(input, output, session) {
   })
   
 }
-
+message("finished", Sys.time())
 # Launching magnetique! --------------------------------------------------------
 shinyApp(magnetique_ui, magnetique_server)
 
