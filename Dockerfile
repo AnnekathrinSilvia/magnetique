@@ -94,7 +94,6 @@ RUN R -e 'renv::restore()'
 RUN R -e 'renv::install("markdown")'
 RUN R -e 'renv::install("future")'
 
-
 EXPOSE 3838
 
-CMD ["R", "-e", "shiny::runApp('root/magnetique/app.R')"]
+CMD ["R", "-e", "shiny::runApp('/root/magnetique/app.R')"]
