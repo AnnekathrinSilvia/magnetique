@@ -100,8 +100,8 @@ all_vst <- list(DCMvsHCM = vst(all_gtls[["DCMvsHCM"]][["BP"]]$dds),
                 DCMvsNFD = vst(all_gtls[["DCMvsNFD"]][["BP"]]$dds),
                 HCMvsNFD = vst(all_gtls[["HCMvsNFD"]][["BP"]]$dds))
 
-se <- readRDS("MAGNetApp_cloud_data/data/summarized_experiment.RDS")
-
+se <- readRDS("MAGNetApp/data/DTU/summarized_experiment.RDS")
+gtf <- readRDS("MAGNetApp/data/DTU/gtf.RDS")
 
 rm(MAGNet_DCMvsHCM_GeneTonic,
    MAGNet_DCMvsNFD_GeneTonic,
@@ -123,17 +123,18 @@ rm(MAGNet_DCMvsHCM_igraph,
 
 
 prepareDataTable <- function(se, res_de, contrast){
-  name <- paste0("DRIMSeq_", contrast)
-  dtu_info <- rowData(se)[[name]]
-  names <- rownames(res_de)
-  genes_dtu <- unique(dtu_info$gene_id)
+  # name <- paste0("DRIMSeq_", contrast)
+  # dtu_info <- rowData(se)[[name]]
+  # names <- rownames(res_de)
+  # genes_dtu <- unique(dtu_info$gene_id)
   
-  dtu_usage <- sapply(names, function(x) if(x %in% genes_dtu){dtu_info[dtu_info$gene_id %in% x,][1,]$lr}else{NA})
-  dtu_padj <- sapply(names, function(x) if(x %in% genes_dtu){dtu_info[dtu_info$gene_id %in% x,][1,]$adj_pvalue}else{NA})
+  # dtu_usage <- sapply(names, function(x) if(x %in% genes_dtu){dtu_info[dtu_info$gene_id %in% x,][1,]$lr}else{NA})
+  # dtu_padj <- sapply(names, function(x) if(x %in% genes_dtu){dtu_info[dtu_info$gene_id %in% x,][1,]$adj_pvalue}else{NA})
   df <- data.frame(symbol = res_de$SYMBOL,
                    log2 = res_de$log2FoldChange,
                    padj = res_de$padj,
-                   dtuusage = dtu_usage,
-                   dtupadj = dtu_padj)
+                  #  dtuusage = dtu_usage,
+                  #  dtupadj = dtu_padj
+                  )
   return(df)
 }
