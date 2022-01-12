@@ -46,3 +46,7 @@ settings.json
 *.zip
 MAGNetApp/*
 MAGNetApp_cloud_data/data/*
+renv/*
+.Rprofile
+core
+.vi.*
