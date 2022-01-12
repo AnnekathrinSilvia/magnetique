@@ -72,7 +72,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
       )
     ),
     tabBox(
-      id = "tabs",
       width = 12,
       id = "magnetique_tab",
       shiny::tabPanel(
@@ -192,14 +191,18 @@ magnetique_server <- function(input, output, session) {
     mygtl <- rvalues$mygtl()
     myde <- mygtl$res_de
     contrast <- paste0(substr(input$selected_contrast, 1, 3), "_vs_",substr(input$selected_contrast, 6, 8))
-    myde <- prepareDataTable(se, myde, contrast)
-    #myde <- GeneTonic::deseqresult2df(myde)
     ensembl_url <- "https://www.ensembl.org/Homo_sapiens/Gene/Summary?g="
-    rownames(myde) <- lapply(rownames(myde), function(x) format_url(ensembl_url, x))
-    colnames(myde) <- c("SYMBOL", "log2FoldChange", "DGE padj", "DTU usage", "DTU padj")
-    #myde <- myde[c("SYMBOL", "log2FoldChange", "padj")]
+
+    myde <- data.frame(
+      symbol = myde$SYMBOL,
+      log2FoldChange = myde$log2FoldChange,
+      padj = myde$padj,
+      # ensembl = lapply(rownames(myde), function(x) format_url(ensembl_url, x)),
+      row.names = rownames(myde)
+      )
+
     DT::datatable(myde, escape = FALSE, options = list(scrollX = TRUE), selection = 'single')  %>% 
-      DT::formatRound(columns=c('log2FoldChange', 'DGE padj', 'DTU usage', 'DTU padj'), digits=3)
+      DT::formatRound(columns=c('log2FoldChange', 'padj'), digits=3)
   })
   
   
@@ -216,21 +219,21 @@ magnetique_server <- function(input, output, session) {
       toWebGL() 
   })
   
-  output$dtu_volcano <- renderPlotly({
-    genes_dtu <- unique(rowData(se)$gene_id)
-    mygtl <- rvalues$mygtl()
-    my_de <- mygtl$res_de
-    filter <- rownames(my_de) %in% genes_dtu
-    my_de <- my_de[filter, ]
-    p <- volcano_plot(my_de, 
-                      mygtl$annotation_obj, 
-                      volcano_labels = 0,
-                      color = "steelblue",
-                      alpha = 0.3,
-                      plot_title = "Volcano Plot - Differential Transcript Usage")
-    plotly::ggplotly(p, tooltip = "text") %>%
-      toWebGL() 
-  })
+  # output$dtu_volcano <- renderPlotly({
+  #   genes_dtu <- unique(rowData(se)$gene_id)
+  #   mygtl <- rvalues$mygtl()
+  #   my_de <- mygtl$res_de
+  #   filter <- rownames(my_de) %in% genes_dtu
+  #   my_de <- my_de[filter, ]
+  #   p <- volcano_plot(my_de, 
+  #                     mygtl$annotation_obj, 
+  #                     volcano_labels = 0,
+  #                     color = "steelblue",
+  #                     alpha = 0.3,
+  #                     plot_title = "Volcano Plot - Differential Transcript Usage")
+  #   plotly::ggplotly(p, tooltip = "text") %>%
+  #     toWebGL() 
+  # })
   
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- DT::renderDataTable({
@@ -305,7 +308,8 @@ magnetique_server <- function(input, output, session) {
   })
   
   # DTU related content --------------------------------------------------------
-  genes_dtu <- unique(rowData(se)$gene_id)
+  # genes_dtu <- unique(rowData(se)$gene_id)
+  genes_dtu <- c("OGT")
   
   output$dtu_plot <- renderPlot({
     row <- input$de_table_rows_selected
