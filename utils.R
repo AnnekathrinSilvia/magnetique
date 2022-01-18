@@ -1,10 +1,3 @@
-format_url <- function(url, target) {
-  if (is.na(target)) {
-    return("")
-  }
-  sprintf("<a target='_blank' href='%s%s'>%s</a>", url, target, target)
-}
-
 get_group_colors <- function(){
   group_colors <- c("steelblue", "gold", "forestgreen")
   names(group_colors) <- c("NFD",  "DCM", "HCM")
@@ -22,20 +15,29 @@ get_gid2name <- function(gtf) {
 
 
 #' Produce table with team info
-make_team_df <- function(){
-  data.frame(
+make_team_df <- data.frame(
     name = c(
       "Annekathrin Ludt",
       "Christoph Dieterich",
       "Enio Gjerga",
       "Etienne Boileau",
       "Federico Marini",
-      "Thiago Britto-Borges")
-  # email
-  # twitter
-  # orcid etc
+      "Thiago Britto-Borges"),
+    twitter = c(
+      "https://twitter.com/AnnekathrinLudt",
+      NA,
+      NA,
+      NA,
+      "https://twitter.com/fedebioinfo",
+      "https://twitter.com/tbrittoborges"),
+    orcid = c(
+      NA,
+      "https://orcid.org/0000-0001-9468-6311",
+      NA,
+      NA,
+      NA,
+      "https://orcid.org/0000-0002-8984-9084")
   )
-}
 
 #' Compute the mean proportion difference between groups
 #' @param gene selection
@@ -107,7 +109,12 @@ gene_structure <- function(gene, gtf, dataset) {
 #' @param dataset SummarizedExperiment object with the dataset
 #' @param gtf GRanges with gene structure
 #' @export
-plot_dtu <- function(gene, dataset, geneid2name, gtf) {
+plot_dtu <- function(gene, dataset, gtf) {
+  library(patchwork)
+    geneid2name <- setNames(
+    nm = gtf$gene_id,
+    gtf$gene_name
+  )
   x_gene <- gene_counts(gene, dataset)
   x_tx <- gene_proportions(gene, dataset)
   x_structure <- gene_structure(gene, gtf, dataset)
@@ -165,7 +172,7 @@ plot_dtu <- function(gene, dataset, geneid2name, gtf) {
     # plot_layout(widths = c(1, 4), heights = c(1.5, 1)) +
     plot_annotation(
       theme = theme(plot.margin = margin()),
-      title = stringr::str_glue("{geneid2name[gene]} - {gene} "),
+      title = stringr::str_glue("{geneid2name[gene]} - {gene}"),
       caption = "Source: MAGNet / GRCh38.96"
     )
   return(p_final)
@@ -182,3 +189,43 @@ results_table <- function(gene, se) {
     ) %>% 
     select('comparison', 'gene_id', 'feature_id',	'lr', 'adj_pvalue')
 }
+
+render_link <- JS(
+  "function(data, type, row){",
+  "  if(type === 'display'){",
+  "    var opt = '_blank'",
+  "    var url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=';",
+  "    var a = '<a target=' + opt + ' href=' + url + row[0] + '>' + row[0] + '</a>'",
+  "    return a;",
+  "  } else {",
+  "    return data;",
+  "  }",
+  "}"
+)
+
+render_DTU_geneid <- JS(
+  "function(data, type, row) {",
+  "  if(type === 'sort' && data === null) {",
+  "    return 9999;",
+  "  }",
+  "  return data;",
+  "}"
+)
+
+render_DTU_pval <- JS(
+  "function(data, type, row) {",
+  "  if(type === 'sort' && data === null) {",
+  "    return 9999;",
+  "  }",
+  "  return data;",
+  "}"
+)
+
+render_DTU_dif <- JS(
+  "function(data, type, row) {",
+  "  if(type === 'sort' && data === null) {",
+  "    return 0;",
+  "  }",
+  "  return data;",
+  "}"
+)
