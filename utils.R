@@ -35,7 +35,7 @@ make_team_df <- data.frame(
       "https://orcid.org/0000-0001-9468-6311",
       NA,
       NA,
-      NA,
+      "https://orcid.org/0000-0003-3252-7758",
       "https://orcid.org/0000-0002-8984-9084")
   )
 
