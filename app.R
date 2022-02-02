@@ -6,7 +6,7 @@ plan(multisession)
 
 library(shinycssloaders)
 library(plotly, warn.conflicts = FALSE)
-library(DT, warn.conflicts = FALSE)
+library(reactable, warn.conflicts = FALSE)
 library(bs4Dash, warn.conflicts = FALSE)
 library(shinydashboard, warn.conflicts = FALSE)
 library(visNetwork)
@@ -91,7 +91,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             width = 6,
             withSpinner(
-              DT::dataTableOutput("de_table")
+              reactableOutput("de_table")
             )
           ),
           column(
@@ -124,7 +124,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 5,
-            DT::dataTableOutput("enrich_table")
+            reactableOutput("enrich_table")
           ),
           column(
             width = 7,
@@ -240,30 +240,41 @@ magnetique_server <- function(input, output, session) {
   })
 
   # DE related content ---------------------------------------------------------
-  output$de_table <- DT::renderDataTable(
+  output$de_table <- renderReactable(
     {
       rvalues$key() %...>% {
         data <- .
-        datatable(
+        reactable(
           data,
-          rownames = FALSE,
+          searchable = TRUE,
+          striped = TRUE,
+          defaultPageSize = 5,
+          highlight = TRUE,
           selection = "single",
-          filter = "top",
-          options = list(
-            scrollX = TRUE,
-            columnDefs = list(
-              list(targets = 0, render = render_link),
-              list(targets = 4, render = render_DTU_pval),
-              list(targets = 5, render = render_DTU_dif)
+          onClick = "select",
+          rowStyle = list(cursor = "pointer"),
+          theme = reactableTheme(
+            stripedColor = "#f6f8fa",
+            highlightColor = "#f0f5f9",
+            cellPadding = "8px 12px",
+          ),
+          list(
+            log2FoldChange = colDef(
+              cell = function(value) format(round(value, 2))
+              ),
+            padj = colDef(
+              cell = function(value) format(round(value, 2))
+            ),
+            dtu_pvadj = colDef(
+              cell = function(value) format(round(value, 2))
+            ),
+            dtu_dif = colDef(
+              cell = function(value) format(round(value, 2))
             )
           )
-        ) %>%
-          formatRound(
-            columns = c("log2FoldChange", "padj", "dtu_pvadj", "dtu_dif"), digits = 3
-          )
+        )
       }
-    },
-    server = FALSE
+    }
   )
 
   output$de_volcano <- renderPlotly({
@@ -326,7 +337,7 @@ magnetique_server <- function(input, output, session) {
   })
 
   # enrichment map related content ---------------------------------------------
-  output$enrich_table <- DT::renderDataTable({
+  output$enrich_table <- renderReactable({
     rvalues$mygtl() %...>% {
       mygtl <- .
       myres_enrich <- mygtl$res_enrich
@@ -339,8 +350,14 @@ magnetique_server <- function(input, output, session) {
       df <- df[order(df$obs, decreasing = T), ]
       rownames(df) <- myres_enrich$gs_id
       colnames(df) <- c("Description", "Observed", "Expected", "padj")
-      DT::datatable(df, escape = FALSE, options = list(scrollX = TRUE)) %>%
-        DT::formatRound(columns = c("padj"), digits = 3)
+      reactable(
+        df,
+        columns = list(
+          padj = colDef(
+            cell = function(value) format(round(value, 2))
+          )
+        )
+      )
     }
   })
 
@@ -489,31 +506,31 @@ magnetique_server <- function(input, output, session) {
         column(
           width = 6,
           h5("Bookmarked genes"),
-          DT::dataTableOutput("bookmarks_genes")
+          reactableOutput("bookmarks_genes")
         ),
         column(
           width = 6,
           h5("Bookmarked genesets"),
-          DT::dataTableOutput("bookmarks_genesets")
+          reactableOutput("bookmarks_genesets")
         )
       )
     )
   })
 
-  output$bookmarks_genes <- DT::renderDataTable({
+  output$bookmarks_genes <- renderReactable({
     book_df_genes <- data.frame(
       gene_id = rvalues$mygenes,
       gene_symbols = rvalues$mygenes
     )
-    DT::datatable(book_df_genes, rownames = FALSE)
+    reactable(book_df_genes, rownames = FALSE)
   })
 
-  output$bookmarks_genesets <- DT::renderDataTable({
+  output$bookmarks_genesets <- renderReactable({
     book_df_genesets <- data.frame(
       geneset_id = rvalues$mygenesets,
       geneset_description = rvalues$mygenesets
     )
-    DT::datatable(book_df_genesets, rownames = FALSE)
+    reactable(book_df_genesets, rownames = FALSE)
   })
 
 
