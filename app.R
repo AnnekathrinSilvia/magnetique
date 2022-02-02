@@ -258,6 +258,7 @@ magnetique_server <- function(input, output, session) {
             highlightColor = "#f0f5f9",
             cellPadding = "8px 12px",
           ),
+          defaultColDef = colDef(sortNALast = TRUE),
           list(
             log2FoldChange = colDef(
               cell = function(value) format(round(value, 2))
