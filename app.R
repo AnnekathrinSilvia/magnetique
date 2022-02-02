@@ -433,7 +433,7 @@ magnetique_server <- function(input, output, session) {
 
   # DTU related content --------------------------------------------------------
   output$dtu_plot <- renderPlot({
-    row <- input$de_table_rows_selected
+    row <- req(getReactableState("de_table", "selected"))
     validate(
       need(!is.na(row),
         message = "Please select an entry from the table."
