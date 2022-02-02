@@ -260,6 +260,12 @@ magnetique_server <- function(input, output, session) {
           ),
           defaultColDef = colDef(sortNALast = TRUE),
           list(
+            gene_id = colDef(html = TRUE, cell = JS("
+            function(cellInfo) {
+              const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
+              return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
+            }")
+            ),
             log2FoldChange = colDef(
               cell = function(value) format(round(value, 2))
               ),
@@ -290,9 +296,8 @@ magnetique_server <- function(input, output, session) {
           text = ~ paste0(
             "<b>", SYMBOL, "</b>",
             "<br><i>GeneID</i>: ", gene_id,
-            "<br><i>Log2FC</i> = ", format(round(log2FoldChange, 2), nsmall = 2),
-            "<br><i>p-value (adjusted)</i> = ", format(padj),
-            nsmall = 2
+            "<br><i>Log2FC</i> = ", format(round(log2FoldChange, 2)),
+            "<br><i>p-value (adjusted)</i> = ", format(round(padj, 2))
           ),
           hoverinfo = "text"
         ) %>%
@@ -320,9 +325,8 @@ magnetique_server <- function(input, output, session) {
           text = ~ paste0(
             "<b>", SYMBOL, "</b>",
             "<br><i>GeneID</i>: ", gene_id,
-            "<br><i>max(abs(dif))</i> = ", format(round(log2FoldChange, 2), nsmall = 2),
-            "<br><i>p-value (adjusted)</i> = ", format(padj),
-            nsmall = 2
+            "<br><i>max(abs(dif))</i> = ", format(round(dtu_dif, 2)),
+            "<br><i>p-value (adjusted)</i> = ", format(round(dtu_pvadj, 2))
           ),
           hoverinfo = "text"
         ) %>%
