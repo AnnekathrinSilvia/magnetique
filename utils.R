@@ -204,29 +204,3 @@ render_link <- JS(
   "}"
 )
 
-render_DTU_geneid <- JS(
-  "function(data, type, row) {",
-  "  if(type === 'sort' && data === null) {",
-  "    return 9999;",
-  "  }",
-  "  return data;",
-  "}"
-)
-
-render_DTU_pval <- JS(
-  "function(data, type, row) {",
-  "  if(type === 'sort' && data === null) {",
-  "    return 9999;",
-  "  }",
-  "  return data;",
-  "}"
-)
-
-render_DTU_dif <- JS(
-  "function(data, type, row) {",
-  "  if(type === 'sort' && data === null) {",
-  "    return 0;",
-  "  }",
-  "  return data;",
-  "}"
-)
