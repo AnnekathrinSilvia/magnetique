@@ -110,14 +110,20 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         fluidRow(
           column(
-            width = 12,
+            width = 4,
+            withSpinner(
+              plotlyOutput("gene_plot")
+            )
+          ),
+          column(
+            width = 8,
             withSpinner(
               plotOutput("dtu_plot")
             ),
             uiOutput("carnival_launch")
+            )
           )
-        )
-      ),
+        ),
       shiny::tabPanel(
         id = "tab-geneset-view",
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
@@ -240,15 +246,14 @@ magnetique_server <- function(input, output, session) {
   })
 
   # DE related content ---------------------------------------------------------
-  output$de_table <- renderReactable(
-    {
+  output$de_table <- renderReactable({
       rvalues$key() %...>% {
         data <- .
         reactable(
           data,
           searchable = TRUE,
           striped = TRUE,
-          defaultPageSize = 5,
+          defaultPageSize = 7,
           highlight = TRUE,
           selection = "single",
           onClick = "select",
@@ -320,7 +325,6 @@ magnetique_server <- function(input, output, session) {
         add_markers(
           x = ~dtu_dif,
           y = ~ -log10(dtu_pvadj),
-          # size = ~n_transcript,
           type = "scatter",
           text = ~ paste0(
             "<b>", SYMBOL, "</b>",
@@ -436,26 +440,58 @@ magnetique_server <- function(input, output, session) {
     }
   })
 
-  # DTU related content --------------------------------------------------------
+  output$gene_plot <- renderPlotly({
+    row <- getReactableState("de_table", "selected")
+    validate(need(!is.na(row),
+      message = "Please select an entry from the table."))
+    rvalues$data() %...>% {
+      data <- .
+      res <- data %>% extract2("res") 
+      gene_id <- res[row, "gene_id"]
+
+      dds <- data %>%
+        extract2("genetonic") %>%
+        extract2("dds")
+
+      data <- colData(dds)
+      data$counts <- counts(dds)[gene_id, ]
+   
+      plot_ly(
+          as.data.frame(data),
+          type = "box",
+          x = ~Etiology,
+          text = ~ paste0(
+            "<br><i>sex</i>: ", Sex,
+            "<br><i>weight</i> : ", Weight,
+            "<br><i>race</i>: ", Race,
+            "<br><i>counts</i>: ", counts
+          ),
+          hoverinfo = "text",
+          y = ~ log10(counts),
+          color = ~Etiology,
+          colors = c(I("steelblue"), I("gold"), I("forestgreen"))
+        ) %>% 
+        config(displayModeBar = FALSE) %>%
+        layout(title = "Gene counts per etiology")
+
+      }
+    })
+  # DTU related content --------------------------------------------------------  
   output$dtu_plot <- renderPlot({
-    row <- req(getReactableState("de_table", "selected"))
-    validate(
-      need(!is.na(row),
-        message = "Please select an entry from the table."
-      )
-    )
+    genes_dtu <- unique(rowData(res_dtu)$gene_id)
 
     rvalues$data() %...>% {
       data <- .
       res <- data %>%
-        extract2("res") 
-
-      genes_dtu <- unique(rowData(res_dtu)$gene_id)
+        extract2("res")
+      row <- getReactableState("de_table", "selected")
       row <- res[row, "gene_id"]
-      validate(need(
-        row %in% genes_dtu,
-          message = paste("The gene you selected, ", row, ", is not a DTU gene. Please select another gene from the table")
-        ))
+      validate(
+        need(
+          row %in% genes_dtu,
+          message = paste("The selected gene was not tested for DTU.")
+        )
+      )
       plot_dtu(row, res_dtu, gtf)
     }
   })

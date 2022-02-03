@@ -112,33 +112,13 @@ gene_structure <- function(gene, gtf, dataset) {
 #' @export
 plot_dtu <- function(gene, dataset, gtf) {
   library(patchwork)
-    geneid2name <- setNames(
+  geneid2name <- setNames(
     nm = gtf$gene_id,
     gtf$gene_name
   )
-  x_gene <- gene_counts(gene, dataset)
+
   x_tx <- gene_proportions(gene, dataset)
   x_structure <- gene_structure(gene, gtf, dataset)
-
-  p1 <- x_gene %>%
-    dplyr::group_by(sample_id) %>%
-    dplyr::summarise(value = sum(value), group = dplyr::first(group)) %>%
-    ggplot() +
-    geom_boxplot(aes(x = group, y = value, fill = group, color = group),
-      alpha = 0.4, lwd = 0.5, show.legend = F
-    ) +
-    scale_y_log10(
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x))
-    ) +
-    scale_fill_manual(name = "group", values = group_colors) +
-    scale_colour_manual(name = "group", values = group_colors) +
-    ylab("Gene counts") +
-    theme_minimal(16) +
-    theme(
-      axis.title.x = element_blank()
-    )
-
 
   p2 <- x_tx %>%
     ggplot() +
@@ -169,8 +149,7 @@ plot_dtu <- function(gene, dataset, gtf) {
     theme(plot.margin = margin())
     })
 
-  p_final <- (p1 | p3 | p2) +
-    # plot_layout(widths = c(1, 4), heights = c(1.5, 1)) +
+  p_final <- (p3 | p2) +
     plot_annotation(
       theme = theme(plot.margin = margin()),
       title = stringr::str_glue("{geneid2name[gene]} - {gene}"),
@@ -178,29 +157,3 @@ plot_dtu <- function(gene, dataset, gtf) {
     )
   return(p_final)
 }
-
-
-results_table <- function(gene, se) {
-  x <- subset(rowData(se), gene_id == gene)
-  x <- dplyr::bind_rows(
-    list("DCM_vs_NFD" = x[["DRIMSeq_DCM_vs_NFD"]], 
-         "HCM_vs_NFD" = x[["DRIMSeq_HCM_vs_NFD"]], 
-         "DCM_vs_HCM" = x[["DRIMSeq_DCM_vs_HCM"]]),
-    .id = 'comparison'
-    ) %>% 
-    select('comparison', 'gene_id', 'feature_id',	'lr', 'adj_pvalue')
-}
-
-render_link <- JS(
-  "function(data, type, row){",
-  "  if(type === 'display'){",
-  "    var opt = '_blank'",
-  "    var url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=';",
-  "    var a = '<a target=' + opt + ' href=' + url + row[0] + '>' + row[0] + '</a>'",
-  "    return a;",
-  "  } else {",
-  "    return data;",
-  "  }",
-  "}"
-)
-
