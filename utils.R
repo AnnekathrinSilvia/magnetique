@@ -6,6 +6,13 @@ get_group_colors <- function(){
 
 group_colors <- get_group_colors()
 
+# from https://glin.github.io/reactable/articles/cookbook/cookbook.html#tooltips
+with_tooltip <- function(value, tooltip) {
+  tags$abbr(style = "text-decoration: underline; text-decoration-style: dotted; cursor: help",
+            title = tooltip, value)
+}
+
+
 #' Compute the mean proportion difference between groups
 get_gid2name <- function(gtf) {
   setNames(

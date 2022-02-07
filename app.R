@@ -246,48 +246,53 @@ magnetique_server <- function(input, output, session) {
   })
 
   # DE related content ---------------------------------------------------------
-  output$de_table <- renderReactable({
-      rvalues$key() %...>% {
-        data <- .
-        reactable(
-          data,
-          searchable = TRUE,
-          striped = TRUE,
-          defaultPageSize = 7,
-          highlight = TRUE,
-          selection = "single",
-          onClick = "select",
-          rowStyle = list(cursor = "pointer"),
-          theme = reactableTheme(
-            stripedColor = "#f6f8fa",
-            highlightColor = "#f0f5f9",
-            cellPadding = "8px 12px",
-          ),
-          defaultColDef = colDef(sortNALast = TRUE),
-          list(
-            gene_id = colDef(html = TRUE, cell = JS("
-            function(cellInfo) {
+output$de_table <- renderReactable({
+  rvalues$key() %...>% {
+    data <- .
+    reactable(
+      data,
+      searchable = TRUE,
+      striped = TRUE,
+      defaultPageSize = 5,
+      highlight = TRUE,
+      selection = "single",
+      onClick = "select",
+      rowStyle = list(cursor = "pointer"),
+      theme = reactableTheme(
+        stripedColor = "#f6f8fa",
+        highlightColor = "#f0f5f9",
+        cellPadding = "8px 12px",
+      ),
+      defaultColDef = colDef(sortNALast = TRUE),
+      list(
+        gene_id = colDef(
+          html = TRUE,
+          cell = JS("function(cellInfo) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
-            }")
-            ),
-            log2FoldChange = colDef(
-              cell = function(value) format(round(value, 2))
-              ),
-            padj = colDef(
-              cell = function(value) format(round(value, 2))
-            ),
-            dtu_pvadj = colDef(
-              cell = function(value) format(round(value, 2))
-            ),
-            dtu_dif = colDef(
-              cell = function(value) format(round(value, 2))
-            )
-          )
+            }"),
+          header = with_tooltip("gene_id", "Link to Ensembl gene page")
+        ),
+        log2FoldChange = colDef(
+          cell = function(value) format(round(value, 2)),
+          header = with_tooltip("log2FoldChange", "DESeq2 log2FoldChange")
+        ),
+        padj = colDef(
+          cell = function(value) format(round(value, 2)),
+          header = with_tooltip("padj", "DESeq2 padj")
+        ),
+        dtu_pvadj = colDef(
+          cell = function(value) format(round(value, 2)),
+          header = with_tooltip("dtu_pvadj", "DRIMseq minimum p-value")
+        ),
+        dtu_dif = colDef(
+          cell = function(value) format(round(value, 2)),
+          header = with_tooltip("dtu_dif", "Differential isoform usage")
         )
-      }
-    }
-  )
+      )
+    )
+  }
+})
 
   output$de_volcano <- renderPlotly({
     rvalues$key() %...>% {
@@ -422,6 +427,7 @@ magnetique_server <- function(input, output, session) {
       center_mean = TRUE,
       scale_row = TRUE,
       anno_col_info = "Etiology"
+
     )}
   })
 
@@ -473,7 +479,6 @@ magnetique_server <- function(input, output, session) {
         ) %>% 
         config(displayModeBar = FALSE) %>%
         layout(title = "Gene counts per etiology")
-
       }
     })
   # DTU related content --------------------------------------------------------  
