@@ -9,7 +9,7 @@ library(plotly, warn.conflicts = FALSE)
 library(reactable, warn.conflicts = FALSE)
 library(bs4Dash, warn.conflicts = FALSE)
 library(shinydashboard, warn.conflicts = FALSE)
-library(visNetwork)
+library(visNetwork, warn.conflicts = FALSE)
 
 options(spinner.type = 6)
 
@@ -17,7 +17,6 @@ options(spinner.type = 6)
 source("utils.R")
 source("data_preparation.R")
 source("heatmap.R")
-
 
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
@@ -96,7 +95,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
           ),
           column(
             width = 3,
-            # withLoader(plotlyOutput("de_volcano"), type="image", loader="/heart.gif") # only works when starting app over RunApp Button (and doesn't look good)
             withSpinner(
               plotlyOutput("de_volcano")
             )
@@ -112,18 +110,24 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             width = 4,
             withSpinner(
-              plotlyOutput("gene_plot")
+              plotlyOutput("gene_counts")
             )
           ),
           column(
-            width = 8,
+            width = 4,
             withSpinner(
-              plotOutput("dtu_plot")
-            ),
-            uiOutput("carnival_launch")
+              plotOutput("transcript_proportion")
             )
-          )
-        ),
+          ),
+          column(
+            width = 4,
+            withSpinner(
+              plotOutput("gene_structure")
+            )
+          ),
+          uiOutput("carnival_launch")
+        )
+      ),
       shiny::tabPanel(
         id = "tab-geneset-view",
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
@@ -175,23 +179,32 @@ magnetique_ui <- shinydashboard::dashboardPage(
 # server definition -------------------------------------------------------
 magnetique_server <- function(input, output, session) {
   progress <- Progress$new(session)
-  progress$set(value = 0.0, message = "Loading.")
-  library(dplyr, warn.conflicts = FALSE)
-  library(magrittr, warn.conflicts = FALSE)
-  library("GeneTonic")
-  library("ggplot2")
-  library("ggrepel")
-  library(igraph, warn.conflicts = FALSE)
-  library("pheatmap")
+  progress$set(value = 0.5, message = "Connecting to the db.")
+  con <- DBI::dbConnect(
+    RPostgres::Postgres(),
+    dbname = "magnetique",
+    host = "10.250.140.12",
+    port = 5432,
+    password = "wGpVDExWK2NppuWENFcjc9v3VKgL4h86ZBHF78pEFdqJwEQwfG",
+    user = "magnetique_reader"
+  )
+  progress$set(value = 0.5, message = "Loading packages.")
   suppressPackageStartupMessages({
-    library("ComplexHeatmap")
-    library("DESeq2")
-    library("RColorBrewer")
+    library(dplyr, warn.conflicts = FALSE)
+    library(tidyr, warn.conflicts = FALSE)
+    library(GenomicRanges, warn.conflicts = FALSE)
+    library(ggplot2, warn.conflicts = FALSE)
+    library(ggbio, warn.conflicts = FALSE)
   })
-  progress$set(value = 0.1, message = "Loading.")
-  res_dtu <- readRDS("MAGNetApp/data/DTU/summarized_experiment.RDS")
-  progress$set(value = .33, message = "Loading.")
-  gtf <- readRDS("MAGNetApp/data/DTU/gtf.RDS")
+  # library("GeneTonic")
+  # library(igraph, warn.conflicts = FALSE)
+  # library("pheatmap")
+  # suppressPackageStartupMessages({
+  # library("ComplexHeatmap")
+  # library("DESeq2")
+  # library("RColorBrewer")
+  # })
+  progress$close()
 
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
@@ -200,14 +213,6 @@ magnetique_server <- function(input, output, session) {
   rvalues$myvst <- NULL
 
   # selector trigger data loading
-  rvalues$data <- eventReactive(
-    c(input$selected_contrast, input$selected_ontology),
-    {
-      future({
-        prepare_data(input$selected_contrast, input$selected_ontology)
-      })
-    }
-  )
 
   rvalues$mygtl <- reactive({
     rvalues$data() %...>% {
@@ -227,127 +232,227 @@ magnetique_server <- function(input, output, session) {
   })
 
   rvalues$key <- reactive({
-    rvalues$data() %...>% {
-      data <- .
-      data %>%
-        extract2("res") %>%
-        select(
-          c(
-            "gene_id",
-            "SYMBOL",
-            "padj",
-            "log2FoldChange",
-            "dtu_pvadj",
-            "dtu_dif"
-          )
-        ) %>%
-        highlight_key()
-    }
+    tbl(con, paste0("res_", input$selected_contrast)) %>%
+      select(
+        c(
+          "gene_id",
+          "SYMBOL",
+          "padj",
+          "log2FoldChange",
+          "dtu_pvadj",
+          "dtu_dif"
+        )
+      ) %>%
+      collect() %>%
+      highlight_key(.)
   })
 
   # DE related content ---------------------------------------------------------
-output$de_table <- renderReactable({
-  rvalues$key() %...>% {
-    data <- .
-    reactable(
-      data,
-      searchable = TRUE,
-      striped = TRUE,
-      defaultPageSize = 5,
-      highlight = TRUE,
-      selection = "single",
-      onClick = "select",
-      rowStyle = list(cursor = "pointer"),
-      theme = reactableTheme(
-        stripedColor = "#f6f8fa",
-        highlightColor = "#f0f5f9",
-        cellPadding = "8px 12px",
-      ),
-      defaultColDef = colDef(sortNALast = TRUE),
-      list(
-        gene_id = colDef(
-          html = TRUE,
-          cell = JS("function(cellInfo) {
+  output$de_table <- renderReactable({
+    rvalues$key() %>%
+      reactable(
+        .,
+        searchable = TRUE,
+        striped = TRUE,
+        defaultPageSize = 5,
+        highlight = TRUE,
+        selection = "single",
+        onClick = "select",
+        rowStyle = list(cursor = "pointer"),
+        theme = reactableTheme(
+          stripedColor = "#f6f8fa",
+          highlightColor = "#f0f5f9",
+          cellPadding = "8px 12px",
+        ),
+        defaultColDef = colDef(sortNALast = TRUE),
+        list(
+          gene_id = colDef(
+            html = TRUE,
+            cell = JS("function(cellInfo) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
             }"),
-          header = with_tooltip("gene_id", "Link to Ensembl gene page")
-        ),
-        log2FoldChange = colDef(
-          cell = function(value) format(round(value, 2)),
-          header = with_tooltip("log2FoldChange", "DESeq2 log2FoldChange")
-        ),
-        padj = colDef(
-          cell = function(value) format(round(value, 2)),
-          header = with_tooltip("padj", "DESeq2 padj")
-        ),
-        dtu_pvadj = colDef(
-          cell = function(value) format(round(value, 2)),
-          header = with_tooltip("dtu_pvadj", "DRIMseq minimum p-value")
-        ),
-        dtu_dif = colDef(
-          cell = function(value) format(round(value, 2)),
-          header = with_tooltip("dtu_dif", "Differential isoform usage")
+            header = with_tooltip("gene_id", "Link to Ensembl gene page")
+          ),
+          log2FoldChange = colDef(
+            header = with_tooltip("log2FoldChange", "DESeq2 log2FoldChange")
+          ),
+          padj = colDef(
+            header = with_tooltip("padj", "DESeq2 padj")
+          ),
+          dtu_pvadj = colDef(
+            header = with_tooltip("dtu_pvadj", "DRIMseq minimum p-value")
+          ),
+          dtu_dif = colDef(
+            header = with_tooltip("dtu_dif", "Differential isoform usage")
+          )
         )
       )
-    )
-  }
-})
+  })
 
   output$de_volcano <- renderPlotly({
-    rvalues$key() %...>% {
-      data <- .
-      data %>%
-        plot_ly(., color = I("black"), showlegend = FALSE) %>%
-        add_markers(
-          x = ~log2FoldChange,
-          y = ~ -log10(padj),
-          type = "scatter",
-          text = ~ paste0(
-            "<b>", SYMBOL, "</b>",
-            "<br><i>GeneID</i>: ", gene_id,
-            "<br><i>Log2FC</i> = ", format(round(log2FoldChange, 2)),
-            "<br><i>p-value (adjusted)</i> = ", format(round(padj, 2))
-          ),
-          hoverinfo = "text"
-        ) %>%
-        config(displayModeBar = FALSE) %>%
-        layout(title = "Differentially expressed genes") %>%
-        toWebGL() %>%
-        highlight(
-          on = "plotly_click",
-          off = "plotly_doubleclick",
-          color = "red"
-        )
-    }
+    rvalues$key() %>%
+      plot_ly(., color = I("black"), showlegend = FALSE) %>%
+      add_markers(
+        x = ~log2FoldChange,
+        y = ~ -log10(padj),
+        type = "scatter",
+        text = ~ paste0(
+          "<b>", SYMBOL, "</b>",
+          "<br><i>GeneID</i>: ", gene_id,
+          "<br><i>Log2FC</i> = ", format(round(log2FoldChange, 2)),
+          "<br><i>p-value (adjusted)</i> = ", format(round(padj, 2))
+        ),
+        hoverinfo = "text"
+      ) %>%
+      config(displayModeBar = FALSE) %>%
+      layout(title = "Differentially expressed genes") %>%
+      toWebGL() %>%
+      highlight(
+        on = "plotly_click",
+        off = "plotly_doubleclick",
+        color = "red"
+      )
   })
 
   output$dtu_volcano <- renderPlotly({
-    rvalues$key() %...>% {
-      data <- .
-      data %>%
-        plot_ly(., color = I("black"), showlegend = FALSE) %>%
-        add_markers(
-          x = ~dtu_dif,
-          y = ~ -log10(dtu_pvadj),
-          type = "scatter",
-          text = ~ paste0(
-            "<b>", SYMBOL, "</b>",
-            "<br><i>GeneID</i>: ", gene_id,
-            "<br><i>max(abs(dif))</i> = ", format(round(dtu_dif, 2)),
-            "<br><i>p-value (adjusted)</i> = ", format(round(dtu_pvadj, 2))
-          ),
-          hoverinfo = "text"
-        ) %>%
-        config(displayModeBar = FALSE) %>%
-        layout(title = "Genes with differential transcript usage") %>%
-        toWebGL() %>%
-        highlight(
-          on = "plotly_click",
-          off = "plotly_doubleclick",
-          color = "red"
-        )
-    }
+    rvalues$key() %>%
+      plot_ly(., color = I("black"), showlegend = FALSE) %>%
+      add_markers(
+        x = ~dtu_dif,
+        y = ~ -log10(dtu_pvadj),
+        type = "scatter",
+        text = ~ paste0(
+          "<b>", SYMBOL, "</b>",
+          "<br><i>GeneID</i>: ", gene_id,
+          "<br><i>max(abs(dif))</i> = ", format(round(dtu_dif, 2)),
+          "<br><i>p-value (adjusted)</i> = ", format(round(dtu_pvadj, 2))
+        ),
+        hoverinfo = "text"
+      ) %>%
+      config(displayModeBar = FALSE) %>%
+      layout(title = "Genes with differential transcript usage") %>%
+      toWebGL() %>%
+      highlight(
+        on = "plotly_click",
+        off = "plotly_doubleclick",
+        color = "red"
+      )
+  })
+
+  output$gene_counts <- renderPlotly({
+    i <- getReactableState("de_table", "selected")
+    validate(need(!is.na(i),
+      message = "Please select an entry from the table."
+    ))
+    i <- rvalues$key()$data()[[i, "gene_id"]]
+
+    counts <- con %>%
+      tbl(paste0("counts_", input$selected_contrast)) %>%
+      filter(row_names == !!i) %>%
+      select(-row_names) %>%
+      mutate(n = n()) %>%
+      collect() %>%
+      pivot_longer(-n)
+
+    metadata <- con %>%
+      tbl("metadata") %>%
+      select(row_names, Etiology) %>%
+      collect()
+
+    left_join(counts, metadata, by = c("name" = "row_names")) %>%
+      plot_ly(
+        .,
+        type = "box",
+        x = ~Etiology,
+        # text = ~ paste0(
+        #   "<br><i>sex</i>: ", Sex,
+        #   "<br><i>weight</i> : ", Weight,
+        #   "<br><i>race</i>: ", Race,
+        #   "<br><i>counts</i>: ", counts
+        # ),
+        # hoverinfo = "text",
+        y = ~ log10(value),
+        color = ~Etiology,
+        colors = c(I("steelblue"), I("gold"), I("forestgreen"))
+      ) %>%
+      config(displayModeBar = FALSE) %>%
+      layout(title = "Gene counts per etiology")
+  })
+
+  output$gene_structure <- renderPlot({
+    i <- getReactableState("de_table", "selected")
+    validate(
+      need(!is.na(i),
+        message = "Please select an entry from the table."
+      )
+    )
+    dtu_tested <- rvalues$key()$data()[[i, "dtu_pvadj"]]
+    validate(
+      need(!is.na(dtu_tested),
+        message = "Entry not tested for DTU."
+      )
+    )
+    i <- rvalues$key()$data()[[i, "gene_id"]]
+    gtf <- con %>%
+      tbl("gtf") %>%
+      filter(gene_id == !!i) %>%
+      collect() %>%
+      GRanges(.)
+    gtf <- split(gtf, gtf$transcript_id)
+    plot_gene_structure(gtf)
+  })
+
+  output$transcript_proportion <- renderPlot({
+    i <- getReactableState("de_table", "selected")
+    validate(
+      need(!is.na(i),
+        message = "Please select an entry from the table."
+      )
+    )
+    dtu_tested <- rvalues$key()$data()[[i, "dtu_pvadj"]]
+    validate(
+      need(!is.na(dtu_tested),
+        message = "Entry not tested for DTU."
+      )
+    )
+    i <- rvalues$key()$data()[[i, "gene_id"]]
+    x <- con %>%
+      tbl("gene2tx") %>%
+      filter(gene_id == !!i) %>%
+      left_join(
+        tbl(con, "dtu_fit_proportions"),
+        by = (c("transcript_id" = "row_names"))
+      ) %>%
+      collect()
+    x <- x %>% pivot_longer(
+      -c(gene_id, transcript_id),
+      names_to = "Run",
+      values_to = "proportion"
+    )
+    metadata <- con %>%
+      tbl("metadata") %>%
+      select(Run, Etiology) %>%
+      collect()
+
+    left_join(x, metadata, by = c("Run" = "Run")) %>%
+      ggplot() +
+      geom_jitter(aes(x = transcript_id, y = proportion, color = Etiology),
+        position = position_jitterdodge(),
+        alpha = 0.9, size = 2, show.legend = T, na.rm = TRUE
+      ) +
+      geom_boxplot(aes(x = transcript_id, y = proportion, fill = Etiology),
+        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = F
+      ) +
+      scale_fill_manual(name = "Etiology", values = group_colors) +
+      scale_colour_manual(name = "Etiology", values = group_colors) +
+      coord_flip() +
+      labs(y = "transcript proportion") +
+      theme_minimal(20) +
+      theme(
+        axis.title.y = element_blank()
+      )
+    
   })
 
   # enrichment map related content ---------------------------------------------
@@ -377,7 +482,6 @@ output$de_table <- renderReactable({
 
   output$visnet_em <- renderVisNetwork({
     rvalues$mygtl() %...>% {
-
       mygtl <- .
       emg <- enrichment_map(
         gtl = mygtl,
@@ -387,20 +491,20 @@ output$de_table <- renderReactable({
         color_by = input$color_by
       )
 
-    visNetwork::visIgraph(emg) %>%
-      visOptions(
-        highlightNearest = list(
-          enabled = TRUE,
-          degree = 1,
-          hover = TRUE
-        ),
-        nodesIdSelection = TRUE
-      ) %>%
-      visExport(
-        name = "emap_network",
-        type = "png",
-        label = "Save enrichment map"
-      )
+      visNetwork::visIgraph(emg) %>%
+        visOptions(
+          highlightNearest = list(
+            enabled = TRUE,
+            degree = 1,
+            hover = TRUE
+          ),
+          nodesIdSelection = TRUE
+        ) %>%
+        visExport(
+          name = "emap_network",
+          type = "png",
+          label = "Save enrichment map"
+        )
     }
   })
 
@@ -409,26 +513,28 @@ output$de_table <- renderReactable({
       data <- .
       mygtl <- extract2(data, "genetonic")
       myvst <- extract2(mygtl, "dds")
-      
+
       cur_gsid <- mygtl$res_enrich$gs_id[
-        match(input$visnet_em_selected, mygtl$res_enrich$gs_description)]
+        match(input$visnet_em_selected, mygtl$res_enrich$gs_description)
+      ]
       validate(
         need(!is.na(cur_gsid),
-        message = "Please select a gene set from the Enrichment Map."
-        ))
-    heatmap(
-      se = myvst,
-      gtl = mygtl,
-      geneset_id = cur_gsid,
-      FDR = 0.05,
-      de_only = FALSE,
-      cluster_rows = TRUE,
-      cluster_columns = TRUE,
-      center_mean = TRUE,
-      scale_row = TRUE,
-      anno_col_info = "Etiology"
-
-    )}
+          message = "Please select a gene set from the Enrichment Map."
+        )
+      )
+      heatmap(
+        se = myvst,
+        gtl = mygtl,
+        geneset_id = cur_gsid,
+        FDR = 0.05,
+        de_only = FALSE,
+        cluster_rows = TRUE,
+        cluster_columns = TRUE,
+        center_mean = TRUE,
+        scale_row = TRUE,
+        anno_col_info = "Etiology"
+      )
+    }
   })
 
   output$enriched_funcres <- renderPlotly({
@@ -446,61 +552,7 @@ output$de_table <- renderReactable({
     }
   })
 
-  output$gene_plot <- renderPlotly({
-    row <- getReactableState("de_table", "selected")
-    validate(need(!is.na(row),
-      message = "Please select an entry from the table."))
-    rvalues$data() %...>% {
-      data <- .
-      res <- data %>% extract2("res") 
-      gene_id <- res[row, "gene_id"]
-
-      dds <- data %>%
-        extract2("genetonic") %>%
-        extract2("dds")
-
-      data <- colData(dds)
-      data$counts <- counts(dds)[gene_id, ]
-   
-      plot_ly(
-          as.data.frame(data),
-          type = "box",
-          x = ~Etiology,
-          text = ~ paste0(
-            "<br><i>sex</i>: ", Sex,
-            "<br><i>weight</i> : ", Weight,
-            "<br><i>race</i>: ", Race,
-            "<br><i>counts</i>: ", counts
-          ),
-          hoverinfo = "text",
-          y = ~ log10(counts),
-          color = ~Etiology,
-          colors = c(I("steelblue"), I("gold"), I("forestgreen"))
-        ) %>% 
-        config(displayModeBar = FALSE) %>%
-        layout(title = "Gene counts per etiology")
-      }
-    })
-  # DTU related content --------------------------------------------------------  
-  output$dtu_plot <- renderPlot({
-    genes_dtu <- unique(rowData(res_dtu)$gene_id)
-
-    rvalues$data() %...>% {
-      data <- .
-      res <- data %>%
-        extract2("res")
-      row <- getReactableState("de_table", "selected")
-      row <- res[row, "gene_id"]
-      validate(
-        need(
-          row %in% genes_dtu,
-          message = paste("The selected gene was not tested for DTU.")
-        )
-      )
-      plot_dtu(row, res_dtu, gtf)
-    }
-  })
-
+  # DTU related content --------------------------------------------------------
   output$carnival_launch <- renderUI({
     tagList(
       actionButton(

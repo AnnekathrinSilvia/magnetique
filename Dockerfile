@@ -75,6 +75,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libssh2-1-dev \
     libfftw3-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # install renv 
@@ -92,7 +93,6 @@ WORKDIR /root/magnetique/
 # install R environment
 RUN R -e 'renv::restore()'
 RUN R -e 'renv::install("markdown")'
-RUN R -e 'renv::install("future")'
 
 EXPOSE 3838
 
