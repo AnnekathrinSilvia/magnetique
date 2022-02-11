@@ -571,30 +571,25 @@ magnetique_server <- function(input, output, session) {
 
 
   output$visnet_igraph <- renderVisNetwork({
-    rvalues$data() %...>% {
-      data <- .
-      data %>%
-        extract2("igraph") %>%
-        visNetwork::visIgraph(.) %>%
-        visOptions(
-          highlightNearest = list(
-            enabled = TRUE,
-            degree = 1,
-            hover = TRUE
-          ),
-          nodesIdSelection = TRUE
-        ) %>%
-        visHierarchicalLayout(
-          levelSeparation = 100,
-          nodeSpacing = 500,
-          shakeTowards = "leaves"
-        ) %>% # same as visLayout(hierarchical = TRUE)
-        visExport(
-          name = "igraph",
-          type = "png",
-          label = "Save igraph graph"
-        )
-    }
+    con %>%
+      tbl("carnival") %>%
+      filter(contrast == local(input$selected_contrast)) %>%
+      pull(igraph) %>% 
+      jsonlite::unserializeJSON() %>%
+      visNetwork::visIgraph() %>%
+      visOptions(
+        highlightNearest = list(
+          enabled = TRUE,
+          degree = 1,
+          hover = TRUE
+        ),
+        nodesIdSelection = TRUE
+      ) %>%
+      visExport(
+        name = "igraph",
+        type = "png",
+        label = "Save igraph graph"
+      )
   })
 
   # Bookmarker -----------------------------------------------------------------
