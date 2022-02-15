@@ -10,6 +10,8 @@ library(reactable, warn.conflicts = FALSE)
 library(bs4Dash, warn.conflicts = FALSE)
 library(shinydashboard, warn.conflicts = FALSE)
 library(visNetwork, warn.conflicts = FALSE)
+library(rintrojs, warn.conflicts = FALSE)
+library(shinyBS, warn.conflicts = FALSE)
 
 options(spinner.type = 6)
 
@@ -61,6 +63,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
 
   # body definition ---------------------------------------------------------
   body = shinydashboard::dashboardBody(
+    introjsUI(),
     shiny::tags$script(
       HTML(
         "$(function(){
@@ -82,10 +85,45 @@ magnetique_ui <- shinydashboard::dashboardPage(
             width = 12,
             includeMarkdown("data/overview.md")
           )
+        ),
+        hr(),
+        fluidRow(
+          column(
+            width = 1,
+            offset = 11,
+            actionButton(
+              "tour_firststeps",
+              label = "", icon = icon("question-circle"),
+              style = .helpbutton_biocstyle
+            ),
+            shinyBS::bsTooltip(
+              "tour_firststeps",
+              "Click me to start a tour of this section!",
+              "bottom",
+              options = list(container = "body")
+            )
+          )
         )
       ),
       shiny::tabPanel(
         title = "Gene View", icon = icon("heartbeat"), value = "tab-gene-view",
+        fluidRow(
+          column(
+            width = 1,
+            offset = 11,
+            actionButton(
+              "tour_geneview",
+              label = "", icon = icon("question-circle"),
+              style = .helpbutton_biocstyle
+            ),
+            shinyBS::bsTooltip(
+              "tour_geneview",
+              "Click me to start a tour of this section!",
+              "bottom",
+              options = list(container = "body")
+            )
+          )
+        ),
         fluidRow(
           column(
             width = 6,
@@ -648,6 +686,16 @@ magnetique_server <- function(input, output, session) {
   output$team_list <- renderTable({
     make_team_df
   })
+  
+  
+  # Tours observers
+  observeEvent(input$tour_firststeps, {
+    tour <- read.delim("tours/intro_firststeps.txt",
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
+  
 
   observeEvent(input$btn_show_carnival, {
     showModal(
