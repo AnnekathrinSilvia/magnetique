@@ -89,3 +89,15 @@ plot_gene_structure <- function(gtf) {
     return(p)
 }
 
+
+createLinkGO <- function(val) {
+  sprintf(
+    "<a href=\"http://amigo.geneontology.org/amigo/term/%s\" target=\"_blank\" class=\"btn btn-primary\">%s</a>",
+    val, val
+  )
+}
+
+.helpbutton_biocstyle <- "color: #0092AC; background-color: #FFFFFF; border-color: #FFFFFF"
+
+
+
