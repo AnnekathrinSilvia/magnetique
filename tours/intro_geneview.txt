@@ -3,4 +3,11 @@ element;intro
 #Step1;The tour will take you 
 #tour_geneview; For the welcome page, you can (re)start it with this button
 #magnetique_tab;You can navigate to the content of the different tabs by clicking...
+#de_table;text
+#de_volcano;text2
+#dtu_volcano;text3
+#de_table;now go back to the table
+#gene_counts;gene counts content
+#transcript_proportion;transcript_proportion text
+#gene_structure;gene_structure text
 #Thanks;Thank you for taking the <b>Gene view tour</b> of <code>magnetique</code>!
