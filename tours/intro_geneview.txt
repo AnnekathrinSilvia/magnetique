@@ -1,0 +1,6 @@
+element;intro
+#welcome;Welcome to the <b>Gene view tour</b> for <code>magnetique</code>
+#Step1;The tour will take you 
+#tour_geneview; For the welcome page, you can (re)start it with this button
+#magnetique_tab;You can navigate to the content of the different tabs by clicking...
+#Thanks;Thank you for taking the <b>Gene view tour</b> of <code>magnetique</code>!

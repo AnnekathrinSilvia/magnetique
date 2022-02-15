@@ -1,0 +1,7 @@
+element;intro
+#welcome;Welcome to the <b>Introduction tour</b> for <code>magnetique</code>
+#Step1;The tour will take you through the relevant elements of the UI. You can start the tour in each section by clicking on the dedicated button.
+#tour_firststeps; For the welcome page, you can (re)start it with this button, and each tab will have a similar one, consistently placed in the upper right section of the page.
+#Exiting;You can at any time exit this guided introduction by clicking outside of the highlighted portion.
+#magnetique_tab;You can navigate to the content of the different tabs by clicking...
+#Thanks;Thank you for taking the <b>Introduction tour</b> of <code>magnetique</code>!
