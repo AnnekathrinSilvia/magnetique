@@ -176,6 +176,23 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
         fluidRow(
           column(
+            width = 1,
+            offset = 11,
+            actionButton(
+              "tour_genesetview",
+              label = "", icon = icon("question-circle"),
+              style = .helpbutton_biocstyle
+            ),
+            shinyBS::bsTooltip(
+              "tour_genesetview",
+              "Click me to start a tour of this section!",
+              "bottom",
+              options = list(container = "body")
+            )
+          )
+        ),
+        fluidRow(
+          column(
             width = 5,
             reactableOutput("enrich_table")
           ),
@@ -201,6 +218,23 @@ magnetique_ui <- shinydashboard::dashboardPage(
       ),
       shiny::tabPanel(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
+        fluidRow(
+          column(
+            width = 1,
+            offset = 11,
+            actionButton(
+              "tour_bookmarks",
+              label = "", icon = icon("question-circle"),
+              style = .helpbutton_biocstyle
+            ),
+            shinyBS::bsTooltip(
+              "tour_bookmarks",
+              "Click me to start a tour of this section!",
+              "bottom",
+              options = list(container = "body")
+            )
+          )
+        ),
         uiOutput("ui_bookmarks")
       ),
       shiny::tabPanel(
@@ -695,6 +729,28 @@ magnetique_server <- function(input, output, session) {
     )
     introjs(session, options = list(steps = tour))
   })
+  
+  observeEvent(input$tour_geneview, {
+    tour <- read.delim("tours/intro_geneview.txt",
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
+  
+  observeEvent(input$tour_genesetview, {
+    tour <- read.delim("tours/intro_genesetview.txt",
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
+  
+  observeEvent(input$tour_bookmarks, {
+    tour <- read.delim("tours/intro_bookmarks.txt",
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
+  
   
 
   observeEvent(input$btn_show_carnival, {
