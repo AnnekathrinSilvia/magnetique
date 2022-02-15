@@ -124,8 +124,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
             withSpinner(
               plotOutput("gene_structure")
             )
-          ),
-          uiOutput("carnival_launch")
+          )
+        ),
+        fluidRow(
+          column(
+            width = 6,
+            uiOutput("carnival_launch")
+          )
         )
       ),
       shiny::tabPanel(
