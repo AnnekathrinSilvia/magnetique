@@ -270,6 +270,9 @@ magnetique_server <- function(input, output, session) {
   rvalues$key <- NULL
   rvalues$myvst <- NULL
   
+  rvalues$mygenes <- c()
+  rvalues$mygenesets <- c()
+  
 
   # sidebar server-side -----------------------------------------------------
   output$ui_sidebar <- renderUI({
