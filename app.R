@@ -270,6 +270,9 @@ magnetique_server <- function(input, output, session) {
   rvalues$key <- NULL
   rvalues$myvst <- NULL
   
+  rvalues$mygenes <- c()
+  rvalues$mygenesets <- c()
+  
 
   # sidebar server-side -----------------------------------------------------
   output$ui_sidebar <- renderUI({
@@ -320,10 +323,13 @@ magnetique_server <- function(input, output, session) {
     message(input$selected_ontology)
     
     # all_gtls[[input$selected_contrast]][[input$selected_ontology]]
-    showNotification("assembling the gtl object for you!")
+    showNotification("Assembling the gtl object for you!", 
+                     id = "info_assembling",
+                     duration = NULL)
     mygtl <- buildup_gtl(con,
                          contrast = input$selected_contrast,
                          ontology = input$selected_ontology)
+    removeNotification(id = "info_assembling")
     showNotification("Done! gtl object ready!", type = "message")
     return(mygtl)
   })
@@ -587,8 +593,8 @@ magnetique_server <- function(input, output, session) {
       )
     }
   })
-
-  output$visnet_em <- renderVisNetwork({
+  
+  emap_graph <- reactive({
     mygtl <- rvalues$mygtl()
     emg <- enrichment_map(
       gtl = mygtl,
@@ -597,8 +603,11 @@ magnetique_server <- function(input, output, session) {
       scale_edges_width = 200,
       color_by = input$color_by
     )
-    
-    visNetwork::visIgraph(emg) %>%
+    return(emg)
+  })
+
+  output$visnet_em <- renderVisNetwork({
+    visNetwork::visIgraph(emap_graph()) %>%
       visOptions(
         highlightNearest = list(
           enabled = TRUE,
@@ -715,22 +724,82 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$bookmarks_genes <- renderReactable({
-    book_df_genes <- data.frame(
-      gene_id = rvalues$mygenes,
-      gene_symbols = rvalues$mygenes
+    validate(
+      need(length(rvalues$mygenes) > 0, 
+           "Please select at least one gene with the Bookmark button")
     )
+    
+    book_df_genes <- rvalues$mygtl()$annotation_obj[rvalues$mygenes, ]
+    
     reactable(book_df_genes, rownames = FALSE)
   })
-
+  
   output$bookmarks_genesets <- renderReactable({
-    book_df_genesets <- data.frame(
-      geneset_id = rvalues$mygenesets,
-      geneset_description = rvalues$mygenesets
+    validate(
+      need(length(rvalues$mygenesets) > 0, 
+           "Please select at least one geneset with the Bookmark button")
     )
+    
+    book_df_genesets <- rvalues$mygtl()$res_enrich[rvalues$mygenesets, c("gs_id", "gs_description")]
+    
     reactable(book_df_genesets, rownames = FALSE)
   })
+  
+  observeEvent(input$bookmarker, {
+    if (input$magnetique_tab == "tab-welcome") {
+      showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
+    } else if (input$magnetique_tab == "tab-gene-view") {
+      # showNotification("in gene view")
+      # TODO - add behavior, this will depend on how the info on genes is passed around
+      i <- getReactableState("de_table", "selected")
+      # message(i)
+      # message(class(i))
+      # message(is.null(i))
+      if(is.null(i)) {
+        showNotification("Select a row in the main table to bookmark it", type = "warning")
+      } else {
+        cur_sel_id <- rvalues$key()$data()[[i, "gene_id"]]
 
+        anno <- rvalues$mygtl()$annotation_obj  # TODO: maybe just do it once at the beginning and keep it constant? this would not change!
+        cur_sel <- anno$gene_name[match(cur_sel_id, anno$gene_id)]
+        # message(cur_sel_id)
+        # message(cur_sel)
 
+        if (cur_sel_id %in% rvalues$mygenes) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", cur_sel, cur_sel_id), type = "default")
+        } else {
+          rvalues$mygenes <- unique(c(rvalues$mygenes, cur_sel_id))
+          # message("there go your genes... ", rvalues$mygenes)
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenes)), type = "message")
+        }
+      }
+      
+    } else if (input$magnetique_tab == "tab-geneset-view") {
+      # showNotification("in geneset view")
+      
+      g <- emap_graph()
+      cur_sel <- input$visnet_em_selected
+      re <- rvalues$mygtl()$res_enrich
+      cur_sel_id <- re$gs_id[match(cur_sel, re$gs_description)]
+      
+      if (cur_sel == "") {
+        showNotification("Select a node in the enrichment map to bookmark it", type = "warning")
+      } else {
+        if (cur_sel_id %in% rvalues$mygenesets) {
+          showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", cur_sel, cur_sel_id), type = "default")
+        } else {
+          rvalues$mygenesets <- unique(c(rvalues$mygenesets, cur_sel_id))
+          # message("here are your genesets... ", rvalues$mygenesets)
+          showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenesets)), type = "message")
+        }
+      }
+    } else if (input$magnetique_tab == "tab-bookmark") {
+      showNotification("You are already in the Bookmarks panel...")
+    } else if (input$magnetique_tab == "tab-aboutus") {
+      showNotification("This tab shows some information on the developers team...")
+    }
+  })
+      
   # Other content --------------------------------------------------------------
   output$de_volcano_signature <- renderPlot({
     signature_volcano(
