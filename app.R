@@ -28,37 +28,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
   # sidebar definition ------------------------------------------------------
   sidebar = shinydashboard::dashboardSidebar(
     title = "Options",
-    selectInput("selected_contrast",
-      label = "Contrast id",
-      choices = c(
-        "DCMvsHCM",
-        "DCMvsNFD",
-        "HCMvsNFD"
-      ),
-      selected = "DCMvsHCM"
-    ),
-    selectInput("selected_ontology",
-      label = "Ontology",
-      choices = c("BP", "MF", "CC"),
-      selected = "BP"
-    ),
-    numericInput("number_genesets",
-      "Number of genesets",
-      value = 15,
-      min = 0
-    ),
-    selectInput("color_by",
-      "Color by",
-      choices = c(
-        "z_score",
-        "gs_pvalue"
-      ),
-      selected = "z_score"
-    ),
-    actionButton("bookmarker",
-      label = "Bookmark", icon = icon("heart"),
-      style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
-    )
+    uiOutput("ui_sidebar")
   ),
 
   # body definition ---------------------------------------------------------
@@ -290,7 +260,46 @@ magnetique_server <- function(input, output, session) {
   rvalues$mygtl <- NULL
   rvalues$key <- NULL
   rvalues$myvst <- NULL
+  
 
+  # sidebar server-side -----------------------------------------------------
+  output$ui_sidebar <- renderUI({
+    tagList(
+      sidebarMenu(
+        selectInput("selected_contrast",
+                    label = "Contrast id",
+                    choices = c(
+                      "DCMvsHCM",
+                      "DCMvsNFD",
+                      "HCMvsNFD"
+                    ),
+                    selected = "DCMvsHCM"
+        ),
+        selectInput("selected_ontology",
+                    label = "Ontology",
+                    choices = c("BP", "MF", "CC"),
+                    selected = "BP"
+        ),
+        numericInput("number_genesets",
+                     "Number of genesets",
+                     value = 15,
+                     min = 0
+        ),
+        selectInput("color_by",
+                    "Color by",
+                    choices = c(
+                      "z_score",
+                      "gs_pvalue"
+                    ),
+                    selected = "z_score"
+        ),
+        actionButton("bookmarker",
+                     label = "Bookmark", icon = icon("heart"),
+                     style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
+        )
+      )
+    )
+  })
   # selector trigger data loading
 
   rvalues$mygtl <- reactive({
