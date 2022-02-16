@@ -729,7 +729,7 @@ magnetique_server <- function(input, output, session) {
            "Please select at least one gene with the Bookmark button")
     )
     
-    book_df_genes <- rvalues()$annotation_obj[rvalues$mygenes, ]
+    book_df_genes <- rvalues$mygtl()$annotation_obj[rvalues$mygenes, ]
     
     reactable(book_df_genes, rownames = FALSE)
   })
