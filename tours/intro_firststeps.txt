@@ -4,5 +4,5 @@ element;intro
 #tour_firststeps; For the welcome page, you can (re)start it with this button, and each tab will have a similar one, consistently placed in the upper right section of the page.
 #Exiting;You can at any time exit this guided introduction by clicking outside of the highlighted portion.
 #magnetique_tab;You can navigate to the content of the different tabs by clicking...
-#magnetique_options;options explained a little
+#ui_sidebar;options explained a little
 #Thanks;Thank you for taking the <b>Introduction tour</b> of <code>magnetique</code>!
