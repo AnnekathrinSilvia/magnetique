@@ -6,9 +6,11 @@ element;intro
 #selected_contrast + .selectize-control;selected_contrast info
 #selected_ontology + .selectize-control;selected_ontology info
 #de_table;text
+#geneview_row1;whole row 1
 #de_volcano;text2
 #dtu_volcano;text3
 #de_table;now go back to the table
+#geneview_row2;whole row 2
 #gene_counts;gene counts content
 #transcript_proportion;transcript_proportion text
 #gene_structure;gene_structure text
