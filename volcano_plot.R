@@ -56,12 +56,12 @@
 #'   anno_df,
 #' )
 volcano_plot <- function(res_de,
-                              annotation_obj,
-                              FDR = 0.05,
-                              color = "#1a81c2",
-                              alpha = 0.10,
-                              volcano_labels = 25,
-                              plot_title = NULL) {
+                         annotation_obj,
+                         FDR = 0.05,
+                         color = "#1a81c2",
+                         alpha = 0.10,
+                         volcano_labels = 25,
+                         plot_title = NULL) {
   
   # Prepare the data
   gene_ids <- rownames(res_de)
@@ -87,6 +87,7 @@ volcano_plot <- function(res_de,
     "log2FoldChange",
     "significant"
   )
+  
   
   # Prepare plotting
   volcano_df <- complete_data
@@ -122,19 +123,22 @@ volcano_plot <- function(res_de,
     labs(
       x = "log2 Fold Change",
       y = "-log10 p-value",
-      color = "p-value <= FDR"
+      color = paste0("pvalue <= ", FDR)
     ) +
     scale_x_continuous(limits = limit_x) +
     scale_color_manual(
       labels = c("significant", "not significant"),
       breaks = c("TRUE", "FALSE"),
       values = c(color, "grey25")
-    ) +
+    ) + 
+    ggtitle(title) +
     theme_bw() +
     theme(
-      legend.title = element_text(size = 11, face = "bold"),
-      legend.text = element_text(size = 10)
+      legend.title = element_text(size = 9, face = "bold"),
+      legend.text = element_text(size = 8),
+      plot.title = element_text(size = 10, face = "bold")
     )
+  
   
   
   # adding labels to the significant points
@@ -145,9 +149,7 @@ volcano_plot <- function(res_de,
       size = 4,
       max.overlaps = volcano_labels
     )
-  }  
+  }
   
-  # handling the title
-  p <- p + ggtitle(title)
   return(p)
 }
