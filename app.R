@@ -534,7 +534,7 @@ magnetique_server <- function(input, output, session) {
 
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({
-    rvalues$mygtl() %...>% {
+    rvalues$mygtl() %>% {
       mygtl <- .
       myres_enrich <- mygtl$res_enrich
       df <- data.frame(
@@ -558,75 +558,71 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$visnet_em <- renderVisNetwork({
-    rvalues$mygtl() %...>% {
-      mygtl <- .
-      emg <- enrichment_map(
-        gtl = mygtl,
-        n_gs = input$number_genesets,
-        overlap_threshold = 0.1,
-        scale_edges_width = 200,
-        color_by = input$color_by
+    mygtl <- rvalues$mygtl()
+    emg <- enrichment_map(
+      gtl = mygtl,
+      n_gs = input$number_genesets,
+      overlap_threshold = 0.1,
+      scale_edges_width = 200,
+      color_by = input$color_by
+    )
+    
+    visNetwork::visIgraph(emg) %>%
+      visOptions(
+        highlightNearest = list(
+          enabled = TRUE,
+          degree = 1,
+          hover = TRUE
+        ),
+        nodesIdSelection = TRUE
+      ) %>%
+      visExport(
+        name = "emap_network",
+        type = "png",
+        label = "Save enrichment map"
       )
-
-      visNetwork::visIgraph(emg) %>%
-        visOptions(
-          highlightNearest = list(
-            enabled = TRUE,
-            degree = 1,
-            hover = TRUE
-          ),
-          nodesIdSelection = TRUE
-        ) %>%
-        visExport(
-          name = "emap_network",
-          type = "png",
-          label = "Save enrichment map"
-        )
-    }
   })
 
   output$emap_signature <- renderPlot({
-    rvalues$data() %...>% {
-      data <- .
-      mygtl <- extract2(data, "genetonic")
-      myvst <- extract2(mygtl, "dds")
-
-      cur_gsid <- mygtl$res_enrich$gs_id[
-        match(input$visnet_em_selected, mygtl$res_enrich$gs_description)
-      ]
-      validate(
-        need(!is.na(cur_gsid),
-          message = "Please select a gene set from the Enrichment Map."
-        )
+    
+    mygtl <- rvalues$mygtl()
+    myvst <- rvalues$myvst()
+    
+    cur_gsid <- mygtl$res_enrich$gs_id[
+      match(input$visnet_em_selected, mygtl$res_enrich$gs_description)
+    ]
+    validate(
+      need(!is.na(cur_gsid),
+           message = "Please select a gene set from the Enrichment Map."
       )
-      heatmap(
-        se = myvst,
-        gtl = mygtl,
-        geneset_id = cur_gsid,
-        FDR = 0.05,
-        de_only = FALSE,
-        cluster_rows = TRUE,
-        cluster_columns = TRUE,
-        center_mean = TRUE,
-        scale_row = TRUE,
-        anno_col_info = "Etiology"
-      )
-    }
+    )
+    
+    colnames(myvst) <- NULL
+    GeneTonic::gs_heatmap(
+      se = myvst,
+      gtl = mygtl,
+      geneset_id = cur_gsid,
+      FDR = 0.05,
+      de_only = FALSE,
+      cluster_rows = TRUE,
+      cluster_columns = TRUE,
+      center_mean = TRUE,
+      scale_row = TRUE,
+      anno_col_info = "Etiology"
+    )
   })
 
   output$enriched_funcres <- renderPlotly({
-    rvalues$mygtl() %...>% {
-      gtl <- .
-      ggplotly(
-        enhance_table(
-          gtl$res_enrich,
-          gtl$res_de,
-          annotation_obj = gtl$annotation_obj,
-          n_gs = input$number_genesets,
-          chars_limit = 50
-        )
+    gtl <- rvalues$mygtl()
+    ggplotly(
+      enhance_table(
+        gtl$res_enrich,
+        gtl$res_de,
+        annotation_obj = gtl$annotation_obj,
+        n_gs = input$number_genesets,
+        chars_limit = 50
       )
-    }
+    )
   })
 
   # DTU related content --------------------------------------------------------
