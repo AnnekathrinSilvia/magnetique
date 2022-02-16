@@ -323,10 +323,13 @@ magnetique_server <- function(input, output, session) {
     message(input$selected_ontology)
     
     # all_gtls[[input$selected_contrast]][[input$selected_ontology]]
-    showNotification("assembling the gtl object for you!")
+    showNotification("Assembling the gtl object for you!", 
+                     id = "info_assembling",
+                     duration = NULL)
     mygtl <- buildup_gtl(con,
                          contrast = input$selected_contrast,
                          ontology = input$selected_ontology)
+    removeNotification(id = "info_assembling")
     showNotification("Done! gtl object ready!", type = "message")
     return(mygtl)
   })
