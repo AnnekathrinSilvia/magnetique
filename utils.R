@@ -90,6 +90,75 @@ plot_gene_structure <- function(gtf) {
 }
 
 
+#' Build up a GeneTonicList, from the magnetique DB 
+#'
+#' @param con The DB connection (an SQLiteConnection object)
+#' @param contrast The contrast, as specified e.g. in the app
+#' @param ontology The ontology to focus upon (BP, MF, CC)
+#' @param verbose Logical, whether to display messages while constructing
+#'
+#' @return A GeneTonicList object, to be used in concert with GeneTonic's function
+#' @export
+#'
+#' @examples
+#' mygtl <- buildup_gtl(con, "DCMvsHCM", "BP")
+buildup_gtl <- function(con,
+                        contrast,
+                        ontology,
+                        verbose = TRUE) {
+  
+  if(verbose) message("... building annotation...")
+  annotation <- tbl(con, "annotation_obj") %>% 
+    select(c("gene_id", "gene_name")) %>% collect() %>% as.data.frame()
+  rownames(annotation) <- annotation$gene_id 
+  if(verbose) message("Done!")
+  
+  if(verbose) message("... building counts...")
+  counts <- tbl(con, "counts") %>% 
+    collect()
+  
+  counts <- counts[counts$contrast == contrast, ]
+  counts$contrast <- NULL
+  counts <- as.matrix(counts)
+  rownames(counts) <- rownames(annotation)
+  
+  coldata <- tbl(con, "metadata") %>% collect()
+  
+  dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts,
+                                        colData = coldata,
+                                        design = ~Etiology + Race + Sex + Age + SV1 + SV2)
+  if(verbose) message("Done!")
+  
+  if(verbose) message("... building DE table...")
+  tbl_de <- tbl(con, "res") %>% collect()
+  tbl_de <- tbl_de[tbl_de$contrast == contrast, ] %>% as.data.frame()
+  tbl_de$contrast <- NULL
+  tbl_de <- as.data.frame(tbl_de)
+  rownames(tbl_de) <- rownames(annotation)
+  
+  res_de <- DESeq2::DESeqResults(DataFrame(tbl_de))
+  if(verbose) message("Done!")
+  
+  if(verbose) message("... building enrichment table...")
+  tbl_enrich <- tbl(con, "res_enrich") %>% collect()
+  tbl_enrich <- tbl_enrich[tbl_enrich$contrast == contrast & tbl_enrich$ontology == ontology, ] 
+  tbl_enrich$contrast <- NULL
+  tbl_enrich$ontology <- NULL
+  tbl_enrich <- as.data.frame(tbl_enrich)
+  rownames(tbl_enrich) <- tbl_enrich$gs_id
+  
+  res_enrich <- tbl_enrich
+  if(verbose) message("Done!")
+  
+  gtl <- GeneTonic::GeneTonic_list(
+    dds = dds,
+    res_de = res_de,
+    res_enrich = res_enrich,
+    annotation_obj = annotation
+  )
+  return(gtl)
+} 
+
 createLinkGO <- function(val) {
   sprintf(
     "<a href=\"http://amigo.geneontology.org/amigo/term/%s\" target=\"_blank\" class=\"btn btn-primary\">%s</a>",
