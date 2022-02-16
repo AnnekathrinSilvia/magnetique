@@ -292,20 +292,25 @@ magnetique_server <- function(input, output, session) {
   # selector trigger data loading
 
   rvalues$mygtl <- reactive({
-    rvalues$data() %...>% {
-      data <- .
-      extract2(data, "genetonic")
-    }
+    # rvalues$data() %...>% {
+    #   data <- .
+    #   extract2(data, "genetonic")
+    # }
+    message(input$selected_contrast)
+    message(input$selected_ontology)
+    
+    all_gtls[[input$selected_contrast]][[input$selected_ontology]]
   })
 
   rvalues$myvst <- reactive({
-    rvalues$data() %...>% {
-      data <- .
-      data %>%
-        extract2("genetonic") %>%
-        extract2("dds") %>%
-        vst(.)
-    }
+    # rvalues$data() %...>% {
+    #   data <- .
+    #   data %>%
+    #     extract2("genetonic") %>%
+    #     extract2("dds") %>%
+    #     vst(.)
+    # }
+    DESeq2::vst(rvalues$mygtl()$dds)
   })
 
   rvalues$key <- reactive({
