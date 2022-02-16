@@ -749,12 +749,33 @@ magnetique_server <- function(input, output, session) {
     if (input$magnetique_tab == "tab-welcome") {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
     } else if (input$magnetique_tab == "tab-gene-view") {
-      showNotification("in gene view")
+      # showNotification("in gene view")
       # TODO - add behavior, this will depend on how the info on genes is passed around
+      i <- getReactableState("de_table", "selected")
+      # message(i)
+      # message(class(i))
+      # message(is.null(i))
+      if(is.null(i)) {
+        showNotification("Select a row in the main table to bookmark it", type = "warning")
+      } else {
+        cur_sel_id <- rvalues$key()$data()[[i, "gene_id"]]
+
+        anno <- rvalues$mygtl()$annotation_obj  # TODO: maybe just do it once at the beginning and keep it constant? this would not change!
+        cur_sel <- anno$gene_name[match(cur_sel_id, anno$gene_id)]
+        # message(cur_sel_id)
+        # message(cur_sel)
+
+        if (cur_sel_id %in% rvalues$mygenes) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", cur_sel, cur_sel_id), type = "default")
+        } else {
+          rvalues$mygenes <- unique(c(rvalues$mygenes, cur_sel_id))
+          # message("there go your genes... ", rvalues$mygenes)
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenes)), type = "message")
+        }
+      }
       
     } else if (input$magnetique_tab == "tab-geneset-view") {
-      
-      showNotification("in geneset view")
+      # showNotification("in geneset view")
       
       g <- emap_graph()
       cur_sel <- input$visnet_em_selected
