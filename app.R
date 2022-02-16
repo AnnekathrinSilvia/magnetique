@@ -128,10 +128,24 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         fluidRow(
           column(
+            width = 1,
+          ),
+          column(
+            width = 10,
+            withSpinner(
+              plotlyOutput("wgcn_heatmap")
+            )
+          ),
+          column(
+            width = 1,
+          ),
+        ),
+        fluidRow(
+          column(
             width = 6,
             uiOutput("carnival_launch")
           )
-        )
+        ) 
       ),
       shiny::tabPanel(
         id = "tab-geneset-view",
@@ -185,14 +199,19 @@ magnetique_ui <- shinydashboard::dashboardPage(
 magnetique_server <- function(input, output, session) {
   progress <- Progress$new(session)
   progress$set(value = 0.5, message = "Connecting to the db.")
-  con <- DBI::dbConnect(
-    RPostgres::Postgres(),
-    dbname = "magnetique",
-    host = "10.250.140.12",
-    port = 5432,
-    password = "wGpVDExWK2NppuWENFcjc9v3VKgL4h86ZBHF78pEFdqJwEQwfG",
-    user = "magnetique_reader"
-  )
+  
+  # use local db for now...
+#   con <- DBI::dbConnect(
+#     RPostgres::Postgres(),
+#     dbname = "magnetique",
+#     host = "10.250.140.12",
+#     port = 5432,
+#     password = "wGpVDExWK2NppuWENFcjc9v3VKgL4h86ZBHF78pEFdqJwEQwfG",
+#     user = "magnetique_reader"
+#   )
+  con <- DBI::dbConnect(RSQLite::SQLite(), "local/MAGNetApp/data/magnetique_v2.sqlite")
+
+  
   progress$set(value = 0.5, message = "Loading packages.")
   suppressPackageStartupMessages({
     library(dplyr, warn.conflicts = FALSE)
@@ -245,9 +264,12 @@ magnetique_server <- function(input, output, session) {
           "padj",
           "log2FoldChange",
           "dtu_pvadj",
-          "dtu_dif"
+          "dtu_dif",
+          "module",
+          "rank"
         )
-      ) %>%
+      ) %>% 
+      mutate_at(vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), funs(round(., 6))) %>%
       collect() %>%
       highlight_key(.)
   })
@@ -290,6 +312,12 @@ magnetique_server <- function(input, output, session) {
           ),
           dtu_dif = colDef(
             header = with_tooltip("dtu_dif", "Differential isoform usage")
+          ),
+          module = colDef(
+            header = with_tooltip("module", "Co-expressed genes module")
+          ),
+          rank = colDef(
+            header = with_tooltip("rank", "Rank in module")
           )
         )
       )
@@ -459,6 +487,35 @@ magnetique_server <- function(input, output, session) {
       )
     
   })
+  
+  
+  # wgcn related content ---------------------------------------------
+  output$wgcn_heatmap <- renderPlotly({
+    y <- con %>%
+      tbl("wgcn_hp") %>%
+      data.frame() %>%
+      tibble::column_to_rownames("row_names") %>% as.matrix()
+    textMatrix <- ifelse(y < 0.01, signif(y, 1), "")
+    a <- rep(0:(ncol(x)-1), each = nrow(x))
+    b <- rep(c(0:(nrow(x)-1)), ncol(x))
+    x <- con %>%
+      tbl("wgcn_hcor") %>%
+      data.frame() %>%
+      tibble::column_to_rownames("row_names") %>%
+      as.matrix()
+    plot_ly(
+        x = colnames(x), 
+        y = rownames(x),
+        z = x, 
+        colors = colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdYlBu")))(256),
+        zmin = -1, zmax =1,
+        type = "heatmap"
+     ) %>% 
+     add_annotations(x=a, y=b, text=textMatrix, xref='x', yref='y', showarrow=FALSE, font=list(color='black')) %>%
+     config(displayModeBar = FALSE) %>%
+     layout(title = "Module-trait correlation")
+  })
+
 
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({

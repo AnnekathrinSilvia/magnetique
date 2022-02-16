@@ -50,3 +50,6 @@ renv/*
 .Rprofile
 core
 .vi.*
+
+# local stuff
+local/
