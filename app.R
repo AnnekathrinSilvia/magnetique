@@ -53,44 +53,48 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 12,
+            div(
+              actionButton(
+                "tour_firststeps",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_firststeps",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style="float:right"
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            width = 12,
             includeMarkdown("data/overview.md")
           )
         ),
-        hr(),
-        fluidRow(
-          column(
-            width = 1,
-            offset = 11,
-            actionButton(
-              "tour_firststeps",
-              label = "", icon = icon("question-circle"),
-              style = .helpbutton_biocstyle
-            ),
-            shinyBS::bsTooltip(
-              "tour_firststeps",
-              "Click me to start a tour of this section!",
-              "bottom",
-              options = list(container = "body")
-            )
-          )
-        )
+        
       ),
       shiny::tabPanel(
         title = "Gene View", icon = icon("heartbeat"), value = "tab-gene-view",
         fluidRow(
           column(
-            width = 1,
-            offset = 11,
-            actionButton(
-              "tour_geneview",
-              label = "", icon = icon("question-circle"),
-              style = .helpbutton_biocstyle
-            ),
-            shinyBS::bsTooltip(
-              "tour_geneview",
-              "Click me to start a tour of this section!",
-              "bottom",
-              options = list(container = "body")
+            width = 12,
+            div(
+              actionButton(
+                "tour_geneview",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_geneview",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style="float:right"
             )
           )
         ),
@@ -148,18 +152,20 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
         fluidRow(
           column(
-            width = 1,
-            offset = 11,
-            actionButton(
-              "tour_genesetview",
-              label = "", icon = icon("question-circle"),
-              style = .helpbutton_biocstyle
-            ),
-            shinyBS::bsTooltip(
-              "tour_genesetview",
-              "Click me to start a tour of this section!",
-              "bottom",
-              options = list(container = "body")
+            width = 12,
+            div(
+              actionButton(
+                "tour_genesetview",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_genesetview",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style="float:right"
             )
           )
         ),
@@ -192,18 +198,21 @@ magnetique_ui <- shinydashboard::dashboardPage(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
         fluidRow(
           column(
-            width = 1,
-            offset = 11,
-            actionButton(
-              "tour_bookmarks",
-              label = "", icon = icon("question-circle"),
-              style = .helpbutton_biocstyle
-            ),
-            shinyBS::bsTooltip(
-              "tour_bookmarks",
-              "Click me to start a tour of this section!",
-              "bottom",
-              options = list(container = "body")
+            width = 12,
+            div(
+              
+              actionButton(
+                "tour_bookmarks",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_bookmarks",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style="float:right"
             )
           )
         ),
