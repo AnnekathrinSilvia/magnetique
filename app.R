@@ -125,6 +125,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
         fluidRow(
+          id = "geneview_row1",
           column(
             width = 6,
             withSpinner(
@@ -145,6 +146,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
         fluidRow(
+          id = "geneview_row2",
           column(
             width = 4,
             withSpinner(
