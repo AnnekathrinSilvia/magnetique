@@ -587,8 +587,8 @@ magnetique_server <- function(input, output, session) {
       )
     }
   })
-
-  output$visnet_em <- renderVisNetwork({
+  
+  emap_graph <- reactive({
     mygtl <- rvalues$mygtl()
     emg <- enrichment_map(
       gtl = mygtl,
@@ -597,8 +597,11 @@ magnetique_server <- function(input, output, session) {
       scale_edges_width = 200,
       color_by = input$color_by
     )
-    
-    visNetwork::visIgraph(emg) %>%
+    return(emg)
+  })
+
+  output$visnet_em <- renderVisNetwork({
+    visNetwork::visIgraph(emap_graph()) %>%
       visOptions(
         highlightNearest = list(
           enabled = TRUE,
