@@ -39,3 +39,14 @@ vignettes/*.pdf
 .Renviron
 **/*.RDS
 /shinyproxy.Rcheck
+.vscode
+settings.json
+*.pdf
+*.gz
+*.zip
+MAGNetApp/*
+MAGNetApp_cloud_data/data/*
+renv/*
+.Rprofile
+core
+.vi.*

@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.1.2",
+    "Version": "4.1.1",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -98,12 +98,6 @@
       "Version": "1.34.0",
       "Source": "Bioconductor",
       "Hash": "9f66edf50ad856a56a804a451ce7b3bc"
-    },
-    "DRIMSeq": {
-      "Package": "DRIMSeq",
-      "Version": "1.22.0",
-      "Source": "Bioconductor",
-      "Hash": "cb8aba06b2232fffb0aa2ea1d1eefe4b"
     },
     "DT": {
       "Package": "DT",
@@ -273,13 +267,6 @@
       "Repository": "CRAN",
       "Hash": "5cc50d9d40a284cb8b1c8604901acf89"
     },
-    "RPostgres": {
-      "Package": "RPostgres",
-      "Version": "1.4.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "bb757978bf74ef58557242b83e559a96"
-    },
     "RSQLite": {
       "Package": "RSQLite",
       "Version": "2.2.8",
@@ -434,10 +421,10 @@
     },
     "broom": {
       "Package": "broom",
-      "Version": "0.7.12",
+      "Version": "0.7.10",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "bfa8a039d77ae8d5413254e572c8abea"
+      "Hash": "ddf8bc55ea050f984835dd2d23cd6828"
     },
     "bs4Dash": {
       "Package": "bs4Dash",
@@ -630,10 +617,10 @@
     },
     "dtplyr": {
       "Package": "dtplyr",
-      "Version": "1.2.1",
+      "Version": "1.1.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f5d195cd5fcc0a77499d9da698ef2ea3"
+      "Hash": "1e14e4c5b2814de5225312394bc316da"
     },
     "dynamicTreeCut": {
       "Package": "dynamicTreeCut",
@@ -641,12 +628,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "11d27b7a5f49a221224f56134f06b1f9"
-    },
-    "edgeR": {
-      "Package": "edgeR",
-      "Version": "3.36.0",
-      "Source": "Bioconductor",
-      "Hash": "670b85ad64219de76ff7e539a41b58a6"
     },
     "ellipsis": {
       "Package": "ellipsis",
@@ -766,13 +747,6 @@
       "Repository": "CRAN",
       "Hash": "0d9bf02413ddc2bbe8da9ce369dcdd2b"
     },
-    "future": {
-      "Package": "future",
-      "Version": "1.23.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "7bf6fbed7f00cae876901fd70c04f3a4"
-    },
     "gargle": {
       "Package": "gargle",
       "Version": "1.2.0",
@@ -825,13 +799,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "08ab869f37e6a7741a64ab9069bcb67d"
-    },
-    "globals": {
-      "Package": "globals",
-      "Version": "0.14.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "eca8023ed5ca6372479ebb9b3207f5ae"
     },
     "glue": {
       "Package": "glue",
@@ -1035,19 +1002,6 @@
       "Repository": "CRAN",
       "Hash": "a6b6d352e3ed897373ab19d8395c98d0"
     },
-    "limma": {
-      "Package": "limma",
-      "Version": "3.50.0",
-      "Source": "Bioconductor",
-      "Hash": "25679c54c2737e06835c5484682990b5"
-    },
-    "listenv": {
-      "Package": "listenv",
-      "Version": "0.8.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "0bde42ee282efb18c7c4e63822f5b4f7"
-    },
     "locfit": {
       "Package": "locfit",
       "Version": "1.5-9.4",
@@ -1146,26 +1100,12 @@
       "Repository": "CRAN",
       "Hash": "5406fd37ef0bf9b88c8a4f264d6ec220"
     },
-    "parallelly": {
-      "Package": "parallelly",
-      "Version": "1.30.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "67db13907a9cea89c118cf82d448799f"
-    },
     "patchwork": {
       "Package": "patchwork",
       "Version": "1.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "c446b30cb33ec125ff02588b60660ccb"
-    },
-    "pheatmap": {
-      "Package": "pheatmap",
-      "Version": "1.0.12",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "db1fb0021811b6693741325bbe916e58"
     },
     "pillar": {
       "Package": "pillar",
@@ -1265,26 +1205,12 @@
       "Repository": "CRAN",
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d"
     },
-    "reactR": {
-      "Package": "reactR",
-      "Version": "0.4.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "75389c8091eb14ee21c6bc87a88b3809"
-    },
-    "reactable": {
-      "Package": "reactable",
-      "Version": "0.2.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "ac1afe50d1c77470a72971a07fd146b1"
-    },
     "readr": {
       "Package": "readr",
-      "Version": "2.1.2",
+      "Version": "2.1.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "9c59de1357dc209868b5feb5c9f0fe2f"
+      "Hash": "6c825746f32a68f4d8c40f94da5b1ac5"
     },
     "readxl": {
       "Package": "readxl",
@@ -1616,10 +1542,10 @@
     },
     "vroom": {
       "Package": "vroom",
-      "Version": "1.5.7",
+      "Version": "1.5.6",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "976507b5a105bc3bdf6a5a5f29e0684f"
+      "Hash": "0af818392e60673cd8968ab9119c30a7"
     },
     "waiter": {
       "Package": "waiter",

@@ -1,0 +1,16 @@
+element;intro
+#welcome;Welcome to the <b>Geneset view tour</b> for <code>magnetique</code>
+#Step1;The tour will take you 
+#tour_genesetview; For the welcome page, you can (re)start it with this button
+#magnetique_tab;You can navigate to the content of the different tabs by clicking...
+#selected_contrast + .selectize-control;selected_contrast info
+#selected_ontology + .selectize-control;selected_ontology info
+#number_genesets;number_genesets info
+#color_by + .selectize-control;color_by info
+#enrich_table;enrich_table content
+#enriched_funcres;enriched_funcres content
+#visnet_em;visnet_em content
+#emap_signature;emap_signature content
+#visnet_em;visnet_em content2
+#emap_signature;emap_signature content2
+#Thanks;Thank you for taking the <b>Geneset view tour</b> of <code>magnetique</code>!

@@ -1,0 +1,10 @@
+element;intro
+#welcome;Welcome to the <b>Bookmarks tour</b> for <code>magnetique</code>
+#Step1;The tour will take you 
+#tour_bookmarks; For the welcome page, you can (re)start it with this button
+#magnetique_tab;You can navigate to the content of the different tabs by clicking...
+#bookmarker;bookmarker button info
+#bookmarks_genes;bookmarks_genes content
+#bookmarks_genesets;bookmarks_genesets content
+#magnetique_tab;navigate back to other tabs to select features of interest!
+#Thanks;Thank you for taking the <b>Bookmarks tour</b> of <code>magnetique</code>!
