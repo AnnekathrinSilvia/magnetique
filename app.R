@@ -200,16 +200,13 @@ magnetique_server <- function(input, output, session) {
   progress <- Progress$new(session)
   progress$set(value = 0.5, message = "Connecting to the db.")
   
-  # use local db for now...
-#   con <- DBI::dbConnect(
-#     RPostgres::Postgres(),
-#     dbname = "magnetique",
-#     host = "10.250.140.12",
-#     port = 5432,
-#     password = "wGpVDExWK2NppuWENFcjc9v3VKgL4h86ZBHF78pEFdqJwEQwfG",
-#     user = "magnetique_reader"
-#   )
-  con <- DBI::dbConnect(RSQLite::SQLite(), "local/MAGNetApp/data/magnetique_v2.sqlite")
+  con <- dbConnect(
+    RPostgres::Postgres(),
+    dbname = 'magnetique',
+    host = Sys.getenv("PGHOST"),
+    port = Sys.getenv("PGPORT"),
+    password = Sys.getenv("PGPASSWORD"),
+    user = Sys.getenv("PGUSER"))
 
   
   progress$set(value = 0.5, message = "Loading packages.")
