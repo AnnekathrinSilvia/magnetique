@@ -92,8 +92,20 @@ WORKDIR /root/magnetique/
 
 # install R environment
 RUN R -e 'renv::restore()'
-RUN R -e 'renv::install("markdown")'
 
 EXPOSE 3838
+ARG PGPASSWORD 
+ENV PGPASSWORD=$PGPASSWORD
 
-CMD ["R", "-e", "shiny::runApp('/root/magnetique/app.R')"]
+ARG PGHOST 
+ENV PGHOST=$PGHOST
+
+ARG PGUSER 
+ENV PGUSER=$PGUSER
+
+ARG PGPORT 
+ENV PGPORT=$PGPORT
+
+RUN R -e 'renv::install("markdown")'
+
+CMD ["R", "-e", "shiny::runApp('app.R')"]
