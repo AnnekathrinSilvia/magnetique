@@ -574,14 +574,15 @@ magnetique_server <- function(input, output, session) {
       data.frame() %>%
       tibble::column_to_rownames("row_names") %>%
       as.matrix()
+
     textMatrix <- ifelse(y < 0.01, signif(y, 1), "")
-    a <- rep(0:(ncol(x) - 1), each = nrow(x))
-    b <- rep(c(0:(nrow(x) - 1)), ncol(x))
     x <- con %>%
       tbl("wgcn_hcor") %>%
       data.frame() %>%
       tibble::column_to_rownames("row_names") %>%
       as.matrix()
+    a <- rep(0:(ncol(x) - 1), each = nrow(x))
+    b <- rep(c(0:(nrow(x) - 1)), ncol(x))
     plot_ly(
       x = colnames(x),
       y = rownames(x),
