@@ -264,9 +264,7 @@ magnetique_server <- function(input, output, session) {
   suppressPackageStartupMessages({
     library(dplyr, warn.conflicts = FALSE)
     library(tidyr, warn.conflicts = FALSE)
-    library(GenomicRanges, warn.conflicts = FALSE)
     library(ggplot2, warn.conflicts = FALSE)
-    library(ggbio, warn.conflicts = FALSE)
   })
   progress$close()
 
@@ -510,8 +508,8 @@ magnetique_server <- function(input, output, session) {
       tbl("gtf") %>%
       filter(gene_id == !!i) %>%
       collect() %>%
-      GRanges(.)
-    gtf <- split(gtf, gtf$transcript_id)
+      GenomicRanges::GRanges(.)
+    gtf <- GenomicRanges::split(gtf, gtf$transcript_id)
     plot_gene_structure(gtf)
   })
 
