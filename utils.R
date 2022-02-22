@@ -80,7 +80,7 @@ plot_gene_structure <- function(gtf) {
       gtf$type, c("five_prime_utr" = "utr", "three_prime_utr" = "utr")
     )
     p <- ggplot() +
-      geom_alignment(gtf,
+      ggbio::geom_alignment(gtf,
         fill = "black", cds.rect.h = .3, utr.rect.h = .2,
         exon.rect.h = .2, label = T
       ) +
