@@ -17,8 +17,6 @@ options(spinner.type = 6)
 
 # sourcing external files -------------------------------------------------
 source("utils.R")
-source("data_preparation.R")
-source("heatmap.R")
 
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
@@ -65,7 +63,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 "bottom",
                 options = list(container = "body")
               ),
-              style="float:right"
+              style = "float:right"
             )
           )
         ),
@@ -75,7 +73,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
             includeMarkdown("data/overview.md")
           )
         ),
-        
       ),
       shiny::tabPanel(
         title = "Gene View", icon = icon("heartbeat"), value = "tab-gene-view",
@@ -94,7 +91,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 "bottom",
                 options = list(container = "body")
               ),
-              style="float:right"
+              style = "float:right"
             )
           )
         ),
@@ -159,7 +156,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
             width = 6,
             uiOutput("carnival_launch")
           )
-        ) 
+        )
       ),
       shiny::tabPanel(
         id = "tab-geneset-view",
@@ -179,7 +176,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 "bottom",
                 options = list(container = "body")
               ),
-              style="float:right"
+              style = "float:right"
             )
           )
         ),
@@ -214,7 +211,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             width = 12,
             div(
-              
+
               actionButton(
                 "tour_bookmarks",
                 label = "", icon = icon("question-circle"),
@@ -226,7 +223,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 "bottom",
                 options = list(container = "body")
               ),
-              style="float:right"
+              style = "float:right"
             )
           )
         ),
@@ -252,16 +249,17 @@ magnetique_ui <- shinydashboard::dashboardPage(
 magnetique_server <- function(input, output, session) {
   progress <- Progress$new(session)
   progress$set(value = 0.5, message = "Connecting to the db.")
-  
-  con <- dbConnect(
+
+  con <- DBI::dbConnect(
     RPostgres::Postgres(),
-    dbname = 'magnetique',
+    dbname = "magnetique",
     host = Sys.getenv("PGHOST"),
     port = Sys.getenv("PGPORT"),
     password = Sys.getenv("PGPASSWORD"),
-    user = Sys.getenv("PGUSER"))
+    user = Sys.getenv("PGUSER")
+  )
 
-  
+
   progress$set(value = 0.5, message = "Loading packages.")
   suppressPackageStartupMessages({
     library(dplyr, warn.conflicts = FALSE)
@@ -270,14 +268,6 @@ magnetique_server <- function(input, output, session) {
     library(ggplot2, warn.conflicts = FALSE)
     library(ggbio, warn.conflicts = FALSE)
   })
-  # library("GeneTonic")
-  # library(igraph, warn.conflicts = FALSE)
-  # library("pheatmap")
-  # suppressPackageStartupMessages({
-  # library("ComplexHeatmap")
-  # library("DESeq2")
-  # library("RColorBrewer")
-  # })
   progress$close()
 
   # reactive objects and setup commands -------------------------------------
@@ -285,45 +275,45 @@ magnetique_server <- function(input, output, session) {
   rvalues$mygtl <- NULL
   rvalues$key <- NULL
   rvalues$myvst <- NULL
-  
+
   rvalues$mygenes <- c()
   rvalues$mygenesets <- c()
-  
+
 
   # sidebar server-side -----------------------------------------------------
   output$ui_sidebar <- renderUI({
     tagList(
       sidebarMenu(
         selectInput("selected_contrast",
-                    label = "Contrast id",
-                    choices = c(
-                      "DCMvsHCM",
-                      "DCMvsNFD",
-                      "HCMvsNFD"
-                    ),
-                    selected = "DCMvsHCM"
+          label = "Contrast id",
+          choices = c(
+            "DCMvsHCM",
+            "DCMvsNFD",
+            "HCMvsNFD"
+          ),
+          selected = "DCMvsHCM"
         ),
         selectInput("selected_ontology",
-                    label = "Ontology",
-                    choices = c("BP", "MF", "CC"),
-                    selected = "BP"
+          label = "Ontology",
+          choices = c("BP", "MF", "CC"),
+          selected = "BP"
         ),
         numericInput("number_genesets",
-                     "Number of genesets",
-                     value = 15,
-                     min = 0
+          "Number of genesets",
+          value = 15,
+          min = 0
         ),
         selectInput("color_by",
-                    "Color by",
-                    choices = c(
-                      "z_score",
-                      "gs_pvalue"
-                    ),
-                    selected = "z_score"
+          "Color by",
+          choices = c(
+            "z_score",
+            "gs_pvalue"
+          ),
+          selected = "z_score"
         ),
         actionButton("bookmarker",
-                     label = "Bookmark", icon = icon("heart"),
-                     style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
+          label = "Bookmark", icon = icon("heart"),
+          style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
         )
       )
     )
@@ -331,33 +321,23 @@ magnetique_server <- function(input, output, session) {
   # selector trigger data loading
 
   rvalues$mygtl <- reactive({
-    # rvalues$data() %...>% {
-    #   data <- .
-    #   extract2(data, "genetonic")
-    # }
     message(input$selected_contrast)
     message(input$selected_ontology)
-    
-    # all_gtls[[input$selected_contrast]][[input$selected_ontology]]
-    showNotification("Assembling the gtl object for you!", 
-                     id = "info_assembling",
-                     duration = NULL)
+
+    showNotification("Assembling the gtl object for you!",
+      id = "info_assembling",
+      duration = NULL
+    )
     mygtl <- buildup_gtl(con,
-                         contrast = input$selected_contrast,
-                         ontology = input$selected_ontology)
+      contrast = input$selected_contrast,
+      ontology = input$selected_ontology
+    )
     removeNotification(id = "info_assembling")
     showNotification("Done! gtl object ready!", type = "message")
     return(mygtl)
   })
 
   rvalues$myvst <- reactive({
-    # rvalues$data() %...>% {
-    #   data <- .
-    #   data %>%
-    #     extract2("genetonic") %>%
-    #     extract2("dds") %>%
-    #     vst(.)
-    # }
     DESeq2::vst(rvalues$mygtl()$dds)
   })
 
@@ -374,7 +354,7 @@ magnetique_server <- function(input, output, session) {
           "module",
           "rank"
         )
-      ) %>% 
+      ) %>%
       mutate_at(vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), funs(round(., 6))) %>%
       collect() %>%
       highlight_key(.)
@@ -504,13 +484,6 @@ magnetique_server <- function(input, output, session) {
         .,
         type = "box",
         x = ~Etiology,
-        # text = ~ paste0(
-        #   "<br><i>sex</i>: ", Sex,
-        #   "<br><i>weight</i> : ", Weight,
-        #   "<br><i>race</i>: ", Race,
-        #   "<br><i>counts</i>: ", counts
-        # ),
-        # hoverinfo = "text",
         y = ~ log10(value),
         color = ~Etiology,
         colors = c(I("steelblue"), I("gold"), I("forestgreen"))
@@ -591,63 +564,64 @@ magnetique_server <- function(input, output, session) {
       theme(
         axis.title.y = element_blank()
       )
-    
   })
-  
-  
+
+
   # wgcn related content ---------------------------------------------
   output$wgcn_heatmap <- renderPlotly({
     y <- con %>%
       tbl("wgcn_hp") %>%
       data.frame() %>%
-      tibble::column_to_rownames("row_names") %>% as.matrix()
+      tibble::column_to_rownames("row_names") %>%
+      as.matrix()
     textMatrix <- ifelse(y < 0.01, signif(y, 1), "")
-    a <- rep(0:(ncol(x)-1), each = nrow(x))
-    b <- rep(c(0:(nrow(x)-1)), ncol(x))
+    a <- rep(0:(ncol(x) - 1), each = nrow(x))
+    b <- rep(c(0:(nrow(x) - 1)), ncol(x))
     x <- con %>%
       tbl("wgcn_hcor") %>%
       data.frame() %>%
       tibble::column_to_rownames("row_names") %>%
       as.matrix()
     plot_ly(
-        x = colnames(x), 
-        y = rownames(x),
-        z = x, 
-        colors = colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdYlBu")))(256),
-        zmin = -1, zmax =1,
-        type = "heatmap"
-     ) %>% 
-     add_annotations(x=a, y=b, text=textMatrix, xref='x', yref='y', showarrow=FALSE, font=list(color='black')) %>%
-     config(displayModeBar = FALSE) %>%
-     layout(title = "Module-trait correlation")
+      x = colnames(x),
+      y = rownames(x),
+      z = x,
+      colors = colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdYlBu")))(256),
+      zmin = -1, zmax = 1,
+      type = "heatmap"
+    ) %>%
+      add_annotations(x = a, y = b, text = textMatrix, xref = "x", yref = "y", showarrow = FALSE, font = list(color = "black")) %>%
+      config(displayModeBar = FALSE) %>%
+      layout(title = "Module-trait correlation")
   })
 
 
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({
-    rvalues$mygtl() %>% {
-      mygtl <- .
-      myres_enrich <- mygtl$res_enrich
-      df <- data.frame(
-        description = myres_enrich$gs_description,
-        obs = myres_enrich$DE_count,
-        exp = myres_enrich$Expected,
-        padj = myres_enrich$gs_pvalue
-      )
-      df <- df[order(df$obs, decreasing = T), ]
-      rownames(df) <- myres_enrich$gs_id
-      colnames(df) <- c("Description", "Observed", "Expected", "padj")
-      reactable(
-        df,
-        columns = list(
-          padj = colDef(
-            cell = function(value) format(round(value, 2))
+    rvalues$mygtl() %>%
+      {
+        mygtl <- .
+        myres_enrich <- mygtl$res_enrich
+        df <- data.frame(
+          description = myres_enrich$gs_description,
+          obs = myres_enrich$DE_count,
+          exp = myres_enrich$Expected,
+          padj = myres_enrich$gs_pvalue
+        )
+        df <- df[order(df$obs, decreasing = T), ]
+        rownames(df) <- myres_enrich$gs_id
+        colnames(df) <- c("Description", "Observed", "Expected", "padj")
+        reactable(
+          df,
+          columns = list(
+            padj = colDef(
+              cell = function(value) format(round(value, 2))
+            )
           )
         )
-      )
-    }
+      }
   })
-  
+
   emap_graph <- reactive({
     mygtl <- rvalues$mygtl()
     emg <- enrichment_map(
@@ -678,19 +652,18 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$emap_signature <- renderPlot({
-    
     mygtl <- rvalues$mygtl()
     myvst <- rvalues$myvst()
-    
+
     cur_gsid <- mygtl$res_enrich$gs_id[
       match(input$visnet_em_selected, mygtl$res_enrich$gs_description)
     ]
     validate(
       need(!is.na(cur_gsid),
-           message = "Please select a gene set from the Enrichment Map."
+        message = "Please select a gene set from the Enrichment Map."
       )
     )
-    
+
     colnames(myvst) <- NULL
     GeneTonic::gs_heatmap(
       se = myvst,
@@ -741,7 +714,7 @@ magnetique_server <- function(input, output, session) {
     con %>%
       tbl("carnival") %>%
       filter(contrast == local(input$selected_contrast)) %>%
-      pull(igraph) %>% 
+      pull(igraph) %>%
       jsonlite::unserializeJSON() %>%
       visNetwork::visIgraph() %>%
       visOptions(
@@ -779,26 +752,30 @@ magnetique_server <- function(input, output, session) {
 
   output$bookmarks_genes <- renderReactable({
     validate(
-      need(length(rvalues$mygenes) > 0, 
-           "Please select at least one gene with the Bookmark button")
+      need(
+        length(rvalues$mygenes) > 0,
+        "Please select at least one gene with the Bookmark button"
+      )
     )
-    
+
     book_df_genes <- rvalues$mygtl()$annotation_obj[rvalues$mygenes, ]
-    
+
     reactable(book_df_genes, rownames = FALSE)
   })
-  
+
   output$bookmarks_genesets <- renderReactable({
     validate(
-      need(length(rvalues$mygenesets) > 0, 
-           "Please select at least one geneset with the Bookmark button")
+      need(
+        length(rvalues$mygenesets) > 0,
+        "Please select at least one geneset with the Bookmark button"
+      )
     )
-    
+
     book_df_genesets <- rvalues$mygtl()$res_enrich[rvalues$mygenesets, c("gs_id", "gs_description")]
-    
+
     reactable(book_df_genesets, rownames = FALSE)
   })
-  
+
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
@@ -809,12 +786,12 @@ magnetique_server <- function(input, output, session) {
       # message(i)
       # message(class(i))
       # message(is.null(i))
-      if(is.null(i)) {
+      if (is.null(i)) {
         showNotification("Select a row in the main table to bookmark it", type = "warning")
       } else {
         cur_sel_id <- rvalues$key()$data()[[i, "gene_id"]]
 
-        anno <- rvalues$mygtl()$annotation_obj  # TODO: maybe just do it once at the beginning and keep it constant? this would not change!
+        anno <- rvalues$mygtl()$annotation_obj # TODO: maybe just do it once at the beginning and keep it constant? this would not change!
         cur_sel <- anno$gene_name[match(cur_sel_id, anno$gene_id)]
         # message(cur_sel_id)
         # message(cur_sel)
@@ -827,15 +804,14 @@ magnetique_server <- function(input, output, session) {
           showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenes)), type = "message")
         }
       }
-      
     } else if (input$magnetique_tab == "tab-geneset-view") {
       # showNotification("in geneset view")
-      
+
       g <- emap_graph()
       cur_sel <- input$visnet_em_selected
       re <- rvalues$mygtl()$res_enrich
       cur_sel_id <- re$gs_id[match(cur_sel, re$gs_description)]
-      
+
       if (cur_sel == "") {
         showNotification("Select a node in the enrichment map to bookmark it", type = "warning")
       } else {
@@ -853,7 +829,7 @@ magnetique_server <- function(input, output, session) {
       showNotification("This tab shows some information on the developers team...")
     }
   })
-      
+
   # Other content --------------------------------------------------------------
   output$de_volcano_signature <- renderPlot({
     signature_volcano(
@@ -870,38 +846,38 @@ magnetique_server <- function(input, output, session) {
   output$team_list <- renderTable({
     make_team_df
   })
-  
-  
+
+
   # Tours observers
   observeEvent(input$tour_firststeps, {
     tour <- read.delim("tours/intro_firststeps.txt",
-                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-  
+
   observeEvent(input$tour_geneview, {
     tour <- read.delim("tours/intro_geneview.txt",
-                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-  
+
   observeEvent(input$tour_genesetview, {
     tour <- read.delim("tours/intro_genesetview.txt",
-                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-  
+
   observeEvent(input$tour_bookmarks, {
     tour <- read.delim("tours/intro_bookmarks.txt",
-                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-  
-  
+
+
 
   observeEvent(input$btn_show_carnival, {
     showModal(
