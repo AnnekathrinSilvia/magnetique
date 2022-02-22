@@ -1153,20 +1153,6 @@
       "Repository": "CRAN",
       "Hash": "67db13907a9cea89c118cf82d448799f"
     },
-    "patchwork": {
-      "Package": "patchwork",
-      "Version": "1.1.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c446b30cb33ec125ff02588b60660ccb"
-    },
-    "pheatmap": {
-      "Package": "pheatmap",
-      "Version": "1.0.12",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "db1fb0021811b6693741325bbe916e58"
-    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.6.4",
@@ -1438,6 +1424,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "402073a8a045c9f5ea096ed94e01d9ce"
+    },
+    "shinyBS": {
+      "Package": "shinyBS",
+      "Version": "0.61",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f895dafd39733c4a70d425f605a832e7"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
