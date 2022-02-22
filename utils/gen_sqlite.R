@@ -14,11 +14,11 @@
 
 library(dplyr)
 
-db_name <- "magnetique_v2.sqlite"
+db_name <- "magnetique.sqlite"
 
 # I/O ------------------------------------------------------
 
-dirloc <- file.path("local", "MAGNetApp", "data", fsep=.Platform$file.sep)
+dirloc <- file.path("MAGNetApp", "data", fsep=.Platform$file.sep)
 
 # load DGE results
 cdir <- file.path(dirloc, "DGE", fsep=.Platform$file.sep)
@@ -205,6 +205,31 @@ dge$DCMvsNFD$annotation_obj %>%  dbWriteTable(db, "annotation_obj", ., overwrite
 dbWriteTable(db, "wgcn_hcor", wgcn.heatmap.c, overwrite=TRUE, row.names=TRUE)
 dbWriteTable(db, "wgcn_hp", wgcn.heatmap.p, overwrite=TRUE, row.names=TRUE)
 
+# Carnival data
+carnival <- list()
+ 
+load(file.path(dirloc, "networks", "igraph_dcm_vs_hcm_hierarchic.RData"))
+carnival[["DCMvsHCM"]] <-  jsonlite::serializeJSON(gg)
+
+load(file.path(dirloc, "networks", "igraph_dcm_vs_nfd_hierarchic.RData"))
+carnival[["DCMvsNFD"]] <-  jsonlite::serializeJSON(gg)
+
+load(file.path(dirloc, "networks", "igraph_hcm_vs_nfd_hierarchic.RData"))
+carnival[["HCMvsNFD"]] <-  jsonlite::serializeJSON(gg)
+
+carnival <- data.frame(
+  contrast = names(carnival),
+  igraph = as.character(carnival)
+)
+
+dbWriteTable(db, "carnival", carnival, overwrite=TRUE)
 
 dbDisconnect(db)
 
+base_url <- "https://data.dieterichlab.org/public.php/webdav/"
+library(httr)
+PUT(
+  paste0(base_url, basename(db_name)), 
+  authenticate('3gCTLGT4DaAqaqb', ''), 
+  body = upload_file(db_name),
+  add_headers('X-Requested-With' = 'XMLHttpRequest'))
