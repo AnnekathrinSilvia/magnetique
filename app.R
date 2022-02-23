@@ -183,7 +183,9 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 5,
-            reactableOutput("enrich_table")
+            withSpinner(
+              reactableOutput("enrich_table")
+            )
           ),
           column(
             width = 7,
@@ -201,7 +203,9 @@ magnetique_ui <- shinydashboard::dashboardPage(
           ),
           column(
             width = 6,
-            plotOutput("emap_signature")
+            withSpinner(
+              plotOutput("emap_signature")
+            )
           )
         )
       ),
@@ -627,7 +631,7 @@ magnetique_server <- function(input, output, session) {
 
   emap_graph <- reactive({
     mygtl <- rvalues$mygtl()
-    emg <- enrichment_map(
+    emg <- GeneTonic::enrichment_map(
       gtl = mygtl,
       n_gs = input$number_genesets,
       overlap_threshold = 0.1,
@@ -899,77 +903,4 @@ magnetique_server <- function(input, output, session) {
 
   .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
 }
-# Launching magnetique! --------------------------------------------------------
-#' Build up a GeneTonicList, from the magnetique DB 
-#'
-#' @param con The DB connection (an SQLiteConnection object)
-#' @param contrast The contrast, as specified e.g. in the app
-#' @param ontology The ontology to focus upon (BP, MF, CC)
-#' @param verbose Logical, whether to display messages while constructing
-#'
-#' @return A GeneTonicList object, to be used in concert with GeneTonic's function
-#' @export
-#'
-#' @examples
-#' mygtl <- buildup_gtl(con, "DCMvsHCM", "BP")
-buildup_gtl <- function(con,
-                        contrast,
-                        ontology,
-                        verbose = TRUE) {
-  
-  coldata <- tbl(con, "metadata") %>% collect()
-
-  if(verbose) message("... building annotation...")
-  annotation <- tbl(con, "annotation_obj") %>% 
-    select(c("gene_id", "gene_name")) %>% collect() %>% as.data.frame()
-  rownames(annotation) <- annotation$gene_id 
-
-  if(verbose) message("Done!")
-  
-  if(verbose) message("... building counts...")
-  
-  counts <- tbl(con, "counts") %>% 
-    collect()
-
-  counts_rownames <- counts$row_names
-  counts <- counts %>% 
-    select(-row_names) %>% 
-    as.matrix(.)
-  rownames(counts) <- counts_rownames
-  
-  dds <- DESeq2::DESeqDataSetFromMatrix(
-    countData = counts[, rownames(coldata)],
-    colData = coldata,
-    design = ~Etiology + Race + Sex + Age + SV1 + SV2)
-  
-  if(verbose) message("Done!")
-  
-  if(verbose) message("... building DE table...")
-  tbl_de <- tbl(con, paste0("res_", local(contrast))) %>% 
-    collect()
-
-  rownames(tbl_de) <- rownames(annotation)
-  
-  res_de <- DESeq2::DESeqResults(tbl_de)
-  if(verbose) message("Done!")
-  
-  if(verbose) message("... building enrichment table...")
-  tbl_enrich <- tbl(con, paste0("res_enrich_", local(contrast))) %>%
-    filter(ontology == ontology) %>%
-    select(-ontology) %>%
-    collect() %>%
-    as.data.frame()
-  rownames(tbl_enrich) <- tbl_enrich$gs_id
-  
-  res_enrich <- tbl_enrich
-  if(verbose) message("Done!")
-  
-  gtl <- GeneTonic::GeneTonic_list(
-    dds = dds,
-    res_de = res_de,
-    res_enrich = res_enrich,
-    annotation_obj = annotation
-  )
-  return(gtl)
-} 
 shinyApp(magnetique_ui, magnetique_server)
