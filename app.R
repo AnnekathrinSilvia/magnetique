@@ -731,12 +731,6 @@ magnetique_server <- function(input, output, session) {
         inputId = "btn_show_carnival",
         icon = icon("flask"),
         label = "Show Carnival View", style = .actionbutton_biocstyle
-      ),
-      actionButton(
-        inputId = "btn_switch_emap",
-        icon = icon("project-diagram"),
-        label = "Jump to Enrichtment Map",
-        style = .actionbutton_biocstyle
       )
     )
   })
