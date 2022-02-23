@@ -247,8 +247,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
 
 # server definition -------------------------------------------------------
 magnetique_server <- function(input, output, session) {
-  progress <- Progress$new(session)
-  progress$set(value = 0.5, message = "Connecting to the db.")
+  showNotification("Connecting to the db.", id = "db_connect", duration=NULL)  
 
   con <- DBI::dbConnect(
     RPostgres::Postgres(),
@@ -258,15 +257,15 @@ magnetique_server <- function(input, output, session) {
     password = Sys.getenv("PGPASSWORD"),
     user = Sys.getenv("PGUSER")
   )
+  removeNotification(id = "db_connect")
 
-
-  progress$set(value = 0.5, message = "Loading packages.")
+  showNotification("Loading libraries.", id = "lib_load", duration=NULL)  
   suppressPackageStartupMessages({
     library(dplyr, warn.conflicts = FALSE)
     library(tidyr, warn.conflicts = FALSE)
     library(ggplot2, warn.conflicts = FALSE)
   })
-  progress$close()
+  removeNotification(id = "lib_load")
 
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
@@ -317,7 +316,6 @@ magnetique_server <- function(input, output, session) {
     )
   })
   # selector trigger data loading
-
   rvalues$mygtl <- reactive({
     message(input$selected_contrast)
     message(input$selected_ontology)
@@ -353,7 +351,7 @@ magnetique_server <- function(input, output, session) {
           "rank"
         )
       ) %>%
-      mutate_at(vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), funs(round(., 6))) %>%
+      mutate_at(vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), ~round(., 6)) %>%
       collect() %>%
       highlight_key(.)
   })
@@ -594,31 +592,37 @@ magnetique_server <- function(input, output, session) {
       layout(title = "Module-trait correlation")
   })
 
+  res_enrich <- reactive({
+    tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
+        filter(ontology == local(input$selected_ontology)) %>%
+        rename(
+          c(
+            "description" = "gs_description", 
+            "expected" = "Expected", 
+            "observed"= "gs_de_count", 
+            "pval" = "gs_pvalue"))  %>%
+        select(description, expected, observed, pval) %>%
+        arrange(pval) %>%
+        collect()
+  })
+
 
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({
-    rvalues$mygtl() %>%
-      {
-        mygtl <- .
-        myres_enrich <- mygtl$res_enrich
-        df <- data.frame(
-          description = myres_enrich$gs_description,
-          obs = myres_enrich$DE_count,
-          exp = myres_enrich$Expected,
-          padj = myres_enrich$gs_pvalue
-        )
-        df <- df[order(df$obs, decreasing = T), ]
-        rownames(df) <- myres_enrich$gs_id
-        colnames(df) <- c("Description", "Observed", "Expected", "padj")
-        reactable(
-          df,
-          columns = list(
-            padj = colDef(
-              cell = function(value) format(round(value, 2))
-            )
-          )
-        )
-      }
+      reactable(
+        res_enrich(),
+        searchable = TRUE,
+        striped = TRUE,
+        defaultPageSize = 5,
+        highlight = TRUE,
+        selection = "single",
+        onClick = "select",
+        rowStyle = list(cursor = "pointer"),
+        theme = reactableTheme(
+          stripedColor = "#f6f8fa",
+          highlightColor = "#f0f5f9",
+          cellPadding = "8px 12px",
+        ))
   })
 
   emap_graph <- reactive({
@@ -679,15 +683,40 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$enriched_funcres <- renderPlotly({
-    gtl <- rvalues$mygtl()
+
+    res_enrich <- tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
+      filter(ontology == local(input$selected_ontology)) %>%
+      collect()
+    res_enrich <- as.data.frame(res_enrich)
+    rownames(res_enrich) <- res_enrich$gs_id
+
+    res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
+      collect()
+    res_de <- res_de %>% 
+      filter(!is.na(SYMBOL)) %>% 
+      arrange(-desc(padj)) %>% 
+      select(gene_id, log2FoldChange, padj, SYMBOL)
+      
+    res_de <- DESeq2::DESeqResults(
+      S4Vectors::DataFrame(res_de))
+
+    rownames(res_de) <- res_de$gene_id
+    res_de$pvalue <- res_de$padj
+    res_de$description <- ''
+
+    annotation_obj <- tbl(con, "annotation_obj") %>%
+      collect() %>%
+      as.data.frame()
+    rownames(annotation_obj) <- annotation_obj$gene_id 
+
     ggplotly(
-      enhance_table(
-        gtl$res_enrich,
-        gtl$res_de,
-        annotation_obj = gtl$annotation_obj,
+      GeneTonic::enhance_table(
+        res_enrich,
+        res_de,
+        annotation_obj = annotation_obj,
         n_gs = input$number_genesets,
         chars_limit = 50
-      )
+      ) 
     )
   })
 
@@ -757,95 +786,73 @@ magnetique_server <- function(input, output, session) {
       )
     )
 
-    book_df_genes <- rvalues$mygtl()$annotation_obj[rvalues$mygenes, ]
+    annotation_obj <- tbl(con, "annotation_obj") %>%
+      filter(gene_id %in% local(rvalues$mygenes)) %>%
+      select(gene_id, gene_name) %>%
+      collect() 
 
-    reactable(book_df_genes, rownames = FALSE)
+    reactable(annotation_obj)
   })
 
   output$bookmarks_genesets <- renderReactable({
-    validate(
-      need(
-        length(rvalues$mygenesets) > 0,
-        "Please select at least one geneset with the Bookmark button"
-      )
-    )
-
-    book_df_genesets <- rvalues$mygtl()$res_enrich[rvalues$mygenesets, c("gs_id", "gs_description")]
-
-    reactable(book_df_genesets, rownames = FALSE)
+    # FIX
+    # validate(
+    #   need(
+    #     length(rvalues$mygenesets) > 0,
+    #     "Please select at least one geneset with the Bookmark button"
+    #   )
+    # )
+    # book_df_genesets <- rvalues$mygtl()$res_enrich[rvalues$mygenesets, c("gs_id", "gs_description")]
+    # reactable(book_df_genesets, rownames = FALSE)
   })
+
+  # observeEvent(input$selected_contrast, {
+  #   if (!is.null(rvalues$key)) {
+  #     rvalues$key <- NULL       
+  #   }
+  # })
 
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
     } else if (input$magnetique_tab == "tab-gene-view") {
-      # showNotification("in gene view")
-      # TODO - add behavior, this will depend on how the info on genes is passed around
       i <- getReactableState("de_table", "selected")
-      # message(i)
-      # message(class(i))
-      # message(is.null(i))
-      if (is.null(i)) {
-        showNotification("Select a row in the main table to bookmark it", type = "warning")
-      } else {
-        cur_sel_id <- rvalues$key()$data()[[i, "gene_id"]]
-
-        anno <- rvalues$mygtl()$annotation_obj # TODO: maybe just do it once at the beginning and keep it constant? this would not change!
-        cur_sel <- anno$gene_name[match(cur_sel_id, anno$gene_id)]
-        # message(cur_sel_id)
-        # message(cur_sel)
-
-        if (cur_sel_id %in% rvalues$mygenes) {
-          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", cur_sel, cur_sel_id), type = "default")
-        } else {
-          rvalues$mygenes <- unique(c(rvalues$mygenes, cur_sel_id))
-          # message("there go your genes... ", rvalues$mygenes)
-          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenes)), type = "message")
+      if (!is.null(i)) {
+        sel_gene <- rvalues$key()$data()[[i, "gene_id"]]
+        if(!sel_gene %in% rvalues$mygenes){
+          rvalues$mygenes <- c(rvalues$mygenes, sel_gene)
+          showNotification(
+            sprintf(
+              "The selected gene %s was added to the bookmarked genes.", 
+              sel_gene), type = "default")
+          }
         }
-      }
-    } else if (input$magnetique_tab == "tab-geneset-view") {
-      # showNotification("in geneset view")
-
-      g <- emap_graph()
-      cur_sel <- input$visnet_em_selected
-      re <- rvalues$mygtl()$res_enrich
-      cur_sel_id <- re$gs_id[match(cur_sel, re$gs_description)]
-
-      if (cur_sel == "") {
-        showNotification("Select a node in the enrichment map to bookmark it", type = "warning")
-      } else {
-        if (cur_sel_id %in% rvalues$mygenesets) {
-          showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", cur_sel, cur_sel_id), type = "default")
-        } else {
-          rvalues$mygenesets <- unique(c(rvalues$mygenesets, cur_sel_id))
-          # message("here are your genesets... ", rvalues$mygenesets)
-          showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenesets)), type = "message")
-        }
-      }
-    } else if (input$magnetique_tab == "tab-bookmark") {
-      showNotification("You are already in the Bookmarks panel...")
-    } else if (input$magnetique_tab == "tab-aboutus") {
-      showNotification("This tab shows some information on the developers team...")
+      # } else if (input$magnetique_tab == "tab-geneset-view") {
+      #   i <- getReactableState("enrich_table", "selected")
+      #   if (!is.null(i)) {
+      #     sel_gs <- rvalues$key()$data()[[i, "gs_id"]]
+      #     # FEDERICO: please fix :)
+      #     if(!sel_gs %in% rvalues$mygenesets){
+      #       rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
+      #       showNotification(
+      #         sprintf(
+      #           "The selected geneset %s was added to the bookmarked genesets.", 
+      #           sel_gs), type = "default")
+      #       }
+      #     }
+      #   }
+      # }
+    # } else if (input$magnetique_tab == "tab-bookmark") {
+    #   showNotification("You are already in the Bookmarks panel...")
+    # } else if (input$magnetique_tab == "tab-aboutus") {
+    #   showNotification("This tab shows some information on the developers team...")
     }
   })
 
   # Other content --------------------------------------------------------------
-  output$de_volcano_signature <- renderPlot({
-    signature_volcano(
-      gtl = rvalues$mygtl(),
-      FDR = 0.05
-    )
-  })
-
-
-  output$gtl_loaded <- renderText({
-    describe_gtl(gtl = rvalues$mygtl())
-  })
-
   output$team_list <- renderTable({
     make_team_df
   })
-
 
   # Tours observers
   observeEvent(input$tour_firststeps, {
@@ -876,8 +883,6 @@ magnetique_server <- function(input, output, session) {
     introjs(session, options = list(steps = tour))
   })
 
-
-
   observeEvent(input$btn_show_carnival, {
     showModal(
       modalDialog(
@@ -895,4 +900,76 @@ magnetique_server <- function(input, output, session) {
   .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
 }
 # Launching magnetique! --------------------------------------------------------
+#' Build up a GeneTonicList, from the magnetique DB 
+#'
+#' @param con The DB connection (an SQLiteConnection object)
+#' @param contrast The contrast, as specified e.g. in the app
+#' @param ontology The ontology to focus upon (BP, MF, CC)
+#' @param verbose Logical, whether to display messages while constructing
+#'
+#' @return A GeneTonicList object, to be used in concert with GeneTonic's function
+#' @export
+#'
+#' @examples
+#' mygtl <- buildup_gtl(con, "DCMvsHCM", "BP")
+buildup_gtl <- function(con,
+                        contrast,
+                        ontology,
+                        verbose = TRUE) {
+  
+  coldata <- tbl(con, "metadata") %>% collect()
+
+  if(verbose) message("... building annotation...")
+  annotation <- tbl(con, "annotation_obj") %>% 
+    select(c("gene_id", "gene_name")) %>% collect() %>% as.data.frame()
+  rownames(annotation) <- annotation$gene_id 
+
+  if(verbose) message("Done!")
+  
+  if(verbose) message("... building counts...")
+  
+  counts <- tbl(con, "counts") %>% 
+    collect()
+
+  counts_rownames <- counts$row_names
+  counts <- counts %>% 
+    select(-row_names) %>% 
+    as.matrix(.)
+  rownames(counts) <- counts_rownames
+  
+  dds <- DESeq2::DESeqDataSetFromMatrix(
+    countData = counts[, rownames(coldata)],
+    colData = coldata,
+    design = ~Etiology + Race + Sex + Age + SV1 + SV2)
+  
+  if(verbose) message("Done!")
+  
+  if(verbose) message("... building DE table...")
+  tbl_de <- tbl(con, paste0("res_", local(contrast))) %>% 
+    collect()
+
+  rownames(tbl_de) <- rownames(annotation)
+  
+  res_de <- DESeq2::DESeqResults(tbl_de)
+  if(verbose) message("Done!")
+  
+  if(verbose) message("... building enrichment table...")
+  tbl_enrich <- tbl(con, paste0("res_enrich_", local(contrast))) %>%
+    filter(ontology == ontology) %>%
+    select(-ontology) %>%
+    collect() %>%
+    as.data.frame()
+  rownames(tbl_enrich) <- tbl_enrich$gs_id
+  
+  res_enrich <- tbl_enrich
+  if(verbose) message("Done!")
+  
+  gtl <- GeneTonic::GeneTonic_list(
+    dds = dds,
+    res_de = res_de,
+    res_enrich = res_enrich,
+    annotation_obj = annotation
+  )
+  return(gtl)
+} 
 shinyApp(magnetique_ui, magnetique_server)
