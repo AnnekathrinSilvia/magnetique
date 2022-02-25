@@ -619,7 +619,7 @@ magnetique_server <- function(input, output, session) {
       z = x,
       colors = colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdYlBu")))(256),
       zmin = -1, zmax = 1,
-      type = "heatmap"
+      type = "heatmap",
     ) %>%
       add_annotations(x = a, y = b, text = textMatrix, xref = "x", yref = "y", showarrow = FALSE, font = list(color = "black")) %>%
       config(displayModeBar = FALSE) %>%
