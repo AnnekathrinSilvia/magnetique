@@ -408,8 +408,8 @@ magnetique_server <- function(input, output, session) {
           cellPadding = "8px 12px",
         ),
         defaultColDef = colDef(sortNALast = TRUE),
-        list(
-          gene_id = colDef(
+        columns = list(
+          gene_id = colDef(name = "Gene ID",
             html = TRUE,
             cell = JS("function(cellInfo) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
@@ -417,22 +417,25 @@ magnetique_server <- function(input, output, session) {
             }"),
             header = with_tooltip("gene_id", "Link to Ensembl gene page")
           ),
-          log2FoldChange = colDef(
-            header = with_tooltip("log2FoldChange", "DESeq2 log2FoldChange")
+          SYMBOL = colDef(name = "Gene name",
+            header = with_tooltip("SYMBOL", "Gene name")
           ),
-          padj = colDef(
-            header = with_tooltip("padj", "DESeq2 padj")
+          log2FoldChange = colDef(name = "log2 FC (DGE)",
+            header = with_tooltip("log2FoldChange", "DESeq2 log2 fold change")
           ),
-          dtu_pvadj = colDef(
+          padj = colDef(name = "Adj. P (DGE)",
+            header = with_tooltip("padj", "DESeq2 adjusted p-value")
+          ),
+          dtu_pvadj = colDef(name = "Adj. P (DTU)",
             header = with_tooltip("dtu_pvadj", "DRIMseq minimum p-value")
           ),
-          dtu_dif = colDef(
+          dtu_dif = colDef(name = "Dif. (DTU)",
             header = with_tooltip("dtu_dif", "Differential isoform usage")
           ),
-          module = colDef(
+          module = colDef(name = "Module",
             header = with_tooltip("module", "Co-expressed genes module")
           ),
-          rank = colDef(
+          rank = colDef(name = "Rank",
             header = with_tooltip("rank", "Rank in module")
           )
         )
