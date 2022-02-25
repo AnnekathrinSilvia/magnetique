@@ -75,7 +75,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
       ),
       shiny::tabPanel(
-        title = "Gene View", icon = icon("heartbeat"), value = "tab-gene-view",
+        title = "Gene View", icon = icon("dna"), value = "tab-gene-view",
         fluidRow(
           column(
             width = 12,
@@ -154,7 +154,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 6,
-            uiOutput("carnival_launch")
+            uiOutput("switch_emap")
           )
         )
       ),
@@ -210,6 +210,35 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       ),
       shiny::tabPanel(
+        id = "tab-carnival",
+        title = "Carnival View", icon = icon("viruses"), value = "tab-carnival",
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              actionButton(
+                "tour_carnivalview",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_carnivalview",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style = "float:right"
+            )
+          )
+        ),
+        fluidRow(
+                column(
+                width = 12,
+                visNetworkOutput("visnet_igraph", height = "500px")
+            )
+        )
+      ),
+      shiny::tabPanel(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
         fluidRow(
           column(
@@ -253,14 +282,15 @@ magnetique_ui <- shinydashboard::dashboardPage(
 magnetique_server <- function(input, output, session) {
   showNotification("Connecting to the db.", id = "db_connect", duration=NULL)  
 
-  con <- DBI::dbConnect(
-    RPostgres::Postgres(),
-    dbname = "magnetique",
-    host = Sys.getenv("PGHOST"),
-    port = Sys.getenv("PGPORT"),
-    password = Sys.getenv("PGPASSWORD"),
-    user = Sys.getenv("PGUSER")
-  )
+  #con <- DBI::dbConnect(
+  #  RPostgres::Postgres(),
+  #  dbname = "magnetique",
+  #  host = Sys.getenv("PGHOST"),
+  #  port = Sys.getenv("PGPORT"),
+  #  password = Sys.getenv("PGPASSWORD"),
+  #  user = Sys.getenv("PGUSER")
+  #)
+  con <- DBI::dbConnect(RSQLite::SQLite(), "local/MAGNetApp/magnetique.sqlite")
   removeNotification(id = "db_connect")
 
   showNotification("Loading libraries.", id = "lib_load", duration=NULL)  
@@ -724,14 +754,9 @@ magnetique_server <- function(input, output, session) {
     )
   })
 
-  # DTU related content --------------------------------------------------------
-  output$carnival_launch <- renderUI({
+  # Buttons --------------------------------------------------------------------
+  output$switch_emap <- renderUI({
     tagList(
-      actionButton(
-        inputId = "btn_show_carnival",
-        icon = icon("flask"),
-        label = "Show Carnival View", style = .actionbutton_biocstyle
-      ),
       actionButton(
         inputId = "btn_switch_emap",
         icon = icon("project-diagram"),
@@ -741,7 +766,7 @@ magnetique_server <- function(input, output, session) {
     )
   })
 
-
+  # Carnival related content ---------------------------------------------------
   output$visnet_igraph <- renderVisNetwork({
     con %>%
       tbl("carnival") %>%
@@ -763,7 +788,8 @@ magnetique_server <- function(input, output, session) {
         label = "Save igraph graph"
       )
   })
-
+  
+  
   # Bookmarker -----------------------------------------------------------------
   output$ui_bookmarks <- renderUI({
     tagList(
@@ -879,22 +905,19 @@ magnetique_server <- function(input, output, session) {
     )
     introjs(session, options = list(steps = tour))
   })
+  
+  observeEvent(input$tour_carnivalview, {
+    tour <- read.delim("tours/intro_carnivalview.txt",
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
 
   observeEvent(input$tour_bookmarks, {
     tour <- read.delim("tours/intro_bookmarks.txt",
       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
-  })
-
-  observeEvent(input$btn_show_carnival, {
-    showModal(
-      modalDialog(
-        title = "Carnival View", size = "l", fade = TRUE,
-        footer = NULL, easyClose = TRUE,
-        visNetworkOutput("visnet_igraph")
-      )
-    )
   })
 
   observeEvent(input$btn_switch_emap, {
