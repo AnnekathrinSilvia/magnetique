@@ -856,18 +856,21 @@ magnetique_server <- function(input, output, session) {
         }
       }
     } else if (input$magnetique_tab == "tab-geneset-view") {
-      i <- getReactableState("enrich_table", "selected")    
-      if (!is.null(i)) {
-        sel_gs <- res_enrich()[[i, "id"]]
-        if (!sel_gs %in% rvalues$mygenesets) {
-          rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
-          showNotification(
-            sprintf(
-              "The selected geneset %s was added to the bookmarked genesets.",
-              sel_gs
-            ),
-            type = "default"
-          )
+      
+      g <- emap_graph()
+      cur_sel <- input$visnet_em_selected
+      re <- rvalues$mygtl()$res_enrich
+      cur_sel_id <- re$gs_id[match(cur_sel, re$gs_description)]
+      
+      if (cur_sel == "") {
+        showNotification("Select a node in the enrichment map to bookmark it", type = "warning")
+      } else {
+        if (cur_sel_id %in% rvalues$mygenesets) {
+          showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", cur_sel, cur_sel_id), type = "default")
+        } else {
+          rvalues$mygenesets <- unique(c(rvalues$mygenesets, cur_sel_id))
+          # message("here are your genesets... ", rvalues$mygenesets)
+          showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenesets)), type = "message")
         }
       }
     }
