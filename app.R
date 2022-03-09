@@ -684,20 +684,31 @@ magnetique_server <- function(input, output, session) {
       match(input$visnet_em_selected, mygtl$res_enrich$gs_description)
     ]
     
-    # cur_gsid_tbl <- 
-      
-      
+    i <- getReactableState("enrich_table", "selected")
+    if (!is.null(i)) {
+      cur_gsid_tbl <- res_enrich()[[i, "id"]]
+    } else {
+      cur_gsid_tbl <- NULL
+    }
+    
     validate(
-      need(!is.na(cur_gsid_em),
-        message = "Please select a gene set from the Enrichment Map."
+      need(!is.na(cur_gsid_em) | !is.null(cur_gsid_tbl),
+        message = "Please select a gene set from the Enrichment Map or from the enrichment table."
       )
     )
+    
+    # define the logic of which geneset is taken
+    if (!is.na(cur_gsid_em) ) {
+      cur_gsid <- cur_gsid_em
+    } else if (!is.null(cur_gsid_tbl)) {
+      cur_gsid <- cur_gsid_tbl
+    }
 
     colnames(myvst) <- NULL
     GeneTonic::gs_heatmap(
       se = myvst,
       gtl = mygtl,
-      geneset_id = cur_gsid_em,
+      geneset_id = cur_gsid,
       FDR = 0.05,
       de_only = FALSE,
       cluster_rows = TRUE,
