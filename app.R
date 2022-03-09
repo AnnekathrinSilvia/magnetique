@@ -253,17 +253,24 @@ magnetique_ui <- shinydashboard::dashboardPage(
 magnetique_server <- function(input, output, session) {
   showNotification("Connecting to the db.", id = "db_connect", duration=NULL)  
 
-  con <- DBI::dbConnect(
-    RPostgres::Postgres(),
-    dbname = "magnetique",
-    host = Sys.getenv("PGHOST"),
-    port = Sys.getenv("PGPORT"),
-    password = Sys.getenv("PGPASSWORD"),
-    user = Sys.getenv("PGUSER")
-  ) 
+  # con <- DBI::dbConnect(str_replace
+  #   RPostgres::Postgres(),
+  #   dbname = "magnetique",
+  #   host = "10.250.140.12",
+  #   port = 5432,
+  #   password = "wGpVDExWK2NppuWENFcjc9v3VKgL4h86ZBHF78pEFdqJwEQwfG",
+  #   user = "magnetique_reader"
+  # )
+  con <- DBI::dbConnect(RSQLite::SQLite(), "MAGNetApp/data/magnetique_v2.sqlite")
+  
   session$onSessionEnded(function() DBI::dbDisconnect(con))
   removeNotification(id = "db_connect")
 
+  showNotification("Loading magnet dataset", id = "dds_loading")
+  dds_magnet <- readRDS("dds_magnet.RDS")
+  showNotification("Loaded magnet dataset!", type = "message")
+  removeNotification(id = "dds_loading")
+  
   showNotification("Loading libraries.", id = "lib_load", duration=NULL)  
   suppressPackageStartupMessages({
     library(dplyr, warn.conflicts = FALSE)
@@ -329,7 +336,9 @@ magnetique_server <- function(input, output, session) {
       id = "info_assembling",
       duration = NULL
     )
-    mygtl <- buildup_gtl(con,
+    mygtl <- buildup_gtl(
+      con,
+      dds = dds_magnet,                   
       contrast = input$selected_contrast,
       ontology = input$selected_ontology
     )
