@@ -260,7 +260,8 @@ magnetique_server <- function(input, output, session) {
     port = Sys.getenv("PGPORT"),
     password = Sys.getenv("PGPASSWORD"),
     user = Sys.getenv("PGUSER")
-  )
+  ) 
+  session$onSessionEnded(function() DBI::dbDisconnect(con))
   removeNotification(id = "db_connect")
 
   showNotification("Loading libraries.", id = "lib_load", duration=NULL)  
@@ -425,8 +426,8 @@ magnetique_server <- function(input, output, session) {
         hoverinfo = "text"
       ) %>%
       config(displayModeBar = FALSE) %>%
+      toWebGL %>%
       layout(title = "Differentially expressed genes") %>%
-      toWebGL() %>%
       highlight(
         on = "plotly_click",
         off = "plotly_doubleclick",
@@ -444,14 +445,14 @@ magnetique_server <- function(input, output, session) {
         text = ~ paste0(
           "<b>", SYMBOL, "</b>",
           "<br><i>GeneID</i>: ", gene_id,
-          "<br><i>max(abs(dif))</i> = ", format(round(dtu_dif, 2)),
+          "<br><i>dif </i> = ", format(round(dtu_dif, 2)),
           "<br><i>p-value (adjusted)</i> = ", format(round(dtu_pvadj, 2))
         ),
         hoverinfo = "text"
       ) %>%
       config(displayModeBar = FALSE) %>%
+      toWebGL %>%
       layout(title = "Genes with differential transcript usage") %>%
-      toWebGL() %>%
       highlight(
         on = "plotly_click",
         off = "plotly_doubleclick",
@@ -485,11 +486,11 @@ magnetique_server <- function(input, output, session) {
         type = "box",
         x = ~Etiology,
         y = ~ log10(value),
-        color = ~Etiology,
+        color = ~factor(Etiology, levels = c("NFD",  "DCM", "HCM")),
         colors = c(I("steelblue"), I("gold"), I("forestgreen"))
       ) %>%
       config(displayModeBar = FALSE) %>%
-      layout(title = "Gene counts per etiology")
+      layout(title = "Gene counts", xaxis = list(title = ""))
   })
 
   output$gene_structure <- renderPlot({
@@ -512,7 +513,7 @@ magnetique_server <- function(input, output, session) {
       collect() %>%
       GenomicRanges::GRanges(.)
     gtf <- GenomicRanges::split(gtf, gtf$transcript_id)
-    plot_gene_structure(gtf)
+    plot_gene_structure(gtf) + labs(title='Gene structure') + theme(plot.title = element_text(size=18))
   })
 
   output$transcript_proportion <- renderPlot({
@@ -550,7 +551,7 @@ magnetique_server <- function(input, output, session) {
     left_join(x, metadata, by = c("Run" = "Run")) %>%
       ggplot() +
       geom_jitter(aes(x = transcript_id, y = proportion, color = Etiology),
-        position = position_jitterdodge(),
+        position = position_jitterdodge( jitter.width = 0.2 ),
         alpha = 0.9, size = 2, show.legend = T, na.rm = TRUE
       ) +
       geom_boxplot(aes(x = transcript_id, y = proportion, fill = Etiology),
@@ -559,10 +560,11 @@ magnetique_server <- function(input, output, session) {
       scale_fill_manual(name = "Etiology", values = group_colors) +
       scale_colour_manual(name = "Etiology", values = group_colors) +
       coord_flip() +
-      labs(y = "transcript proportion") +
+      labs(y = "Transcript proportion", title = 'Transcript usage') +
       theme_minimal(20) +
       theme(
-        axis.title.y = element_blank()
+        axis.title.y = element_blank(),
+        plot.title = element_text(size=18)
       )
   })
 
@@ -804,11 +806,13 @@ magnetique_server <- function(input, output, session) {
     # reactable(book_df_genesets, rownames = FALSE)
   })
 
-  # observeEvent(input$selected_contrast, {
-  #   if (!is.null(rvalues$key)) {
-  #     rvalues$key <- NULL       
-  #   }
-  # })
+  observeEvent(input$selected_contrast, {
+    message(input$selected_contrast)
+    if (!is.null(rvalues$key)) {
+      message(dim(rvalues$key()$data))
+      # rvalues$key()$data <- NULL       
+    }
+  })
 
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
