@@ -261,7 +261,7 @@ magnetique_server <- function(input, output, session) {
   #   password = "wGpVDExWK2NppuWENFcjc9v3VKgL4h86ZBHF78pEFdqJwEQwfG",
   #   user = "magnetique_reader"
   # )
-  con <- DBI::dbConnect(RSQLite::SQLite(), "MAGNetApp/data/magnetique_v2.sqlite")
+  con <- DBI::dbConnect(RSQLite::SQLite(), "magnetique.sqlite")
   
   session$onSessionEnded(function() DBI::dbDisconnect(con))
   removeNotification(id = "db_connect")
