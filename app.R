@@ -267,6 +267,11 @@ magnetique_server <- function(input, output, session) {
   removeNotification(id = "db_connect")
 
   showNotification("Loading magnet dataset", id = "dds_loading")
+  
+  ## Info on how to create dds_magnet (to be adapted and updated in the final version):
+  # DCMvsHCM <- readRDS("~/Development/magnetique/MAGNetApp/DCMvsHCM.RDS")
+  # dds_magnet <- DCMvsHCM$dds
+  # saveRDS(dds_magnet, "dds_magnet.RDS")
   dds_magnet <- readRDS("dds_magnet.RDS")
   showNotification("Loaded magnet dataset!", type = "message")
   removeNotification(id = "dds_loading")
