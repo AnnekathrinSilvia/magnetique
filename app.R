@@ -400,6 +400,7 @@ magnetique_server <- function(input, output, session) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
             }"),
+            minWidth = 140,
             header = with_tooltip("gene_id", "Link to Ensembl gene page")
           ),
           log2FoldChange = colDef(
@@ -617,11 +618,12 @@ magnetique_server <- function(input, output, session) {
         filter(ontology == local(input$selected_ontology)) %>%
         rename(
           c(
+            "id" = "gs_id",
             "description" = "gs_description", 
             "expected" = "Expected", 
             "observed"= "gs_de_count", 
             "pval" = "gs_pvalue"))  %>%
-        select(description, expected, observed, pval) %>%
+        select(id, description, expected, observed, pval) %>%
         arrange(pval) %>%
         collect()
   })
@@ -813,24 +815,25 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$bookmarks_genesets <- renderReactable({
-    # FIX
-    # validate(
-    #   need(
-    #     length(rvalues$mygenesets) > 0,
-    #     "Please select at least one geneset with the Bookmark button"
-    #   )
-    # )
-    # book_df_genesets <- rvalues$mygtl()$res_enrich[rvalues$mygenesets, c("gs_id", "gs_description")]
-    # reactable(book_df_genesets, rownames = FALSE)
+    validate(
+      need(
+        length(rvalues$mygenesets) > 0,
+        "Please select at least one geneset with the Bookmark button"
+      )
+    )
+    res_enrich() %>%
+      filter(id %in% rvalues$mygenesets) %>%
+      select(id, description) %>%
+      reactable(rownames = FALSE)
   })
 
-  observeEvent(input$selected_contrast, {
-    message(input$selected_contrast)
-    if (!is.null(rvalues$key)) {
-      message(dim(rvalues$key()$data))
-      # rvalues$key()$data <- NULL       
-    }
-  })
+  # observeEvent(input$selected_contrast, {
+  #   message(input$selected_contrast)
+  #   if (!is.null(rvalues$key)) {
+  #     message(dim(rvalues$key()$data))
+  #     # rvalues$key()$data <- NULL       
+  #   }
+  # })
 
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
@@ -839,33 +842,32 @@ magnetique_server <- function(input, output, session) {
       i <- getReactableState("de_table", "selected")
       if (!is.null(i)) {
         sel_gene <- rvalues$key()$data()[[i, "gene_id"]]
-        if(!sel_gene %in% rvalues$mygenes){
+        if (!sel_gene %in% rvalues$mygenes) {
           rvalues$mygenes <- c(rvalues$mygenes, sel_gene)
           showNotification(
             sprintf(
-              "The selected gene %s was added to the bookmarked genes.", 
-              sel_gene), type = "default")
-          }
+              "The selected gene %s was added to the bookmarked genes.",
+              sel_gene
+            ),
+            type = "default"
+          )
         }
-      # } else if (input$magnetique_tab == "tab-geneset-view") {
-      #   i <- getReactableState("enrich_table", "selected")
-      #   if (!is.null(i)) {
-      #     sel_gs <- rvalues$key()$data()[[i, "gs_id"]]
-      #     # FEDERICO: please fix :)
-      #     if(!sel_gs %in% rvalues$mygenesets){
-      #       rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
-      #       showNotification(
-      #         sprintf(
-      #           "The selected geneset %s was added to the bookmarked genesets.", 
-      #           sel_gs), type = "default")
-      #       }
-      #     }
-      #   }
-      # }
-    # } else if (input$magnetique_tab == "tab-bookmark") {
-    #   showNotification("You are already in the Bookmarks panel...")
-    # } else if (input$magnetique_tab == "tab-aboutus") {
-    #   showNotification("This tab shows some information on the developers team...")
+      }
+    } else if (input$magnetique_tab == "tab-geneset-view") {
+      i <- getReactableState("enrich_table", "selected")    
+      if (!is.null(i)) {
+        sel_gs <- res_enrich()[[i, "id"]]
+        if (!sel_gs %in% rvalues$mygenesets) {
+          rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
+          showNotification(
+            sprintf(
+              "The selected geneset %s was added to the bookmarked genesets.",
+              sel_gs
+            ),
+            type = "default"
+          )
+        }
+      }
     }
   })
 
