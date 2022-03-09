@@ -386,6 +386,7 @@ magnetique_server <- function(input, output, session) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
             }"),
+            minWidth = 140,
             header = with_tooltip("gene_id", "Link to Ensembl gene page")
           ),
           log2FoldChange = colDef(
@@ -795,7 +796,6 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$bookmarks_genesets <- renderReactable({
-    # FIX
     # validate(
     #   need(
     #     length(rvalues$mygenesets) > 0,
