@@ -115,37 +115,41 @@ createLinkGO <- function(val) {
 #' @examples
 #' mygtl <- buildup_gtl(con, "DCMvsHCM", "BP")
 buildup_gtl <- function(con,
+                        dds,
                         contrast,
                         ontology,
                         verbose = TRUE) {
   
   coldata <- tbl(con, "metadata") %>% collect()
-
+  
   if(verbose) message("... building annotation...")
   annotation <- tbl(con, "annotation_obj") %>% 
     select(c("gene_id", "gene_name")) %>% collect() %>% as.data.frame()
   rownames(annotation) <- annotation$gene_id 
-
+  
   if(verbose) message("Done!")
   
   if(verbose) message("... building counts...")
   
-counts <- tbl(con, "counts") %>%
-  filter(contrast == contrast) %>% 
-  mutate(row_names = str_replace_all(row_names, 'DCMvsHCM.', "")) %>% 
-  collect()
+  # counts <- tbl(con, "counts") %>%
+  #   filter(contrast == contrast) %>% 
+  #   mutate(row_names = stringr::str_replace_all(row_names, 'DCMvsHCM.', "")) %>% 
+  #   collect()
+  # 
+  # counts <- as.data.frame(counts)
+  # counts_rownames <- counts$row_names
+  # counts$row_names <- NULL
+  # counts$contrast <- NULL
+  # rownames(counts) <- counts_rownames
+  # 
+  # dds <- DESeq2::DESeqDataSetFromMatrix(
+  #   countData = counts,
+  #   colData = coldata,
+  #   design = ~Etiology + Race + Sex + Age + SV1 + SV2)
 
-  counts <- as.data.frame(counts)
-  counts_rownames <- counts$row_names
-  counts$row_names <- NULL
-  counts$contrast <- NULL
-  rownames(counts) <- counts_rownames
-
-  dds <- DESeq2::DESeqDataSetFromMatrix(
-    countData = counts,
-    colData = coldata,
-    design = ~Etiology + Race + Sex + Age + SV1 + SV2)
-  
+  dim(dds)
+  message("loaded dds")
+    
   if(verbose) message("Done!")
   
   if(verbose) message("... building DE table...")
