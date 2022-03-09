@@ -840,17 +840,19 @@ magnetique_server <- function(input, output, session) {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
     } else if (input$magnetique_tab == "tab-gene-view") {
       i <- getReactableState("de_table", "selected")
-      if (!is.null(i)) {
-        sel_gene <- rvalues$key()$data()[[i, "gene_id"]]
-        if (!sel_gene %in% rvalues$mygenes) {
-          rvalues$mygenes <- c(rvalues$mygenes, sel_gene)
-          showNotification(
-            sprintf(
-              "The selected gene %s was added to the bookmarked genes.",
-              sel_gene
-            ),
-            type = "default"
-          )
+      if (is.null(i)) {
+        showNotification("Select a row in the main table to bookmark it", type = "warning")
+      } else {
+        cur_sel_id <- rvalues$key()$data()[[i, "gene_id"]]
+        
+        anno <- rvalues$mygtl()$annotation_obj  
+        cur_sel <- anno$gene_name[match(cur_sel_id, anno$gene_id)]
+        
+        if (cur_sel_id %in% rvalues$mygenes) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", cur_sel, cur_sel_id), type = "default")
+        } else {
+          rvalues$mygenes <- unique(c(rvalues$mygenes, cur_sel_id))
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", cur_sel, cur_sel_id, length(rvalues$mygenes)), type = "message")
         }
       }
     } else if (input$magnetique_tab == "tab-geneset-view") {
