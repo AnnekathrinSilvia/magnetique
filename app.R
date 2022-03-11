@@ -546,7 +546,10 @@ magnetique_server <- function(input, output, session) {
       collect() %>%
       GenomicRanges::GRanges(.)
     gtf <- GenomicRanges::split(gtf, gtf$transcript_id)
-    plot_gene_structure(gtf) + labs(title='Gene structure') + theme(plot.title = element_text(size=18))
+    suppressMessages({
+      plot_gene_structure(gtf) + labs(title='Gene structure') + theme(plot.title = element_text(size=18))
+    })
+    
   })
 
   output$transcript_proportion <- renderPlot({
