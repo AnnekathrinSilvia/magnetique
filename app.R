@@ -75,7 +75,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
       ),
       shiny::tabPanel(
-        title = "Gene View", icon = icon("heartbeat"), value = "tab-gene-view",
+        title = "Gene View", icon = icon("dna"), value = "tab-gene-view",
         fluidRow(
           column(
             width = 12,
@@ -154,7 +154,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 6,
-            uiOutput("carnival_launch")
+            uiOutput("switch_emap")
           )
         )
       ),
@@ -207,6 +207,35 @@ magnetique_ui <- shinydashboard::dashboardPage(
               plotOutput("emap_signature")
             )
           )
+        )
+      ),
+      shiny::tabPanel(
+        id = "tab-carnival",
+        title = "Carnival View", icon = icon("viruses"), value = "tab-carnival",
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              actionButton(
+                "tour_carnivalview",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_carnivalview",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style = "float:right"
+            )
+          )
+        ),
+        fluidRow(
+                column(
+                width = 12,
+                visNetworkOutput("visnet_igraph", height = "500px")
+            )
         )
       ),
       shiny::tabPanel(
@@ -379,8 +408,8 @@ magnetique_server <- function(input, output, session) {
           cellPadding = "8px 12px",
         ),
         defaultColDef = colDef(sortNALast = TRUE),
-        list(
-          gene_id = colDef(
+        columns = list(
+          gene_id = colDef(name = "Gene ID",
             html = TRUE,
             cell = JS("function(cellInfo) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
@@ -389,22 +418,25 @@ magnetique_server <- function(input, output, session) {
             minWidth = 140,
             header = with_tooltip("gene_id", "Link to Ensembl gene page")
           ),
-          log2FoldChange = colDef(
-            header = with_tooltip("log2FoldChange", "DESeq2 log2FoldChange")
+          SYMBOL = colDef(name = "Gene name",
+            header = with_tooltip("SYMBOL", "Gene name")
           ),
-          padj = colDef(
-            header = with_tooltip("padj", "DESeq2 padj")
+          log2FoldChange = colDef(name = "log2 FC (DGE)",
+            header = with_tooltip("log2FoldChange", "DESeq2 log2 fold change")
           ),
-          dtu_pvadj = colDef(
+          padj = colDef(name = "Adj. P (DGE)",
+            header = with_tooltip("padj", "DESeq2 adjusted p-value")
+          ),
+          dtu_pvadj = colDef(name = "Adj. P (DTU)",
             header = with_tooltip("dtu_pvadj", "DRIMseq minimum p-value")
           ),
-          dtu_dif = colDef(
+          dtu_dif = colDef(name = "Dif. (DTU)",
             header = with_tooltip("dtu_dif", "Differential isoform usage")
           ),
-          module = colDef(
+          module = colDef(name = "Module",
             header = with_tooltip("module", "Co-expressed genes module")
           ),
-          rank = colDef(
+          rank = colDef(name = "Rank",
             header = with_tooltip("rank", "Rank in module")
           )
         )
@@ -592,7 +624,7 @@ magnetique_server <- function(input, output, session) {
       z = x,
       colors = colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdYlBu")))(256),
       zmin = -1, zmax = 1,
-      type = "heatmap"
+      type = "heatmap",
     ) %>%
       add_annotations(x = a, y = b, text = textMatrix, xref = "x", yref = "y", showarrow = FALSE, font = list(color = "black")) %>%
       config(displayModeBar = FALSE) %>%
@@ -728,18 +760,8 @@ magnetique_server <- function(input, output, session) {
     )
   })
 
-  # DTU related content --------------------------------------------------------
-  output$carnival_launch <- renderUI({
-    tagList(
-      actionButton(
-        inputId = "btn_show_carnival",
-        icon = icon("flask"),
-        label = "Show Carnival View", style = .actionbutton_biocstyle
-      )
-    )
-  })
 
-
+  # Carnival related content ---------------------------------------------------
   output$visnet_igraph <- renderVisNetwork({
     con %>%
       tbl("carnival") %>%
@@ -761,7 +783,8 @@ magnetique_server <- function(input, output, session) {
         label = "Save igraph graph"
       )
   })
-
+  
+  
   # Bookmarker -----------------------------------------------------------------
   output$ui_bookmarks <- renderUI({
     tagList(
@@ -879,22 +902,19 @@ magnetique_server <- function(input, output, session) {
     )
     introjs(session, options = list(steps = tour))
   })
+  
+  observeEvent(input$tour_carnivalview, {
+    tour <- read.delim("tours/intro_carnivalview.txt",
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
 
   observeEvent(input$tour_bookmarks, {
     tour <- read.delim("tours/intro_bookmarks.txt",
       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
-  })
-
-  observeEvent(input$btn_show_carnival, {
-    showModal(
-      modalDialog(
-        title = "Carnival View", size = "l", fade = TRUE,
-        footer = NULL, easyClose = TRUE,
-        visNetworkOutput("visnet_igraph")
-      )
-    )
   })
 
   observeEvent(input$btn_switch_emap, {
