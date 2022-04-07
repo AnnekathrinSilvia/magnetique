@@ -12,6 +12,7 @@ library(shinydashboard, warn.conflicts = FALSE)
 library(visNetwork, warn.conflicts = FALSE)
 library(rintrojs, warn.conflicts = FALSE)
 library(shinyBS, warn.conflicts = FALSE)
+library(igraph)
 
 options(spinner.type = 6)
 
@@ -760,6 +761,8 @@ magnetique_server <- function(input, output, session) {
       filter(contrast == local(input$selected_contrast)) %>%
       pull(igraph) %>%
       jsonlite::unserializeJSON() %>%
+      igraph::upgrade_graph(.) %>%
+      permute.vertices(., Matrix::invPerm(order(V(.)$name))) %>%
       visNetwork::visIgraph() %>%
       visOptions(
         highlightNearest = list(
@@ -769,6 +772,7 @@ magnetique_server <- function(input, output, session) {
         ),
         nodesIdSelection = TRUE
       ) %>%
+      visLegend(addEdges = ledges, addNodes = lnodes, useGroups = FALSE) %>% 
       visExport(
         name = "igraph",
         type = "png",
