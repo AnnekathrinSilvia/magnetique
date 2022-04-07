@@ -176,3 +176,14 @@ counts <- tbl(con, "counts") %>%
   )
   return(gtl)
 } 
+
+ledges <- data.frame(
+  color = c("black", "red"),
+  label = c("\nActivatory Interaction", "\nInhibitory Interaction"), 
+  arrows =c("to", "to"))
+
+lnodes <- data.frame(
+  label = c("Down-regulation", "Not-regulated", "Up-regulation", "Pertubation", "Inferred Protein", "Transcription Factor"),
+  shape = c("ellipse", "ellipse", "ellipse", "ellipse", "circle", 'square'), 
+  color = c("#0000FF", "lightgrey", "#FF0000",  "#00FF00", "lightgrey", "lightgrey"),
+  id = 1:6)
