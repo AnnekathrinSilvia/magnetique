@@ -21,16 +21,17 @@ source("utils.R")
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
-  header = shinydashboard::dashboardHeader(title = "magnetique"),
+  header = shinydashboard::dashboardHeader(disable = TRUE),
 
   # sidebar definition ------------------------------------------------------
-  sidebar = shinydashboard::dashboardSidebar(
-    title = "Options",
+  sidebar =dashboardSidebar(
+    h1("Magnetique"),
+    h2("Options"),
     uiOutput("ui_sidebar")
   ),
 
   # body definition ---------------------------------------------------------
-  body = shinydashboard::dashboardBody(
+  body = dashboardBody(
     introjsUI(),
     shiny::tags$script(
       HTML(
@@ -46,7 +47,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
     tabBox(
       width = 12,
       id = "magnetique_tab",
-      shiny::tabPanel(
+      tabPanel(
         title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
         fluidRow(
           column(
@@ -74,7 +75,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
       ),
-      shiny::tabPanel(
+      tabPanel(
         title = "Gene View", icon = icon("dna"), value = "tab-gene-view",
         fluidRow(
           column(
@@ -139,26 +140,15 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         fluidRow(
           column(
-            width = 1,
-          ),
-          column(
+            align = "center",
             width = 10,
             withSpinner(
               plotlyOutput("wgcn_heatmap")
             )
-          ),
-          column(
-            width = 1,
-          ),
-        ),
-        fluidRow(
-          column(
-            width = 6,
-            uiOutput("switch_emap")
           )
         )
       ),
-      shiny::tabPanel(
+      tabPanel(
         id = "tab-geneset-view",
         title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
         fluidRow(
@@ -209,7 +199,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         )
       ),
-      shiny::tabPanel(
+      tabPanel(
         id = "tab-carnival",
         title = "Carnival View", icon = icon("viruses"), value = "tab-carnival",
         fluidRow(
@@ -238,13 +228,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
             )
         )
       ),
-      shiny::tabPanel(
+      tabPanel(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
         fluidRow(
           column(
             width = 12,
             div(
-
               actionButton(
                 "tour_bookmarks",
                 label = "", icon = icon("question-circle"),
@@ -262,7 +251,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         uiOutput("ui_bookmarks")
       ),
-      shiny::tabPanel(
+      tabPanel(
         title = "About us", icon = icon("users"), value = "tab-aboutus",
         fluidRow(
           column(
