@@ -11,7 +11,7 @@
 # wget --output-document data.zip 'https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb/download' --header 'Accept: text/html' --header 'Connection: keep-alive'
 # unzip -o data.zip
 # rm data.zip
-
+setwd('~/repos/magnetique/')
 library(dplyr)
 
 db_name <- "magnetique.sqlite"
@@ -36,10 +36,10 @@ cdir <- file.path(dirloc, "networks", fsep=.Platform$file.sep)
 carnival <- purrr::map(dir(cdir, "*.RData"), ~get(load(file.path(cdir, .x))))
 
 get_names <- function(files) {
-    l <- strsplit(files, "_", fixed = T)
-    lapply(l, function(.x) {
-        paste(toupper(unlist(.x)[c(2,4)]), collapse='vs')
-    })
+  l <- strsplit(files, "_", fixed = T)
+  lapply(l, function(.x) {
+    paste(toupper(unlist(.x)[c(2,4)]), collapse='vs')
+  })
 }
 names(carnival) <- get_names(dir(cdir, "*.RData"))
 
@@ -70,13 +70,13 @@ modules <- c("MEred",
 mcolours <- gsub("ME", "", modules)
 new_modules <- paste('M', 1:length(modules), sep="")
 wgcn.gene$module <- plyr::mapvalues(wgcn.gene$color, 
-          from=mcolours, 
-          to=new_modules)
+                                    from=mcolours, 
+                                    to=new_modules)
 wgcn.gene <- wgcn.gene[,c("gene_id", "module", "rank")]
 
 wgcn.heatmap$module <- plyr::mapvalues(wgcn.heatmap$X, 
-          from=modules, 
-          to=new_modules)
+                                       from=modules, 
+                                       to=new_modules)
 rownames(wgcn.heatmap) <- wgcn.heatmap$module
 wgcn.heatmap$module <- NULL
 wgcn.heatmap$X <- NULL
@@ -101,16 +101,16 @@ db <- dbConnect(RSQLite::SQLite(), db_name)
 
 # write separate dds counts...
 wrt <- purrr::map2(dge, names(dge), function(.x, .y) {
-            DESeq2::counts(.x$dds) %>% 
-                data.frame() %>% 
-                dbWriteTable(db, paste("counts", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
+  DESeq2::counts(.x$dds) %>% 
+    data.frame() %>% 
+    dbWriteTable(db, paste("counts", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
 })
 
 # ... and a long table
 wrt <- purrr::map2(dge, names(dge), function(.x, .y) {
-            DESeq2::counts(.x$dds) %>% 
-                data.frame() %>% 
-                mutate(contrast=.y)
+  DESeq2::counts(.x$dds) %>% 
+    data.frame() %>% 
+    mutate(contrast=.y)
 })
 do.call("rbind", wrt) %>% dbWriteTable(db, "counts", ., overwrite=TRUE, row.names=TRUE)
 
@@ -125,74 +125,91 @@ contrasts <- names(rowdata@listData)[grep("^DRIMSeq", names(rowdata@listData))]
 stopifnot(all(rownames(SummarizedExperiment::colData(dtu)) == coldata$Run))
 
 compute_usage_dif <- function(transcript, dataset, c, .type = "fit_full") {
-    ind <- which(SummarizedExperiment::rowData(dataset)[, "transcript_id"] == transcript)
-    x <- SummarizedExperiment::assays(dataset)[[.type]][ind, ]
-    stopifnot(all(coldata$Run == names(x)))
-    x <- x %>% as.numeric()
-    mean(x[coldata$Etiology==c[1]])-mean(x[coldata$Etiology==c[2]])
+  ind <- which(SummarizedExperiment::rowData(dataset)[, "transcript_id"] == transcript)
+  x <- SummarizedExperiment::assays(dataset)[[.type]][ind, ]
+  stopifnot(all(coldata$Run == names(x)))
+  x <- x %>% as.numeric()
+  mean(x[coldata$Etiology==c[1]])-mean(x[coldata$Etiology==c[2]])
 }
 
+
 wrt <- purrr::map(contrasts, function(.x) {
-        c <- unlist(sapply(strsplit(.x, "_", fixed = T), "[", c(2, 4)))
-        res_dtu <- rowdata[[.x]] %>% group_by(gene_id) %>% add_tally() %>%
-                    slice_min(order_by = adj_pvalue) %>%
-                    filter(row_number() == 1) %>% # approx. equal pvals
-                    dplyr::rename(dtu_pvadj=adj_pvalue) %>%
-                    mutate(dtu_dif=compute_usage_dif(feature_id, dtu, c)) %>%
-                    select(gene_id, n, dtu_pvadj, dtu_dif)
-                    
-        res_de <- dge[[paste(c, collapse='vs')]]$res_de %>% as.data.frame() %>%
-                    select(log2FoldChange, padj, SYMBOL) %>% tibble::rownames_to_column("gene_id")
-        res_de <- merge(res_de, res_dtu, all.x=T, by='gene_id')
-        res_de <- merge(res_de, wgcn.gene, all.x=T, by='gene_id')
-        res_de
+  contrast <- unlist(sapply(strsplit(.x, "_", fixed = T), "[", c(2, 4)))
+  res_dtu <- rowdata[[.x]] %>% 
+    arrange(adj_pvalue) %>%
+    group_by(gene_id) %>% 
+    mutate(dtu_dif=compute_usage_dif(feature_id, dtu, contrast)) %>%
+    summarise(
+      n_transcript = n(), 
+      adj_pvalue = first(adj_pvalue),
+      dtu_dif = first(dtu_dif)) %>%
+    dplyr::rename(dtu_pvadj=adj_pvalue) %>%
+    dplyr::select(gene_id, n_transcript, dtu_pvadj, dtu_dif)
+  
+  res_de <- dge[[paste(contrast, collapse='vs')]]$res_de %>% as.data.frame() %>%
+    dplyr::select(log2FoldChange, padj, SYMBOL) %>% tibble::rownames_to_column("gene_id")
+  res_de <- merge(res_de, res_dtu, all.x=T, by='gene_id')
+  res_de <- merge(res_de, wgcn.gene, all.x=T, by='gene_id')
+  res_de
 })
 names(wrt) <- get_names(contrasts)
 tmp <- purrr::map2(wrt, names(wrt), function(.x, .y) {
-            .x %>% dbWriteTable(db, paste("res", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
+  .x %>% dbWriteTable(db, paste("res", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
 })
 
 # ... also add one long table
 wrt <- purrr::map2(wrt, names(wrt), function(.x, .y) {
-            .x %>% mutate(contrast=.y)
+  .x %>% mutate(contrast=.y)
 })
 do.call("rbind", wrt) %>% dbWriteTable(db, "res", ., overwrite=TRUE, row.names=TRUE)
 
 
 # DRIMSeq transcript proportions
 dtu@assays@data$fit_full %>%
-    data.frame() %>% 
-    dbWriteTable(db, "dtu_fit_proportions", .,  overwrite=TRUE, row.names=TRUE)
-  
-  
+  data.frame() %>% 
+  dbWriteTable(db, "dtu_fit_proportions", .,  overwrite=TRUE, row.names=TRUE)
+
+# Loads the gene ontology for Human
+library(org.Hs.eg.db)
+
+hs_go <-  toTable(org.Hs.egGO)
+# filter terms with more than 300 genes
+hs_go <- hs_go %>% 
+  group_by(go_id) %>% 
+  summarise(n_gene_p_term = n_distinct(gene_id)) %>%
+  filter(n_gene_p_term < 300)
+
 # enrichment results per contrast...
 wrt <- purrr::map2(dge, names(dge), function(.x, .y) {
-        do.call("rbind", purrr::map2(.x$res_enrich, names(.x$res_enrich), function(.xi, .yi) {
-            .xi %>% data.frame() %>% 
-            mutate(ontology=.yi)
-            })) %>%
-             dbWriteTable(db, paste("res_enrich", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
+  do.call("rbind", purrr::map2(.x$res_enrich, names(.x$res_enrich), function(.xi, .yi) {
+    .xi %>% data.frame() %>% 
+      mutate(ontology=.yi) %>% 
+      filter(gs_id %in% hs_go$go_id)
+  })) %>%
+    dbWriteTable(db, paste("res_enrich", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
 })
 
 # ... and in one long table  
 wrt <- purrr::map2(dge, names(dge), function(.x, .y) {
-        do.call("rbind", purrr::map2(.x$res_enrich, names(.x$res_enrich), function(.xi, .yi) {
-            .xi %>% data.frame() %>% 
-            mutate(ontology=.yi)
-            })) %>% 
-             mutate(contrast=.y)
+  do.call("rbind", purrr::map2(.x$res_enrich, names(.x$res_enrich), function(.xi, .yi) {
+    .xi %>% data.frame() %>% 
+      mutate(ontology=.yi)
+      
+  })) %>% 
+    mutate(contrast=.y) %>% 
+    filter(gs_id %in% hs_go$go_id)
 })
 do.call("rbind", wrt) %>% dbWriteTable(db, "res_enrich", ., overwrite=TRUE, row.names=TRUE)
 
 # metadata
 dbWriteTable(db, 'metadata', coldata, ., overwrite=TRUE, row.names=TRUE)
-  
+
 # gtf gene to transcript
 tx <- gtf[gtf$type == "transcript"]
 gene2tx <- as.data.frame(
-     S4Vectors::mcols(tx)[
-         , c("gene_id", "transcript_id")
-     ]
+  S4Vectors::mcols(tx)[
+    , c("gene_id", "transcript_id")
+  ]
 )
 dbWriteTable(db, 'gene2tx', gene2tx, overwrite=TRUE, row.names=FALSE)
 gtf %>% data.frame() %>% dbWriteTable(db, 'gtf', ., overwrite=TRUE, row.names=FALSE)
@@ -206,7 +223,7 @@ dbWriteTable(db, "wgcn_hp", wgcn.heatmap.p, overwrite=TRUE, row.names=TRUE)
 
 # Carnival data
 carnival <- list()
- 
+
 load(file.path(dirloc, "networks", "igraph_dcm_vs_hcm_hierarchic.RData"))
 carnival[["DCMvsHCM"]] <-  jsonlite::serializeJSON(gg)
 
