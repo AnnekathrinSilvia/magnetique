@@ -375,14 +375,14 @@ magnetique_server <- function(input, output, session) {
           "rank"
         )
       ) %>%
-      mutate_at(vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), ~round(., 6)) %>%
-      collect() %>%
-      highlight_key(.)
+      collect()
   })
 
   # DE related content ---------------------------------------------------------
   output$de_table <- renderReactable({
     rvalues$key() %>%
+      mutate_at(
+        vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), ~round(., 2)) %>%
       reactable(
         .,
         searchable = TRUE,
@@ -396,6 +396,7 @@ magnetique_server <- function(input, output, session) {
           stripedColor = "#f6f8fa",
           highlightColor = "#f0f5f9",
           cellPadding = "8px 12px",
+          rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #FF0000")
         ),
         defaultColDef = colDef(sortNALast = TRUE),
         columns = list(
@@ -433,9 +434,16 @@ magnetique_server <- function(input, output, session) {
       )
   })
 
+  prev_selected <- reactive(getReactableState("de_table", "selected"))
+  colors <- reactive(highlight_selected(prev_selected(), nrow(rvalues$key())))
+  colors_dtu <- reactive({
+    df <- rvalues$key()
+    colors()[!is.na(df$dtu_pvadj)]
+  })
+
   output$de_volcano <- renderPlotly({
     rvalues$key() %>%
-      plot_ly(., color = I("black"), showlegend = FALSE) %>%
+      plot_ly(., color=I('black'), showlegend = FALSE) %>%
       add_markers(
         x = ~log2FoldChange,
         y = ~ -log10(padj),
@@ -450,17 +458,23 @@ magnetique_server <- function(input, output, session) {
       ) %>%
       config(displayModeBar = FALSE) %>%
       toWebGL %>%
-      layout(title = "Differentially expressed genes") %>%
-      highlight(
-        on = "plotly_click",
-        off = "plotly_doubleclick",
-        color = "red"
-      )
+      layout(title = "Differentially expressed genes") 
   })
 
-  output$dtu_volcano <- renderPlotly({
+  observeEvent(colors(), {
+    plotlyProxy("de_volcano", session) %>%
+        plotlyProxyInvoke("restyle", "marker.color", list(colors()), 0)
+        
+  })
+  
+  # observeEvent(colors_dtu(), {
+  #   plotlyProxy("dtu_volcano", session) %>%
+  #       plotlyProxyInvoke("restyle", "marker.color", list(colors_dtu()), 0)        
+  # })
+
+  output$dtu_volcano <- renderPlotly({  
     rvalues$key() %>%
-      plot_ly(., color = I("black"), showlegend = FALSE) %>%
+      plot_ly(., color=I('black'), showlegend = FALSE) %>%
       add_markers(
         x = ~dtu_dif,
         y = ~ -log10(dtu_pvadj),
@@ -475,12 +489,7 @@ magnetique_server <- function(input, output, session) {
       ) %>%
       config(displayModeBar = FALSE) %>%
       toWebGL %>%
-      layout(title = "Genes with differential transcript usage") %>%
-      highlight(
-        on = "plotly_click",
-        off = "plotly_doubleclick",
-        color = "red"
-      )
+      layout(title = "Genes with differential transcript usage")
   })
 
   output$gene_counts <- renderPlotly({
@@ -488,7 +497,7 @@ magnetique_server <- function(input, output, session) {
     validate(need(!is.na(i),
       message = "Please select an entry from the table."
     ))
-    i <- rvalues$key()$data()[[i, "gene_id"]]
+    i <- rvalues$key()[[i, "gene_id"]]
 
     counts <- con %>%
       tbl(paste0("counts_", input$selected_contrast)) %>%
@@ -523,13 +532,13 @@ magnetique_server <- function(input, output, session) {
         message = "Please select an entry from the table."
       )
     )
-    dtu_tested <- rvalues$key()$data()[[i, "dtu_pvadj"]]
+    dtu_tested <- rvalues$key()[[i, "dtu_pvadj"]]
     validate(
       need(!is.na(dtu_tested),
         message = "Entry not tested for DTU."
       )
     )
-    i <- rvalues$key()$data()[[i, "gene_id"]]
+    i <- rvalues$key()[[i, "gene_id"]]
     gtf <- con %>%
       tbl("gtf") %>%
       filter(gene_id == !!i) %>%
@@ -549,13 +558,13 @@ magnetique_server <- function(input, output, session) {
         message = "Please select an entry from the table."
       )
     )
-    dtu_tested <- rvalues$key()$data()[[i, "dtu_pvadj"]]
+    dtu_tested <- rvalues$key()[[i, "dtu_pvadj"]]
     validate(
       need(!is.na(dtu_tested),
         message = "Entry not tested for DTU."
       )
     )
-    i <- rvalues$key()$data()[[i, "gene_id"]]
+    i <- rvalues$key()[[i, "gene_id"]]
     x <- con %>%
       tbl("gene2tx") %>%
       filter(gene_id == !!i) %>%
@@ -828,21 +837,13 @@ magnetique_server <- function(input, output, session) {
       reactable(rownames = FALSE)
   })
 
-  # observeEvent(input$selected_contrast, {
-  #   message(input$selected_contrast)
-  #   if (!is.null(rvalues$key)) {
-  #     message(dim(rvalues$key()$data))
-  #     # rvalues$key()$data <- NULL       
-  #   }
-  # })
-
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
     } else if (input$magnetique_tab == "tab-gene-view") {
       i <- getReactableState("de_table", "selected")
       if (!is.null(i)) {
-        sel_gene <- rvalues$key()$data()[[i, "gene_id"]]
+        sel_gene <- rvalues$key()[[i, "gene_id"]]
         if (!sel_gene %in% rvalues$mygenes) {
           rvalues$mygenes <- c(rvalues$mygenes, sel_gene)
           showNotification(
