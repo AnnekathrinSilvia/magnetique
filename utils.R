@@ -183,7 +183,7 @@ ledges <- data.frame(
   arrows =c("to", "to"))
 
 lnodes <- data.frame(
-  label = c("Down-regulation", "Not-regulated", "Up-regulation", "Pertubation", "Inferred Protein", "Transcription Factor"),
-  shape = c("ellipse", "ellipse", "ellipse", "ellipse", "circle", 'square'), 
-  color = c("#0000FF", "lightgrey", "#FF0000",  "#00FF00", "lightgrey", "lightgrey"),
-  id = 1:6)
+  label = c("Down-regulation", "Up-regulation", "Pertubation", "Inferred Protein", "Transcription Factor"),
+  shape = c("ellipse", "ellipse", "ellipse", "circle", 'square'), 
+  color = c("#0000FF", "#FF0000",  "#00FF00", "lightgrey", "lightgrey"),
+  id = 1:5)
