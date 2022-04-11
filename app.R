@@ -679,8 +679,17 @@ magnetique_server <- function(input, output, session) {
         theme = reactableTheme(
           stripedColor = "#f6f8fa",
           highlightColor = "#f0f5f9",
-          cellPadding = "8px 12px",
+          cellPadding = "8px 12px"),
+        columns = list(
+          id = colDef(
+            html = TRUE,
+            cell = JS("function(cellInfo) {
+              const url = 'http://amigo.geneontology.org/amigo/term/' + cellInfo.value
+              return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
+            }"),
+            minWidth = 100,
         ))
+      )
   })
 
   emap_graph <- reactive({
