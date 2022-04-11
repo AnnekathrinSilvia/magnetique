@@ -151,18 +151,18 @@ magnetique_ui <- shinydashboard::dashboardPage(
       ),
       tabPanel(
         id = "tab-geneset-view",
-        title = "Geneset View", icon = icon("project-diagram"), value = "tab-geneset-view",
+        title = "Gene set View", icon = icon("project-diagram"), value = "tab--view",
         fluidRow(
           column(
             width = 12,
             div(
               actionButton(
-                "tour_genesetview",
+                "tour_view",
                 label = "", icon = icon("question-circle"),
                 style = .helpbutton_biocstyle
               ),
               shinyBS::bsTooltip(
-                "tour_genesetview",
+                "tour_view",
                 "Click me to start a tour of this section!",
                 "bottom",
                 options = list(container = "body")
@@ -320,7 +320,7 @@ magnetique_server <- function(input, output, session) {
           selected = "BP"
         ),
         numericInput("number_genesets",
-          "Number of genesets",
+          "Number of gene sets",
           value = 15,
           min = 0
         ),
@@ -398,9 +398,9 @@ magnetique_server <- function(input, output, session) {
           cellPadding = "8px 12px",
           rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #FF0000")
         ),
-        defaultColDef = colDef(sortNALast = TRUE),
         columns = list(
-          gene_id = colDef(name = "Gene ID",
+          gene_id = colDef(
+            name = "gene_id",
             html = TRUE,
             cell = JS("function(cellInfo) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
@@ -409,28 +409,36 @@ magnetique_server <- function(input, output, session) {
             minWidth = 140,
             header = with_tooltip("gene_id", "Link to Ensembl gene page")
           ),
-          SYMBOL = colDef(name = "Gene name",
-            header = with_tooltip("SYMBOL", "Gene name")
+          SYMBOL = colDef(
+            name = "Gene name",
+            header = with_tooltip("gene_name", "Gene symbol")
           ),
-          log2FoldChange = colDef(name = "log2 FC (DGE)",
-            header = with_tooltip("log2FoldChange", "DESeq2 log2 fold change")
+          log2FoldChange = colDef(
+            name = "dge_log2fc",
+            header = with_tooltip("dge_log2fc", "Fold change for the DESeq2 analysis") 
           ),
-          padj = colDef(name = "Adj. P (DGE)",
-            header = with_tooltip("padj", "DESeq2 adjusted p-value")
+          padj = colDef(
+            name = "dge_padj",
+            header = with_tooltip("dge_padj", "Adjusted p-value for the DESeq2 analysis")
           ),
-          dtu_pvadj = colDef(name = "Adj. P (DTU)",
-            header = with_tooltip("dtu_pvadj", "DRIMseq minimum p-value")
+          dtu_pvadj = colDef(
+            name = "dtu_padj",
+            header = with_tooltip("dtu_padj", "Adjusted p-value for the DRIMseq analysis")
           ),
-          dtu_dif = colDef(name = "Dif. (DTU)",
-            header = with_tooltip("dtu_dif", "Differential isoform usage")
+          dtu_dif = colDef(
+            name = "dtu_dif",
+            header = with_tooltip("dtu_dif", "Difference in isoform usage for the DRIMseq analysis")
           ),
-          module = colDef(name = "Module",
-            header = with_tooltip("module", "Co-expressed genes module")
+          module = colDef(
+            name = "Module",
+            header = with_tooltip("net_module", "Co-expressed genes module for the network analysis")
           ),
-          rank = colDef(name = "Rank",
-            header = with_tooltip("rank", "Rank in module")
+          rank = colDef(
+            name = "Rank",
+            header = with_tooltip("net_rank", "Rank in module for the network analysis")
           )
-        )
+        ),
+        defaultColDef = colDef(sortNALast = TRUE)
       )
   })
 
@@ -458,19 +466,13 @@ magnetique_server <- function(input, output, session) {
       ) %>%
       config(displayModeBar = FALSE) %>%
       toWebGL %>%
-      layout(title = "Differentially expressed genes") 
+      layout(
+        title = "Differentially expressed genes",
+        yaxis = list(title = '-log10(dge_padj)'), 
+        xaxis = list(title = 'dge_log2fc')
+      ) 
   })
 
-  observeEvent(colors(), {
-    plotlyProxy("de_volcano", session) %>%
-        plotlyProxyInvoke("restyle", "marker.color", list(colors()), 0)
-        
-  })
-  
-  # observeEvent(colors_dtu(), {
-  #   plotlyProxy("dtu_volcano", session) %>%
-  #       plotlyProxyInvoke("restyle", "marker.color", list(colors_dtu()), 0)        
-  # })
 
   output$dtu_volcano <- renderPlotly({  
     rvalues$key() %>%
@@ -489,7 +491,21 @@ magnetique_server <- function(input, output, session) {
       ) %>%
       config(displayModeBar = FALSE) %>%
       toWebGL %>%
-      layout(title = "Genes with differential transcript usage")
+      layout(
+        title = "Genes with differential transcript usage",
+        yaxis = list(title = '-log10(dtu_padj)'), 
+        xaxis = list(title = 'dtu_dif')
+      )
+  })
+
+  observeEvent(colors(), {
+
+    plotlyProxy("de_volcano", session) %>%
+      plotlyProxyInvoke("restyle", "marker.color", list(colors()), 0)
+    
+    plotlyProxy("dtu_volcano", session) %>%
+      plotlyProxyInvoke("restyle", "marker.color", list(colors()), 0)        
+        
   })
 
   output$gene_counts <- renderPlotly({
@@ -801,7 +817,7 @@ magnetique_server <- function(input, output, session) {
         ),
         column(
           width = 6,
-          h5("Bookmarked genesets"),
+          h5("Bookmarked gene sets"),
           reactableOutput("bookmarks_genesets")
         )
       )
@@ -863,7 +879,7 @@ magnetique_server <- function(input, output, session) {
           rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
           showNotification(
             sprintf(
-              "The selected geneset %s was added to the bookmarked genesets.",
+              "The selected geneset %s was added to the bookmarked gene sets.",
               sel_gs
             ),
             type = "default"
