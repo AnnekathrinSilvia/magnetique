@@ -151,7 +151,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
       ),
       tabPanel(
         id = "tab-geneset-view",
-        title = "Gene set View", icon = icon("project-diagram"), value = "tab--view",
+        title = "Gene set View", icon = icon("project-diagram"), value = "tab-geneset-view",
         fluidRow(
           column(
             width = 12,
@@ -293,9 +293,9 @@ magnetique_server <- function(input, output, session) {
 
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
-  rvalues$mygtl <- NULL
+  # rvalues$mygtl <- NULL
   rvalues$key <- NULL
-  rvalues$myvst <- NULL
+  # rvalues$myvst <- NULL
 
   rvalues$mygenes <- c()
   rvalues$mygenesets <- c()
@@ -340,26 +340,26 @@ magnetique_server <- function(input, output, session) {
     )
   })
   # selector trigger data loading
-  rvalues$mygtl <- reactive({
-    message(input$selected_contrast)
-    message(input$selected_ontology)
+  # rvalues$mygtl <- reactive({
+  #   message(input$selected_contrast)
+  #   message(input$selected_ontology)
 
-    showNotification("Assembling the gtl object for you!",
-      id = "info_assembling",
-      duration = NULL
-    )
-    mygtl <- buildup_gtl(con,
-      contrast = input$selected_contrast,
-      ontology = input$selected_ontology
-    )
-    removeNotification(id = "info_assembling")
-    showNotification("Done! gtl object ready!", type = "message")
-    return(mygtl)
-  })
+  #   showNotification("Assembling the gtl object for you!",
+  #     id = "info_assembling",
+  #     duration = NULL
+  #   )
+  #   mygtl <- buildup_gtl(con,
+  #     contrast = input$selected_contrast,
+  #     ontology = input$selected_ontology
+  #   )
+  #   removeNotification(id = "info_assembling")
+  #   showNotification("Done! gtl object ready!", type = "message")
+  #   return(mygtl)
+  # })
 
-  rvalues$myvst <- reactive({
-    DESeq2::vst(rvalues$mygtl()$dds)
-  })
+  # rvalues$myvst <- reactive({
+  #   DESeq2::vst(rvalues$mygtl()$dds)
+  # })
 
   rvalues$key <- reactive({
     tbl(con, paste0("res_", input$selected_contrast)) %>%
@@ -659,7 +659,7 @@ magnetique_server <- function(input, output, session) {
             "expected" = "Expected", 
             "observed"= "gs_de_count", 
             "pval" = "gs_pvalue"))  %>%
-        select(id, description, expected, observed, pval) %>%
+        select(id, description, pval, expected, observed) %>%
         arrange(pval) %>%
         collect()
   })
@@ -687,15 +687,45 @@ magnetique_server <- function(input, output, session) {
               const url = 'http://amigo.geneontology.org/amigo/term/' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
             }"),
-            minWidth = 100,
-        ))
+            minWidth = 100),
+          description = colDef(
+            width = 250)
       )
+    )
   })
 
   emap_graph <- reactive({
-    mygtl <- rvalues$mygtl()
+    # mygtl <- rvalues$mygtl()
+
+    res_enrich <- tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
+      filter(ontology == local(input$selected_ontology)) %>%
+      collect()
+    res_enrich <- as.data.frame(res_enrich)
+    rownames(res_enrich) <- res_enrich$gs_id
+
+    res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
+      collect()
+    res_de <- res_de %>% 
+      filter(!is.na(SYMBOL)) %>% 
+      arrange(-desc(padj)) %>% 
+      select(gene_id, log2FoldChange, padj, SYMBOL)
+      
+    res_de <- DESeq2::DESeqResults(
+      S4Vectors::DataFrame(res_de))
+
+    rownames(res_de) <- res_de$gene_id
+    res_de$pvalue <- res_de$padj
+    res_de$description <- ''
+
+    annotation_obj <- tbl(con, "annotation_obj") %>%
+      collect() %>%
+      as.data.frame()
+    rownames(annotation_obj) <- annotation_obj$gene_id 
+
     emg <- GeneTonic::enrichment_map(
-      gtl = mygtl,
+      res_enrich,
+      res_de,
+      annotation_obj,
       n_gs = input$number_genesets,
       overlap_threshold = 0.1,
       scale_edges_width = 200,
@@ -722,11 +752,16 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$emap_signature <- renderPlot({
-    mygtl <- rvalues$mygtl()
-    myvst <- rvalues$myvst()
+    # mygtl <- rvalues$mygtl()
+    # myvst <- rvalues$myvst()
+    res_enrich <- tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
+      filter(ontology == local(input$selected_ontology)) %>%
+      collect()
+    res_enrich <- as.data.frame(res_enrich)
+    rownames(res_enrich) <- res_enrich$gs_id
 
-    cur_gsid <- mygtl$res_enrich$gs_id[
-      match(input$visnet_em_selected, mygtl$res_enrich$gs_description)
+    cur_gsid <- res_enrich$gs_id[
+      match(input$visnet_em_selected, res_enrich$gs_description)
     ]
     validate(
       need(!is.na(cur_gsid),
@@ -734,10 +769,57 @@ magnetique_server <- function(input, output, session) {
       )
     )
 
-    colnames(myvst) <- NULL
+    res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
+      collect()
+    res_de <- res_de %>% 
+      filter(!is.na(SYMBOL)) %>% 
+      arrange(-desc(padj)) %>% 
+      select(gene_id, log2FoldChange, padj, SYMBOL)
+      
+    res_de <- DESeq2::DESeqResults(
+      S4Vectors::DataFrame(res_de))
+
+    rownames(res_de) <- res_de$gene_id
+    res_de$pvalue <- res_de$padj
+    res_de$description <- ''
+
+    annotation_obj <- tbl(con, "annotation_obj") %>%
+      collect() %>%
+      as.data.frame()
+    rownames(annotation_obj) <- annotation_obj$gene_id 
+
+    counts <- con %>%
+      tbl(paste0("counts_", local(input$selected_contrast))) %>% 
+      collect() 
+
+    metadata <- con %>% 
+      tbl(paste0("metadata")) %>% 
+      collect()
+
+    common <- intersect(
+      colnames(counts)[2: ncol(counts)],
+      metadata$row_names)
+
+    counts_rnames <- counts$row_names
+    counts <- as.data.frame(counts[, common])
+    rownames(counts) <- counts_rnames
+
+    metadata <- metadata %>% 
+      filter(row_names %in% common)
+
+    dds <- DESeq2::DESeqDataSetFromMatrix(
+      counts,
+      colData=metadata,
+      design = ~Etiology + Race + Sex + Age + SV1 + SV2)
+
+    vsd <- DESeq2::vst(dds, blind=FALSE)
+    
+    colnames(vsd) <- NULL
     GeneTonic::gs_heatmap(
-      se = myvst,
-      gtl = mygtl,
+      vsd,
+      res_de,
+      res_enrich,
+      annotation_obj = annotation_obj,
       geneset_id = cur_gsid,
       FDR = 0.05,
       de_only = FALSE,
@@ -745,7 +827,7 @@ magnetique_server <- function(input, output, session) {
       cluster_columns = TRUE,
       center_mean = TRUE,
       scale_row = TRUE,
-      anno_col_info = "Etiology"
+      anno_col_info = c("Etiology", "Race", "Sex", "Age", "SV1", "SV2")
     )
   })
 
@@ -937,10 +1019,6 @@ magnetique_server <- function(input, output, session) {
       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
-  })
-
-  observeEvent(input$btn_switch_emap, {
-    updateTabsetPanel(session, "tabs", selected = "tab-geneset-view")
   })
 
   .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
