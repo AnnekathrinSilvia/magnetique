@@ -187,3 +187,13 @@ lnodes <- data.frame(
   shape = c("ellipse", "ellipse", "ellipse", "circle", 'square'), 
   color = c("#0000FF", "#FF0000",  "#00FF00", "lightgrey", "lightgrey"),
   id = 1:5)
+
+highlight_selected <- function(selected, nelements) {     
+    if(!is.null(selected)){
+      colors <- rep('rgba(0,0,0,.10)', nelements)
+      colors[selected] <- 'rgba(255,0,0,1)'
+    } else {
+      colors <- 'rgb(0,0,0)'
+    }
+    return(colors)
+}
