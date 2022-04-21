@@ -140,15 +140,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
             )
           )
         ),
-        fluidRow(
-          column(
-            align = "center",
-            width = 10,
-            withSpinner(
-              plotlyOutput("wgcn_heatmap")
-            )
-          )
-        )
       ),
       tabPanel(
         id = "tab-geneset-view",
@@ -227,6 +218,35 @@ magnetique_ui <- shinydashboard::dashboardPage(
                 column(
                 width = 12,
                 visNetworkOutput("visnet_igraph", height = "500px")
+            )
+        )
+      ),
+      tabPanel(
+        id = "tab-wcgn",
+        title = "Network correlation View", icon = icon("network"), value = "tab-wcgn",
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              actionButton(
+                "tour_wcgnview",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_wcgnview",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style = "float:right"
+            )
+          )
+        ),
+        fluidRow(
+                column(
+                width = 12,
+                plotlyOutput("wgcn_heatmap")
             )
         )
       ),
