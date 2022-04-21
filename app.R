@@ -18,16 +18,17 @@ options(spinner.type = 6)
 
 # sourcing external files -------------------------------------------------
 source("utils.R")
-
+logo_url <- "https://gist.githubusercontent.com/tbrittoborges/3c86ffbaa62e671771f443c65cb04fdc/raw/7ae0ea4a76e8f5464139ef34164c67de7a297ce8/baltica_logo.png"
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
   header = shinydashboard::dashboardHeader(disable = TRUE),
 
   # sidebar definition ------------------------------------------------------
-  sidebar =dashboardSidebar(
-    h1("Magnetique"),
-    h2("Options"),
+  sidebar = dashboardSidebar(
+    img(src = logo_url, class="img-responsive"),
+    h1("Magnetique", align='center'),
+    h2("Options:", style = 'margin: 15px'),
     uiOutput("ui_sidebar")
   ),
 
