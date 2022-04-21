@@ -376,6 +376,9 @@ magnetique_server <- function(input, output, session) {
           "rank"
         )
       ) %>%
+      mutate(dtu_dif = case_when(
+        !is.na(dtu_pvadj) & is.na(dtu_dif) ~ 0,
+        TRUE ~ dtu_dif)) %>%
       collect()
   })
 
