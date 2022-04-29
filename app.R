@@ -34,6 +34,15 @@ magnetique_ui <- shinydashboard::dashboardPage(
   # body definition ---------------------------------------------------------
   body = dashboardBody(
     introjsUI(),
+    
+    shiny::tags$head(
+      shiny::tags$style(
+        HTML("#myScrollBox{
+                overflow-y: scroll;
+              }")
+      )
+    ),
+    
     shiny::tags$script(
       HTML(
         "$(function(){
@@ -45,6 +54,10 @@ magnetique_ui <- shinydashboard::dashboardPage(
         })"
       )
     ),
+    
+    div(
+      id = "myScrollBox",
+      ## will adjust indentation later ##
     tabBox(
       width = 12,
       id = "magnetique_tab",
@@ -265,6 +278,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       )
     )
+    ) ## end of the scrollbox
   )
 )
 
