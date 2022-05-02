@@ -687,6 +687,7 @@ magnetique_server <- function(input, output, session) {
         .,
         searchable = TRUE,
         striped = TRUE,
+        rownames = FALSE,
         defaultPageSize = 5,
         highlight = TRUE,
         selection = "single",
@@ -813,7 +814,11 @@ magnetique_server <- function(input, output, session) {
       design = ~Etiology + Race + Sex + Age + SV1 + SV2)
 
     colnames(dds) <- NULL
-
+    show_row_names <- TRUE
+    if(length(rownames(dds)) > 30){
+      show_row_names <- FALSE
+    }
+  
     GeneTonic::gs_heatmap(
       dds,
       res_de,
@@ -826,7 +831,8 @@ magnetique_server <- function(input, output, session) {
       cluster_columns = TRUE,
       center_mean = TRUE,
       scale_row = TRUE,
-      anno_col_info = c("Etiology", "Race", "Sex", "Age", "SV1", "SV2")
+      anno_col_info = c("Etiology", "Race", "Sex", "Age", "SV1", "SV2"),
+      show_row_names = show_row_names
     )
   })
 
@@ -959,7 +965,7 @@ magnetique_server <- function(input, output, session) {
     } else if (input$magnetique_tab == "tab-geneset-view") {
       i <- getReactableState("enrich_table", "selected")    
       if (!is.null(i)) {
-        sel_gs <- rvalues$res_enrich()[[i, "gs_id"]]
+        sel_gs <- rvalues$res_enrich()[[i, "id"]]
         if (!sel_gs %in% rvalues$mygenesets) {
           rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
           showNotification(
