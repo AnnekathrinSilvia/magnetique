@@ -223,7 +223,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
       ),
       tabPanel(
         id = "tab-wcgn",
-        title = "Network correlation View", icon = icon("network"), value = "tab-wcgn",
+        title = "Network correlation View", icon = icon("network-wired"), value = "tab-wcgn",
         fluidRow(
           column(
             width = 12,
@@ -314,10 +314,6 @@ magnetique_server <- function(input, output, session) {
 
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
-  # rvalues$mygtl <- NULL
-  rvalues$key <- NULL
-  # rvalues$myvst <- NULL
-
   rvalues$mygenes <- c()
   rvalues$mygenesets <- c()
 
@@ -360,27 +356,6 @@ magnetique_server <- function(input, output, session) {
       )
     )
   })
-  # selector trigger data loading
-  # rvalues$mygtl <- reactive({
-  #   message(input$selected_contrast)
-  #   message(input$selected_ontology)
-
-  #   showNotification("Assembling the gtl object for you!",
-  #     id = "info_assembling",
-  #     duration = NULL
-  #   )
-  #   mygtl <- buildup_gtl(con,
-  #     contrast = input$selected_contrast,
-  #     ontology = input$selected_ontology
-  #   )
-  #   removeNotification(id = "info_assembling")
-  #   showNotification("Done! gtl object ready!", type = "message")
-  #   return(mygtl)
-  # })
-
-  # rvalues$myvst <- reactive({
-  #   DESeq2::vst(rvalues$mygtl()$dds)
-  # })
 
   rvalues$key <- reactive({
     tbl(con, paste0("res_", input$selected_contrast)) %>%
@@ -400,6 +375,33 @@ magnetique_server <- function(input, output, session) {
         !is.na(dtu_pvadj) & is.na(dtu_dif) ~ 0,
         TRUE ~ dtu_dif)) %>%
       collect()
+  })
+  
+  rvalues$metadata <- reactive({
+    con %>%
+      tbl("metadata") %>%
+      collect()
+  })
+
+  rvalues$counts <- reactive({
+    con %>%
+      tbl(paste0("counts_", local(input$selected_contrast))) %>% 
+      collect() 
+  })
+
+  rvalues$res_enrich <- reactive({
+    tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
+      filter(ontology == local(input$selected_ontology)) %>%
+      collect() %>% 
+      as.data.frame(.) %>%
+      `rownames<-`(.$gs_id)
+    })
+
+  rvalues$annotation_obj <- reactive({
+     tbl(con, "annotation_obj") %>%
+      collect() %>%
+      as.data.frame() %>% 
+      `rownames<-`(.$gene_id)
   })
 
   # DE related content ---------------------------------------------------------
@@ -539,18 +541,15 @@ magnetique_server <- function(input, output, session) {
     ))
     i <- rvalues$key()[[i, "gene_id"]]
 
-    counts <- con %>%
-      tbl(paste0("counts_", input$selected_contrast)) %>%
+    counts <- rvalues$counts() %>%
       filter(row_names == !!i) %>%
       select(-row_names) %>%
       mutate(n = n()) %>%
       collect() %>%
       pivot_longer(-n)
 
-    metadata <- con %>%
-      tbl("metadata") %>%
-      select(row_names, Etiology) %>%
-      collect()
+    metadata <- rvalues$metadata() %>%
+      select(row_names, Etiology)
 
     left_join(counts, metadata, by = c("name" = "row_names")) %>%
       plot_ly(
@@ -618,9 +617,7 @@ magnetique_server <- function(input, output, session) {
       names_to = "Run",
       values_to = "proportion"
     )
-    metadata <- con %>%
-      tbl("metadata") %>%
-      select(Run, Etiology) %>%
+    metadata <- rvalues$metadata() %>%
       collect()
 
     left_join(x, metadata, by = c("Run" = "Run")) %>%
@@ -673,9 +670,10 @@ magnetique_server <- function(input, output, session) {
       layout(title = "Module-trait correlation")
   })
 
-  res_enrich <- reactive({
-    tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
-        filter(ontology == local(input$selected_ontology)) %>%
+
+  # enrichment map related content ---------------------------------------------
+  output$enrich_table <- renderReactable({
+    rvalues$res_enrich() %>%
         rename(
           c(
             "id" = "gs_id",
@@ -685,14 +683,8 @@ magnetique_server <- function(input, output, session) {
             "pval" = "gs_pvalue"))  %>%
         select(id, description, pval, expected, observed) %>%
         arrange(pval) %>%
-        collect()
-  })
-
-
-  # enrichment map related content ---------------------------------------------
-  output$enrich_table <- renderReactable({
       reactable(
-        res_enrich(),
+        .,
         searchable = TRUE,
         striped = TRUE,
         defaultPageSize = 5,
@@ -719,12 +711,8 @@ magnetique_server <- function(input, output, session) {
   })
 
   emap_graph <- reactive({
-    # mygtl <- rvalues$mygtl()
 
-    res_enrich <- tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
-      filter(ontology == local(input$selected_ontology)) %>%
-      collect()
-    res_enrich <- as.data.frame(res_enrich)
+    res_enrich <- rvalues$res_enrich() %>% as.data.frame(.)
     rownames(res_enrich) <- res_enrich$gs_id
 
     res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
@@ -741,10 +729,7 @@ magnetique_server <- function(input, output, session) {
     res_de$pvalue <- res_de$padj
     res_de$description <- ''
 
-    annotation_obj <- tbl(con, "annotation_obj") %>%
-      collect() %>%
-      as.data.frame()
-    rownames(annotation_obj) <- annotation_obj$gene_id 
+    annotation_obj <- rvalues$annotation_obj()
 
     emg <- GeneTonic::enrichment_map(
       res_enrich,
@@ -776,25 +761,19 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$emap_signature <- renderPlot({
-    # mygtl <- rvalues$mygtl()
-    # myvst <- rvalues$myvst()
-    res_enrich <- tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
-      filter(ontology == local(input$selected_ontology)) %>%
-      collect()
-    res_enrich <- as.data.frame(res_enrich)
-    rownames(res_enrich) <- res_enrich$gs_id
-
-    cur_gsid <- res_enrich$gs_id[
-      match(input$visnet_em_selected, res_enrich$gs_description)
-    ]
+    i <- getReactableState("enrich_table", "selected")    
     validate(
-      need(!is.na(cur_gsid),
-        message = "Please select a gene set from the Enrichment Map."
+      need(!is.na(i),
+        message = "Please select a gene set from the table."
       )
     )
 
+    res_enrich <- rvalues$res_enrich() %>% as.data.frame(.)
+    sel_gs <- res_enrich[[i, "gs_id"]]
+
     res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
       collect()
+
     res_de <- res_de %>% 
       filter(!is.na(SYMBOL)) %>% 
       arrange(-desc(padj)) %>% 
@@ -807,18 +786,15 @@ magnetique_server <- function(input, output, session) {
     res_de$pvalue <- res_de$padj
     res_de$description <- ''
 
-    annotation_obj <- tbl(con, "annotation_obj") %>%
-      collect() %>%
-      as.data.frame()
-    rownames(annotation_obj) <- annotation_obj$gene_id 
+    annotation_obj <- rvalues$annotation_obj()
+    genes <- res_enrich[i, 'gs_genes']
+    genes <- unlist(strsplit(genes, ","))
+    genes <- annotation_obj[
+      match(genes, annotation_obj$gene_name), ]$gene_id
+    counts <- rvalues$counts() %>%
+      filter(row_names %in% local(genes))
 
-    counts <- con %>%
-      tbl(paste0("counts_", local(input$selected_contrast))) %>% 
-      collect() 
-
-    metadata <- con %>% 
-      tbl(paste0("metadata")) %>% 
-      collect()
+    metadata <- rvalues$metadata()
 
     common <- intersect(
       colnames(counts)[2: ncol(counts)],
@@ -836,15 +812,14 @@ magnetique_server <- function(input, output, session) {
       colData=metadata,
       design = ~Etiology + Race + Sex + Age + SV1 + SV2)
 
-    vsd <- DESeq2::vst(dds, blind=FALSE)
-    
-    colnames(vsd) <- NULL
+    colnames(dds) <- NULL
+
     GeneTonic::gs_heatmap(
-      vsd,
+      dds,
       res_de,
       res_enrich,
       annotation_obj = annotation_obj,
-      geneset_id = cur_gsid,
+      genelist = genes,
       FDR = 0.05,
       de_only = FALSE,
       cluster_rows = TRUE,
@@ -857,9 +832,7 @@ magnetique_server <- function(input, output, session) {
 
   output$enriched_funcres <- renderPlotly({
 
-    res_enrich <- tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
-      filter(ontology == local(input$selected_ontology)) %>%
-      collect()
+    res_enrich <- rvalues$res_enrich()
     res_enrich <- as.data.frame(res_enrich)
     rownames(res_enrich) <- res_enrich$gs_id
 
@@ -877,10 +850,7 @@ magnetique_server <- function(input, output, session) {
     res_de$pvalue <- res_de$padj
     res_de$description <- ''
 
-    annotation_obj <- tbl(con, "annotation_obj") %>%
-      collect() %>%
-      as.data.frame()
-    rownames(annotation_obj) <- annotation_obj$gene_id 
+    annotation_obj <- rvalues$annotation_obj()
 
     ggplotly(
       GeneTonic::enhance_table(
@@ -962,7 +932,7 @@ magnetique_server <- function(input, output, session) {
         "Please select at least one geneset with the Bookmark button"
       )
     )
-    res_enrich() %>%
+    rvalues$res_enrich() %>%
       filter(id %in% rvalues$mygenesets) %>%
       select(id, description) %>%
       reactable(rownames = FALSE)
@@ -989,7 +959,7 @@ magnetique_server <- function(input, output, session) {
     } else if (input$magnetique_tab == "tab-geneset-view") {
       i <- getReactableState("enrich_table", "selected")    
       if (!is.null(i)) {
-        sel_gs <- res_enrich()[[i, "id"]]
+        sel_gs <- rvalues$res_enrich()[[i, "id"]]
         if (!sel_gs %in% rvalues$mygenesets) {
           rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
           showNotification(
