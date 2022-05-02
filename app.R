@@ -696,7 +696,9 @@ magnetique_server <- function(input, output, session) {
         theme = reactableTheme(
           stripedColor = "#f6f8fa",
           highlightColor = "#f0f5f9",
-          cellPadding = "8px 12px"),
+          cellPadding = "8px 12px",
+          rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #FF0000")
+        ),
         columns = list(
           id = colDef(
             html = TRUE,
