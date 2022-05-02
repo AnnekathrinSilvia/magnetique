@@ -959,7 +959,7 @@ magnetique_server <- function(input, output, session) {
     } else if (input$magnetique_tab == "tab-geneset-view") {
       i <- getReactableState("enrich_table", "selected")    
       if (!is.null(i)) {
-        sel_gs <- rvalues$res_enrich()[[i, "id"]]
+        sel_gs <- rvalues$res_enrich()[[i, "gs_id"]]
         if (!sel_gs %in% rvalues$mygenesets) {
           rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
           showNotification(
