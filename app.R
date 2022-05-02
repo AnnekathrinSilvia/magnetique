@@ -181,6 +181,38 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
         fluidRow(
+          box(
+            width = 9,
+            fluidRow(
+          column(
+            width = 4,
+            selectInput("selected_ontology2",
+                        label = "Ontology",
+                        choices = c("BP", "MF", "CC"),
+                        selected = "BP"
+            )
+          ),
+          column(
+            width = 4,
+            numericInput("number_genesets2",
+                         "Number of genesets",
+                         value = 15,
+                         min = 0
+            )
+          ),
+          column(
+            width = 4,
+            selectInput("color_by2",
+                        "Color by",
+                        choices = c(
+                          "z_score",
+                          "gs_pvalue"
+                        ),
+                        selected = "z_score"
+            )
+          )
+        ))),
+        fluidRow(
           column(
             width = 5,
             withSpinner(
@@ -307,24 +339,7 @@ magnetique_server <- function(input, output, session) {
           ),
           selected = "DCMvsHCM"
         ),
-        selectInput("selected_ontology",
-          label = "Ontology",
-          choices = c("BP", "MF", "CC"),
-          selected = "BP"
-        ),
-        numericInput("number_genesets",
-          "Number of genesets",
-          value = 15,
-          min = 0
-        ),
-        selectInput("color_by",
-          "Color by",
-          choices = c(
-            "z_score",
-            "gs_pvalue"
-          ),
-          selected = "z_score"
-        ),
+        uiOutput("ui_genesetsidebar"),
         actionButton("bookmarker",
           label = "Bookmark", icon = icon("heart"),
           style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
@@ -332,6 +347,37 @@ magnetique_server <- function(input, output, session) {
       )
     )
   })
+  
+  output$ui_genesetsidebar <- renderUI({
+    validate(
+      need(input$magnetique_tab == "tab-geneset-view", 
+           message = ""
+      ) # make it blank if not in the relevant panel
+    )
+    tagList(
+      selectInput("selected_ontology",
+                  label = "Ontology",
+                  choices = c("BP", "MF", "CC"),
+                  selected = "BP"
+      ),
+      numericInput("number_genesets",
+                   "Number of genesets",
+                   value = 15,
+                   min = 0
+      ),
+      selectInput("color_by",
+                  "Color by",
+                  choices = c(
+                    "z_score",
+                    "gs_pvalue"
+                  ),
+                  selected = "z_score"
+      )
+    )
+  })
+  
+  
+  
   # selector trigger data loading
   rvalues$mygtl <- reactive({
     message(input$selected_contrast)
