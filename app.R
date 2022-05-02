@@ -315,7 +315,7 @@ magnetique_server <- function(input, output, session) {
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
   rvalues$mygenes <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gene_id", "gene_name"))))
-  rvalues$mygenesets <- c()
+  rvalues$mygenesets <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gs_id", "gs_description"))))
 
 
   # sidebar server-side -----------------------------------------------------
@@ -909,7 +909,8 @@ magnetique_server <- function(input, output, session) {
         column(
           width = 6,
           h5("Bookmarked gene sets"),
-          reactableOutput("bookmarks_genesets")
+          reactableOutput("bookmarks_genesets"),
+          downloadButton("download_bookmarks_genesets", "Download as csv")
         )
       )
     )
@@ -933,6 +934,13 @@ magnetique_server <- function(input, output, session) {
       }
   )
 
+  output$download_bookmarks_genesets <- downloadHandler(
+    filename = "magnetique_genesets_bookmark.csv",
+    content = function(file){
+      write.csv(rvalues$mygenesets, file=file)
+      }
+  )
+
   output$bookmarks_genesets <- renderReactable({
     validate(
       need(
@@ -940,10 +948,7 @@ magnetique_server <- function(input, output, session) {
         "Please select at least one geneset with the Bookmark button"
       )
     )
-    rvalues$res_enrich() %>%
-      filter(gs_id %in% rvalues$mygenesets) %>%
-      select(gs_id, gs_description) %>%
-      reactable(rownames = FALSE)
+    reactable(rvalues$mygenesets, rownames = FALSE)
   })
 
   observeEvent(input$bookmarker, {
@@ -971,9 +976,14 @@ magnetique_server <- function(input, output, session) {
     } else if (input$magnetique_tab == "tab-geneset-view") {
       i <- getReactableState("enrich_table", "selected")    
       if (!is.null(i)) {
-        sel_gs <- rvalues$res_enrich()[i, ]$gs_id
-        if (!sel_gs %in% rvalues$mygenesets) {
-          rvalues$mygenesets <- c(rvalues$mygenesets, sel_gs)
+        
+        df <- rvalues$res_enrich() %>%
+          slice(i) %>%
+          select(gs_id, gs_description)
+        
+        sel_gs <- df[[i, "gs_id"]]
+        if (!sel_gs %in% rvalues$mygenesets$gs_id) {
+          rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
           showNotification(
             sprintf(
               "The selected geneset %s was added to the bookmarked gene sets.",
