@@ -314,7 +314,7 @@ magnetique_server <- function(input, output, session) {
 
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
-  rvalues$mygenes <- c()
+  rvalues$mygenes <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gene_id", "gene_name"))))
   rvalues$mygenesets <- c()
 
 
@@ -371,9 +371,6 @@ magnetique_server <- function(input, output, session) {
           "rank"
         )
       ) %>%
-      mutate(dtu_dif = case_when(
-        !is.na(dtu_pvadj) & is.na(dtu_dif) ~ 0,
-        TRUE ~ dtu_dif)) %>%
       collect()
   })
   
@@ -906,7 +903,8 @@ magnetique_server <- function(input, output, session) {
         column(
           width = 6,
           h5("Bookmarked genes"),
-          reactableOutput("bookmarks_genes")
+          reactableOutput("bookmarks_genes"),
+          downloadButton("download_bookmarks_genes", "Download as csv")
         ),
         column(
           width = 6,
@@ -920,23 +918,25 @@ magnetique_server <- function(input, output, session) {
   output$bookmarks_genes <- renderReactable({
     validate(
       need(
-        length(rvalues$mygenes) > 0,
+        nrow(rvalues$mygenes) > 0,
         "Please select at least one gene with the Bookmark button"
       )
     )
 
-    annotation_obj <- tbl(con, "annotation_obj") %>%
-      filter(gene_id %in% local(rvalues$mygenes)) %>%
-      select(gene_id, gene_name) %>%
-      collect() 
-
-    reactable(annotation_obj)
+    reactable(rvalues$mygenes)
   })
+
+  output$download_bookmarks_genes <- downloadHandler(
+    filename = "magnetique_genes_bookmark.csv",
+    content = function(file){
+      write.csv(rvalues$mygenes, file=file)
+      }
+  )
 
   output$bookmarks_genesets <- renderReactable({
     validate(
       need(
-        length(rvalues$mygenesets) > 0,
+        nrow(rvalues$mygenesets) > 0,
         "Please select at least one geneset with the Bookmark button"
       )
     )
@@ -952,9 +952,13 @@ magnetique_server <- function(input, output, session) {
     } else if (input$magnetique_tab == "tab-gene-view") {
       i <- getReactableState("de_table", "selected")
       if (!is.null(i)) {
-        sel_gene <- rvalues$key()[[i, "gene_id"]]
-        if (!sel_gene %in% rvalues$mygenes) {
-          rvalues$mygenes <- c(rvalues$mygenes, sel_gene)
+        key <- rvalues$key()
+        df <- key[i, c("gene_id", "SYMBOL")] %>%
+          rename(gene_name=SYMBOL)
+
+        sel_gene <- df[[1, "gene_id"]]
+        if (!sel_gene %in% rvalues$mygenes$gene_id) {
+          rvalues$mygenes <- rbind(rvalues$mygenes, df)
           showNotification(
             sprintf(
               "The selected gene %s was added to the bookmarked genes.",
