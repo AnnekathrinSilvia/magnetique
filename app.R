@@ -222,35 +222,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       ),
       tabPanel(
-        id = "tab-wcgn",
-        title = "Network correlation View", icon = icon("network-wired"), value = "tab-wcgn",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_wcgnview",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_wcgnview",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
-            )
-          )
-        ),
-        fluidRow(
-                column(
-                width = 12,
-                plotlyOutput("wgcn_heatmap")
-            )
-        )
-      ),
-      tabPanel(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
         fluidRow(
           column(
@@ -366,9 +337,7 @@ magnetique_server <- function(input, output, session) {
           "padj",
           "log2FoldChange",
           "dtu_pvadj",
-          "dtu_dif",
-          "module",
-          "rank"
+          "dtu_dif"
         )
       ) %>%
       collect()
@@ -451,14 +420,6 @@ magnetique_server <- function(input, output, session) {
           dtu_dif = colDef(
             name = "dtu_dif",
             header = with_tooltip("dtu_dif", "Difference in isoform usage for the DRIMseq analysis")
-          ),
-          module = colDef(
-            name = "Module",
-            header = with_tooltip("net_module", "Co-expressed genes module for the network analysis")
-          ),
-          rank = colDef(
-            name = "Rank",
-            header = with_tooltip("net_rank", "Rank in module for the network analysis")
           )
         ),
         defaultColDef = colDef(sortNALast = TRUE)
@@ -1012,8 +973,7 @@ magnetique_server <- function(input, output, session) {
         df <- rvalues$res_enrich() %>%
           slice(i) %>%
           select(gs_id, gs_description)
-        
-        sel_gs <- df[[i, "gs_id"]]
+        sel_gs <- df[[1, 1]]
         if (!sel_gs %in% rvalues$mygenesets$gs_id) {
           rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
           showNotification(
