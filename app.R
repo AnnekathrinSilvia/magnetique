@@ -18,7 +18,7 @@ options(spinner.type = 6)
 
 # sourcing external files -------------------------------------------------
 source("utils.R")
-logo_url <- "https://gist.githubusercontent.com/tbrittoborges/3c86ffbaa62e671771f443c65cb04fdc/raw/7ae0ea4a76e8f5464139ef34164c67de7a297ce8/baltica_logo.png"
+logo_url <- "https://upload.wikimedia.org/wikipedia/commons/2/2d/Dow.png"
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
@@ -466,14 +466,14 @@ magnetique_server <- function(input, output, session) {
   })
 
   prev_selected <- reactive(getReactableState("de_table", "selected"))
-  colors <- reactive(highlight_selected(prev_selected(), nrow(rvalues$key())))
-  colors_dtu <- reactive({
-    df <- rvalues$key()
-    colors()[!is.na(df$dtu_pvadj)]
-  })
+  # colors <- reactive(highlight_selected(prev_selected(), nrow(rvalues$key())))
+  # colors_dtu <- reactive({
+  #   df <- rvalues$key()
+  #   colors()[!is.na(df$dtu_pvadj)]
+  # })
 
   output$de_volcano <- renderPlotly({
-    rvalues$key() %>%
+    p <- rvalues$key() %>%
       plot_ly(., color=I('black'), showlegend = FALSE) %>%
       add_markers(
         x = ~log2FoldChange,
@@ -494,11 +494,27 @@ magnetique_server <- function(input, output, session) {
         yaxis = list(title = '-log10(dge_padj)'), 
         xaxis = list(title = 'dge_log2fc')
       ) 
+    
+    if(length(prev_selected()) == 1) {
+      df <- rvalues$key() %>%
+        slice(prev_selected())
+
+      p <- add_trace(
+        p, 
+        x = df[[1, "log2FoldChange"]],
+        y = ~ -log10(df[[1, "padj"]]),
+        type = "scatter",
+        mode = "markers", 
+        color = I("red"), 
+        inherit = FALSE)
+    }
+    p
+    
   })
 
 
   output$dtu_volcano <- renderPlotly({  
-    rvalues$key() %>%
+    p <- rvalues$key() %>%
       plot_ly(., color=I('black'), showlegend = FALSE) %>%
       add_markers(
         x = ~dtu_dif,
@@ -519,15 +535,31 @@ magnetique_server <- function(input, output, session) {
         yaxis = list(title = '-log10(dtu_padj)'), 
         xaxis = list(title = 'dtu_dif')
       )
+
+
+  if(length(prev_selected()) == 1) {
+    df <- rvalues$key() %>%
+      slice(prev_selected())
+
+    p <- add_trace(
+      p, 
+      x = df[[1, "dtu_dif"]],
+      y = ~ -log10(df[[1, "dtu_pvadj"]]),
+      type = "scatter",
+      color = I("red"), 
+      inherit = FALSE)
+  }
+  p
+ 
   })
 
-  observeEvent(colors(), {
+  observeEvent(prev_selected(), {
 
     plotlyProxy("de_volcano", session) %>%
-      plotlyProxyInvoke("restyle", "marker.color", list(colors()), 0)
+      plotlyProxyInvoke("restyle", "marker.color", list('rgba(0,0,0,.10)'), 0)
     
     plotlyProxy("dtu_volcano", session) %>%
-      plotlyProxyInvoke("restyle", "marker.color", list(colors()), 0)        
+      plotlyProxyInvoke("restyle", "marker.color", list('rgba(0,0,0,.10)'), 0)        
         
   })
 
