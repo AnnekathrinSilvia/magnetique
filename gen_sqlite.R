@@ -114,6 +114,13 @@ wrt <- purrr::map2(dge, names(dge), function(.x, .y) {
 })
 do.call("rbind", wrt) %>% dbWriteTable(db, "counts", ., overwrite=TRUE, row.names=TRUE)
 
+message('Loading VST-transformed counts into DB')
+dds_object <- dge$DCMvsNFD$dds
+transformed <- DESeq2::vst(dds_object, blind=FALSE)
+vst <- SummarizedExperiment::assay(transformed)
+vst <- as_tibble(vst, rownames='row_names')
+dbWriteTable(db, "vst",vst , overwrite=TRUE)
+
 # write DGE results, but first add DTU and WGCN
 
 # DRIMSeq can generate a single p-value per gene, which tests whether there is any differential transcript usage within the gene, but
