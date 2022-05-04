@@ -359,6 +359,7 @@ magnetique_server <- function(input, output, session) {
   
   observeEvent(input$magnetique_tab, {
     if (input$magnetique_tab == "tab-geneset-view") {
+      shinyjs::show("selected_contrast")
       shinyjs::show("selected_ontology")
       shinyjs::show("number_genesets")
       shinyjs::show("color_by")
@@ -442,6 +443,7 @@ magnetique_server <- function(input, output, session) {
         highlight = TRUE,
         selection = "single",
         onClick = "select",
+        wrap = FALSE,
         rowStyle = list(cursor = "pointer"),
         theme = reactableTheme(
           stripedColor = "#f6f8fa",
@@ -738,6 +740,7 @@ magnetique_server <- function(input, output, session) {
         highlight = TRUE,
         selection = "single",
         onClick = "select",
+        wrap = FALSE,
         rowStyle = list(cursor = "pointer"),
         theme = reactableTheme(
           stripedColor = "#f6f8fa",
@@ -745,6 +748,7 @@ magnetique_server <- function(input, output, session) {
           cellPadding = "8px 12px",
           rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #FF0000")
         ),
+        defaultColDef = colDef(width = 70),
         columns = list(
           id = colDef(
             html = TRUE,
@@ -752,12 +756,22 @@ magnetique_server <- function(input, output, session) {
               const url = 'http://amigo.geneontology.org/amigo/term/' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
             }"),
-            minWidth = 100),
+            minWidth = 100,
+            width = 120,
+            header = with_tooltip("gs_id", "Gene set ID and link to AMIGO db")
+            ),
           description = colDef(
-            width = 250)
-      )
-    )
-  })
+            width = 250,
+            header = with_tooltip("gs_description", "Description for the gene set")),
+          pval = colDef(
+            header = with_tooltip("pvalue", "p-value for the TopGO enrichment test")),
+          expected = colDef(
+            header = with_tooltip("expec.", "Expected number of genes in the gene set")),
+          observed = colDef(
+            header = with_tooltip("obser.", "Number of genes observed in the gene set"))
+          )
+        )
+      })
 
   emap_graph <- reactive({
 
