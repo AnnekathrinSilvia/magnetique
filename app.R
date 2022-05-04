@@ -355,6 +355,12 @@ magnetique_server <- function(input, output, session) {
       collect() 
   })
 
+  rvalues$vst <- reactive({
+    con %>%
+      tbl("vst") %>% 
+      collect() 
+  })
+  
   rvalues$res_enrich <- reactive({
     tbl(con, paste0("res_enrich_", local(input$selected_contrast))) %>%
       filter(ontology == local(input$selected_ontology)) %>%
@@ -763,8 +769,10 @@ magnetique_server <- function(input, output, session) {
 
     res_enrich <- rvalues$res_enrich() %>% as.data.frame(.)
     sel_gs <- res_enrich[[i, "gs_id"]]
+    gs_description <- res_enrich[[i, "gs_description"]]
 
-    res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
+    res_de <- con %>%
+      tbl(paste0("res_", local(input$selected_contrast))) %>%
       collect()
 
     res_de <- res_de %>% 
@@ -784,47 +792,41 @@ magnetique_server <- function(input, output, session) {
     genes <- unlist(strsplit(genes, ","))
     genes <- annotation_obj[
       match(genes, annotation_obj$gene_name), ]$gene_id
-    counts <- rvalues$counts() %>%
-      filter(row_names %in% local(genes))
 
     metadata <- rvalues$metadata()
 
-    common <- intersect(
-      colnames(counts)[2: ncol(counts)],
-      metadata$row_names)
+    counts <- con %>%
+      tbl("vst") %>% 
+      collect() %>% 
+      filter(row_names %in% local(genes)) %>% 
+      as.data.frame(.)
 
-    counts_rnames <- counts$row_names
-    counts <- as.data.frame(counts[, common])
-    rownames(counts) <- counts_rnames
+    rownames(counts) <- counts[, 1]
+    counts[, 1] <- NULL
 
-    metadata <- metadata %>% 
-      filter(row_names %in% common)
-
-    dds <- DESeq2::DESeqDataSetFromMatrix(
+    se <- SummarizedExperiment::SummarizedExperiment(
       counts,
-      colData=metadata,
-      design = ~Etiology + Race + Sex + Age + SV1 + SV2)
+      colData = metadata,
+      rowData = rownames(counts))
 
-    colnames(dds) <- NULL
-    show_row_names <- TRUE
-    if(length(rownames(dds)) > 30){
-      show_row_names <- FALSE
-    }
-  
+    show_row_names <- ifelse(nrow(se) > 30, FALSE, TRUE)  
     GeneTonic::gs_heatmap(
-      dds,
+      se,
       res_de,
       res_enrich,
       annotation_obj = annotation_obj,
       genelist = genes,
       FDR = 0.05,
       de_only = FALSE,
+      plot_title = stringr::str_glue(
+        "Gene signature plot for {gs_description} geneset"), 
       cluster_rows = TRUE,
       cluster_columns = TRUE,
       center_mean = TRUE,
       scale_row = TRUE,
       anno_col_info = c("Etiology", "Race", "Sex", "Age", "SV1", "SV2"),
-      show_row_names = show_row_names
+      show_row_names = show_row_names,
+      show_column_names = FALSE
     )
   })
 
@@ -856,7 +858,9 @@ magnetique_server <- function(input, output, session) {
         res_de,
         annotation_obj = annotation_obj,
         n_gs = input$number_genesets,
-        chars_limit = 50
+        chars_limit = 50,
+        plot_title = stringr::str_glue(
+          "Enrichment overview for top {input$number_genesets} genesets \n ({input$selected_ontology} and {input$selected_contrast})") # params
       ) 
     )
   })
