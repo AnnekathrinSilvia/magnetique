@@ -35,7 +35,17 @@ magnetique_ui <- shinydashboard::dashboardPage(
   # body definition ---------------------------------------------------------
   body = dashboardBody(
     introjsUI(),
+    ## handling the overflow in vertical direction for the tabBox
+    shiny::tags$head(
+      shiny::tags$style(
+        HTML("#myScrollBox{
+                overflow-y: scroll;
+              }")
+      )
+    ),
+    ## using shinyjs inside the app
     shinyjs::useShinyjs(),
+    ## left ctrl to trigger the bookmarking functionality (via button)
     shiny::tags$script(
       HTML(
         "$(function(){
@@ -47,6 +57,10 @@ magnetique_ui <- shinydashboard::dashboardPage(
         })"
       )
     ),
+    
+    div(
+      id = "myScrollBox",
+      ## will adjust indentation later ##
     tabBox(
       width = 12,
       id = "magnetique_tab",
@@ -267,6 +281,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         )
       )
     )
+    ) ## end of the scrollbox
   )
 )
 
