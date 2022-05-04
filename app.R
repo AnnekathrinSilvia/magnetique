@@ -194,7 +194,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
       ),
       tabPanel(
         id = "tab-carnival",
-        title = "Carnival View", icon = icon("viruses"), value = "tab-carnival",
+        title = "Carnival View", icon = icon("network-wired"), value = "tab-carnival",
         fluidRow(
           column(
             width = 12,
@@ -677,6 +677,7 @@ magnetique_server <- function(input, output, session) {
             "expected" = "Expected", 
             "observed"= "gs_de_count", 
             "pval" = "gs_pvalue"))  %>%
+        mutate_at(vars(pval), ~round(., 2)) %>%
         select(id, description, pval, expected, observed) %>%
         arrange(pval) %>%
       reactable(
@@ -888,6 +889,7 @@ magnetique_server <- function(input, output, session) {
       igraph::upgrade_graph(.) %>%
       permute.vertices(., Matrix::invPerm(order(V(.)$name))) %>%
       visNetwork::visIgraph() %>%
+      visNodes(font = list(background = "white"))  %>%
       visOptions(
         highlightNearest = list(
           enabled = TRUE,
@@ -896,7 +898,7 @@ magnetique_server <- function(input, output, session) {
         ),
         nodesIdSelection = TRUE
       ) %>%
-      # visLegend(addEdges = ledges, addNodes = lnodes, useGroups = FALSE) %>% 
+      visInteraction(navigationButtons = T) %>%
       visExport(
         name = "igraph",
         type = "png",
