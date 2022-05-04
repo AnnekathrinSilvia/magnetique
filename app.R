@@ -29,7 +29,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
   sidebar = dashboardSidebar(
     img(src = logo_url, class="img-responsive"),
     h1("Magnetique", align='center'),
-    h2("Options:", style = 'margin: 15px'),
+    hidden(h2("Options:", style = 'margin: 15px', id='options')),
     uiOutput("ui_sidebar")
   ),
 
@@ -363,6 +363,7 @@ magnetique_server <- function(input, output, session) {
       shinyjs::show("number_genesets")
       shinyjs::show("color_by")
       shinyjs::show("bookmarker")
+      shinyjs::show("options")
     } else if (
       input$magnetique_tab == "tab-gene-view" 
       || input$magnetique_tab == "tab-carnival") {
@@ -371,12 +372,14 @@ magnetique_server <- function(input, output, session) {
       shinyjs::hide("number_genesets")
       shinyjs::hide("color_by")
       shinyjs::show("bookmarker")
+      shinyjs::show("options")
     } else {
       shinyjs::hide("selected_contrast")
       shinyjs::hide("selected_ontology")
       shinyjs::hide("number_genesets")
       shinyjs::hide("color_by")
       shinyjs::hide("bookmarker")
+      shinyjs::hide("options")
     }
   })
   
