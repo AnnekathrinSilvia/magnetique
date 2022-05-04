@@ -511,8 +511,9 @@ magnetique_server <- function(input, output, session) {
     p <- add_trace(
       p, 
       x = df[[1, "dtu_dif"]],
-      y = ~ -log10(df[[1, "dtu_pvadj"]]),
+      y = -log10(df[[1, "dtu_pvadj"]]),
       type = "scatter",
+      mode = "markers", 
       color = I("red"), 
       inherit = FALSE)
   }
@@ -819,7 +820,7 @@ magnetique_server <- function(input, output, session) {
       FDR = 0.05,
       de_only = FALSE,
       plot_title = stringr::str_glue(
-        "Gene signature plot for {gs_description} geneset"), 
+        "Gene signature for {gs_description} geneset"), 
       cluster_rows = TRUE,
       cluster_columns = TRUE,
       center_mean = TRUE,
@@ -831,8 +832,21 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$enriched_funcres <- renderPlotly({
+    
+    i <- getReactableState("enrich_table", "selected")    
+    if(!is.null(i)) {
+      res_enrich <- rvalues$res_enrich() %>% 
+        slice(i)
+      plot_title <- "Enrichment for genes comprising  
+        {res_enrich[1, 'gs_id']} geneset \n ({input$selected_contrast})"
 
-    res_enrich <- rvalues$res_enrich()
+    } else {
+      res_enrich <- rvalues$res_enrich()
+
+      plot_title <- "Enrichment overview for top genesets 
+          ({input$selected_ontology} and {input$selected_contrast})"
+    }
+        
     res_enrich <- as.data.frame(res_enrich)
     rownames(res_enrich) <- res_enrich$gs_id
 
@@ -859,8 +873,7 @@ magnetique_server <- function(input, output, session) {
         annotation_obj = annotation_obj,
         n_gs = input$number_genesets,
         chars_limit = 50,
-        plot_title = stringr::str_glue(
-          "Enrichment overview for top {input$number_genesets} genesets \n ({input$selected_ontology} and {input$selected_contrast})") # params
+        plot_title = stringr::str_glue(plot_title)
       ) 
     )
   })
