@@ -773,8 +773,7 @@ magnetique_server <- function(input, output, session) {
       visOptions(
         highlightNearest = list(
           enabled = TRUE,
-          degree = 1,
-          hover = TRUE
+          degree = 1
         ),
         nodesIdSelection = TRUE
       ) %>%
@@ -917,8 +916,7 @@ magnetique_server <- function(input, output, session) {
       visOptions(
         highlightNearest = list(
           enabled = TRUE,
-          degree = 1,
-          hover = TRUE
+          degree = 1
         ),
         nodesIdSelection = TRUE
       ) %>%
