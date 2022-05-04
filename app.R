@@ -314,14 +314,16 @@ magnetique_server <- function(input, output, session) {
   output$ui_sidebar <- renderUI({
     tagList(
       sidebarMenu(
-        selectInput("selected_contrast",
-          label = "Contrast id",
-          choices = c(
-            "DCMvsHCM",
-            "DCMvsNFD",
-            "HCMvsNFD"
-          ),
-          selected = "DCMvsHCM"
+        hidden(
+          selectInput("selected_contrast",
+            label = "Contrast id",
+            choices = c(
+              "DCMvsHCM",
+              "DCMvsNFD",
+              "HCMvsNFD"
+            ),
+            selected = "DCMvsHCM"
+          )
         ),
         shinyjs::hidden(
           tagList(
@@ -345,9 +347,11 @@ magnetique_server <- function(input, output, session) {
             )
           )
         ),
-        actionButton("bookmarker",
+        hidden(
+          actionButton("bookmarker",
           label = "Bookmark", icon = icon("heart"),
           style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
+          )
         )
       )
     )
@@ -358,17 +362,21 @@ magnetique_server <- function(input, output, session) {
       shinyjs::show("selected_ontology")
       shinyjs::show("number_genesets")
       shinyjs::show("color_by")
+      shinyjs::show("bookmarker")
     } else if (
       input$magnetique_tab == "tab-gene-view" 
-      | input$magnetique_tab == "tab-carnival") {
+      || input$magnetique_tab == "tab-carnival") {
+      shinyjs::show("selected_contrast")
       shinyjs::hide("selected_ontology")
       shinyjs::hide("number_genesets")
       shinyjs::hide("color_by")
+      shinyjs::show("bookmarker")
     } else {
       shinyjs::hide("selected_contrast")
       shinyjs::hide("selected_ontology")
       shinyjs::hide("number_genesets")
       shinyjs::hide("color_by")
+      shinyjs::hide("bookmarker")
     }
   })
   
