@@ -5,6 +5,7 @@ library(promises)
 plan(multisession)
 
 library(shinycssloaders)
+library(shinyjs)
 library(plotly, warn.conflicts = FALSE)
 library(reactable, warn.conflicts = FALSE)
 library(bs4Dash, warn.conflicts = FALSE)
@@ -35,6 +36,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
   # body definition ---------------------------------------------------------
   body = dashboardBody(
     introjsUI(),
+    shinyjs::useShinyjs(),
     shiny::tags$script(
       HTML(
         "$(function(){
@@ -306,23 +308,27 @@ magnetique_server <- function(input, output, session) {
           ),
           selected = "DCMvsHCM"
         ),
-        selectInput("selected_ontology",
-          label = "Ontology",
-          choices = c("BP", "MF", "CC"),
-          selected = "BP"
-        ),
-        numericInput("number_genesets",
-          "Number of gene sets",
-          value = 15,
-          min = 0
-        ),
-        selectInput("color_by",
-          "Color by",
-          choices = c(
-            "z_score",
-            "gs_pvalue"
-          ),
-          selected = "z_score"
+        shinyjs::hidden(
+          tagList(
+            selectInput("selected_ontology",
+                        label = "Ontology",
+                        choices = c("BP", "MF", "CC"),
+                        selected = "BP"
+            ),
+            numericInput("number_genesets",
+                         "Number of genesets",
+                         value = 15,
+                         min = 0
+            ),
+            selectInput("color_by",
+                        "Color by",
+                        choices = c(
+                          "z_score",
+                          "gs_pvalue"
+                        ),
+                        selected = "z_score"
+            )
+          )
         ),
         actionButton("bookmarker",
           label = "Bookmark", icon = icon("heart"),
@@ -331,7 +337,26 @@ magnetique_server <- function(input, output, session) {
       )
     )
   })
-
+  
+  observeEvent(input$magnetique_tab, {
+    if (input$magnetique_tab == "tab-geneset-view") {
+      shinyjs::show("selected_ontology")
+      shinyjs::show("number_genesets")
+      shinyjs::show("color_by")
+    } else if (
+      input$magnetique_tab == "tab-gene-view" 
+      | input$magnetique_tab == "tab-carnival") {
+      shinyjs::hide("selected_ontology")
+      shinyjs::hide("number_genesets")
+      shinyjs::hide("color_by")
+    } else {
+      shinyjs::hide("selected_contrast")
+      shinyjs::hide("selected_ontology")
+      shinyjs::hide("number_genesets")
+      shinyjs::hide("color_by")
+    }
+  })
+  
   rvalues$key <- reactive({
     tbl(con, paste0("res_", input$selected_contrast)) %>%
       select(
@@ -360,9 +385,7 @@ magnetique_server <- function(input, output, session) {
   })
 
   rvalues$vst <- reactive({
-    con %>%
-      tbl("vst") %>% 
-      collect() 
+    con %>% tbl("vst")
   })
   
   rvalues$res_enrich <- reactive({
@@ -796,10 +819,9 @@ magnetique_server <- function(input, output, session) {
 
     metadata <- rvalues$metadata()
 
-    counts <- con %>%
-      tbl("vst") %>% 
-      collect() %>% 
+    counts <- rvalues$vst() %>% 
       filter(row_names %in% local(genes)) %>% 
+      collect() %>% 
       as.data.frame(.)
 
     rownames(counts) <- counts[, 1]
