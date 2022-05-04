@@ -215,11 +215,15 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
         fluidRow(
-                column(
-                width = 12,
-                visNetworkOutput("visnet_igraph", height = "500px")
+          column(
+            width = 3,
+            img(src = "https://user-images.githubusercontent.com/4517913/166660064-8b171940-b2ce-46e5-bfc6-c2c6685a5bd0.jpeg", class="img-responsive")
+            ),
+          column(
+            width = 9,
+            visNetworkOutput("visnet_igraph", height = "500px")
             )
-        )
+          )
       ),
       tabPanel(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
@@ -433,11 +437,6 @@ magnetique_server <- function(input, output, session) {
   })
 
   prev_selected <- reactive(getReactableState("de_table", "selected"))
-  # colors <- reactive(highlight_selected(prev_selected(), nrow(rvalues$key())))
-  # colors_dtu <- reactive({
-  #   df <- rvalues$key()
-  #   colors()[!is.na(df$dtu_pvadj)]
-  # })
 
   output$de_volcano <- renderPlotly({
     p <- rvalues$key() %>%
@@ -897,7 +896,7 @@ magnetique_server <- function(input, output, session) {
         ),
         nodesIdSelection = TRUE
       ) %>%
-      visLegend(addEdges = ledges, addNodes = lnodes, useGroups = FALSE) %>% 
+      # visLegend(addEdges = ledges, addNodes = lnodes, useGroups = FALSE) %>% 
       visExport(
         name = "igraph",
         type = "png",
