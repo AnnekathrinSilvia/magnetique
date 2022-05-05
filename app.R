@@ -974,28 +974,49 @@ magnetique_server <- function(input, output, session) {
         column(
           width = 6,
           h5("Bookmarked genes"),
-          reactableOutput("bookmarks_genes"),
-          downloadButton("download_bookmarks_genes", "Download as csv")
+          uiOutput("ui_bookmarks_genes")
         ),
         column(
           width = 6,
           h5("Bookmarked gene sets"),
-          reactableOutput("bookmarks_genesets"),
-          downloadButton("download_bookmarks_genesets", "Download as csv")
+          uiOutput("ui_bookmarks_genesets")
         )
       )
     )
   })
-
-  output$bookmarks_genes <- renderReactable({
+  
+  output$ui_bookmarks_genes <- renderUI({
     validate(
       need(
         nrow(rvalues$mygenes) > 0,
         "Please select at least one gene with the Bookmark button"
       )
     )
+    tagList(
+      reactableOutput("bookmarks_genes"),
+      downloadButton("download_bookmarks_genes", "Download as csv")
+    )
+  })
 
+  output$ui_bookmarks_genesets <- renderUI({
+    validate(
+      need(
+        nrow(rvalues$mygenesets) > 0,
+        "Please select at least one geneset with the Bookmark button"
+      )
+    )
+    tagList(
+      reactableOutput("bookmarks_genesets"),
+      downloadButton("download_bookmarks_genesets", "Download as csv")
+    )
+  })
+  
+  output$bookmarks_genes <- renderReactable({
     reactable(rvalues$mygenes)
+  })
+  
+  output$bookmarks_genesets <- renderReactable({
+    reactable(rvalues$mygenesets, rownames = FALSE)
   })
 
   output$download_bookmarks_genes <- downloadHandler(
@@ -1011,16 +1032,6 @@ magnetique_server <- function(input, output, session) {
       write.csv(rvalues$mygenesets, file=file)
       }
   )
-
-  output$bookmarks_genesets <- renderReactable({
-    validate(
-      need(
-        nrow(rvalues$mygenesets) > 0,
-        "Please select at least one geneset with the Bookmark button"
-      )
-    )
-    reactable(rvalues$mygenesets, rownames = FALSE)
-  })
 
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
