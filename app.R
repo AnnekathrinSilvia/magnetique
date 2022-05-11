@@ -807,6 +807,13 @@ magnetique_server <- function(input, output, session) {
   })
 
   output$visnet_em <- renderVisNetwork({
+    validate(
+      need({ecount(emap_graph()) > 0}, 
+           message = paste0(
+             "No edges detecte in the enrichment map. ",
+             "Please select a larger number of genesets to generate a full graph")
+      )
+    )
     visNetwork::visIgraph(emap_graph()) %>%
       visOptions(
         highlightNearest = list(
