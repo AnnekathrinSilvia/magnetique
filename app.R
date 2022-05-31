@@ -14,12 +14,15 @@ library(visNetwork, warn.conflicts = FALSE)
 library(rintrojs, warn.conflicts = FALSE)
 library(shinyBS, warn.conflicts = FALSE)
 library(igraph)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr, warn.conflicts = FALSE)
+library(ggplot2, warn.conflicts = FALSE)
 
 options(spinner.type = 6)
 
 # sourcing external files -------------------------------------------------
 source("utils.R")
-logo_url <- "https://upload.wikimedia.org/wikipedia/commons/2/2d/Dow.png"
+
 # ui definition -----------------------------------------------------------
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
@@ -27,7 +30,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
 
   # sidebar definition ------------------------------------------------------
   sidebar = dashboardSidebar(
-    img(src = logo_url, class="img-responsive"),
+    img(src = "magnetique_logo.png", class="img-responsive"),
     h1("Magnetique", align='center'),
     hidden(h2("Options:", style = 'margin: 15px', id='options')),
     uiOutput("ui_sidebar")
@@ -38,6 +41,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
     introjsUI(),
     ## handling the overflow in vertical direction for the tabBox
     shiny::tags$head(
+      tags$link(rel="shortcut icon", href="favicon.ico"),
       shiny::tags$style(
         HTML("#myScrollBox{
                 overflow-y: scroll;
@@ -88,8 +92,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         fluidRow(
           column(
-            width = 12,
-            includeMarkdown("data/overview.md")
+            width = 6,
+            includeMarkdown("www/overview.md")
+          ),
+          column(
+            width = 6,
+            h2("Patient characteristics and technical covariates"),
+            includeHTML("www/metadata_table.html")
           )
         ),
       ),
@@ -296,13 +305,6 @@ magnetique_server <- function(input, output, session) {
   session$onSessionEnded(function() DBI::dbDisconnect(con))
   removeNotification(id = "db_connect")
 
-  showNotification("Loading libraries.", id = "lib_load", duration=NULL)  
-  suppressPackageStartupMessages({
-    library(dplyr, warn.conflicts = FALSE)
-    library(tidyr, warn.conflicts = FALSE)
-    library(ggplot2, warn.conflicts = FALSE)
-  })
-  removeNotification(id = "lib_load")
 
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
