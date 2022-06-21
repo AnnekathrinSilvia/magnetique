@@ -5,6 +5,7 @@
 *Magnetique* can be used to identify novel molecular mechanisms associated with cardiomyopathies with potential diagnostics, prognosis and therapeutics values.
 
 *Magnetique* offers:
+
  - **Gene View**. Explore gene expression, differentially expressed genes, and genes with differential transcript usage for three different contrasts.
  - **Gene Set View**. Explore enriched gene sets accross three different contrasts for three ontologies.
  - **Carnival View**. Explore regulatory networks leading to transcription factor activity for three different contrasts.
