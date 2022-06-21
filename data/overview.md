@@ -19,6 +19,6 @@ whole-transcriptomes of left ventricle (LV) tissues from end-stage heart failure
 
 ---
 
-The app is developed and maintained by the [Dieterich Lab](https://www.klinikum.uni-heidelberg.de/zentrum-fuer-innere-medizin-medizin-klinik/innere-medizin-iii-kardiologie-angiologie-und-pneumologie/forschung/forschung/klaus-tschira-institut-for-computational-cardiology) and the [Core Facility Bioinformatics of the University Medical Center Mainz](http://www.bium-mz.de/index-en.html).
+The app is developed and maintained by the [Dieterich Lab](https://www.klinikum.uni-heidelberg.de/zentrum-fuer-innere-medizin-medizin-klinik/innere-medizin-iii-kardiologie-angiologie-und-pneumologie/forschung/forschung/klaus-tschira-institut-for-computational-cardiology) and the [ Bioinformatics Group at the IMBEI (University Medical Center Mainz)](https://www.unimedizin-mainz.de/imbei).
 
 Source code is available on [GitHub](https://github.com/AnnekathrinSilvia/magnetique). To address questions, bugs or feedback, please use the GitHub bug tracker.
