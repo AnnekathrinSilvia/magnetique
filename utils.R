@@ -34,7 +34,7 @@ make_team_df <- data.frame(
       NA,
       "https://twitter.com/e_ni_o",
       NA,
-      "https://twitter.com/fedebioinfo",
+      "https://twitter.com/FedeBioinfo",
       "https://twitter.com/tbrittoborges"),
     orcid = c(
       "https://orcid.org/0000-0002-2475-4945",
