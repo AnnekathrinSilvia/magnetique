@@ -1047,21 +1047,21 @@ magnetique_server <- function(input, output, session) {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
     } else if (input$magnetique_tab == "tab-gene-view") {
       i <- getReactableState("de_table", "selected")
-      if (!is.null(i)) {
+      
+      if (is.null(i)) {
+        showNotification("Select a row in the main table to bookmark it", type = "warning")
+      } else {
         key <- rvalues$key()
         df <- key[i, c("gene_id", "SYMBOL")] %>%
           rename(gene_name=SYMBOL)
 
-        sel_gene <- df[[1, "gene_id"]]
-        if (!sel_gene %in% rvalues$mygenes$gene_id) {
+        sel_gene_id <- df[[1, "gene_id"]]
+        sel_gene <- df[[1, "gene_name"]]
+        if (sel_gene_id %in% rvalues$mygenes$gene_id) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", sel_gene, sel_gene_id), type = "default")
+        } else {
           rvalues$mygenes <- rbind(rvalues$mygenes, df)
-          showNotification(
-            sprintf(
-              "The selected gene %s was added to the bookmarked genes.",
-              sel_gene
-            ),
-            type = "default"
-          )
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", sel_gene, sel_gene_id, nrow(rvalues$mygenes)), type = "message")
         }
       }
     } else if (input$magnetique_tab == "tab-geneset-view") {
