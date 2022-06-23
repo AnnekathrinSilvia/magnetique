@@ -673,10 +673,10 @@ magnetique_server <- function(input, output, session) {
       ggplot() +
       geom_jitter(aes(x = transcript_id, y = proportion, color = Etiology),
         position = position_jitterdodge( jitter.width = 0.2 ),
-        alpha = 0.9, size = 2, show.legend = T, na.rm = TRUE
+        alpha = 0.9, size = 2, show.legend = TRUE, na.rm = TRUE
       ) +
       geom_boxplot(aes(x = transcript_id, y = proportion, fill = Etiology),
-        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = F
+        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = FALSE
       ) +
       scale_fill_manual(name = "Etiology", values = group_colors) +
       scale_colour_manual(name = "Etiology", values = group_colors) +
@@ -967,7 +967,7 @@ magnetique_server <- function(input, output, session) {
         ),
         nodesIdSelection = TRUE
       ) %>%
-      visInteraction(navigationButtons = T) %>%
+      visInteraction(navigationButtons = TRUE) %>%
       visExport(
         name = "igraph",
         type = "png",
