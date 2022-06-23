@@ -246,7 +246,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
             ),
           column(
             width = 9,
-            visNetworkOutput("visnet_igraph", height = "500px")
+            visNetworkOutput("visnet_carnival", height = "500px")
             )
           )
       ),
@@ -950,7 +950,7 @@ magnetique_server <- function(input, output, session) {
 
 
   # Carnival related content ---------------------------------------------------
-  output$visnet_igraph <- renderVisNetwork({
+  output$visnet_carnival <- renderVisNetwork({
     con %>%
       tbl("carnival") %>%
       filter(contrast == local(input$selected_contrast)) %>%
