@@ -1066,21 +1066,41 @@ magnetique_server <- function(input, output, session) {
       }
     } else if (input$magnetique_tab == "tab-geneset-view") {
       i <- getReactableState("enrich_table", "selected")    
-      if (!is.null(i)) {
-        
+      
+      if (is.null(i)) {
+        showNotification("Select a node in the enrichment table to bookmark it", type = "warning")
+      } else {
         df <- rvalues$res_enrich() %>%
           slice(i) %>%
           select(gs_id, gs_description)
-        sel_gs <- df[[1, 1]]
-        if (!sel_gs %in% rvalues$mygenesets$gs_id) {
+        sel_gs_id <- df[[1, "gs_id"]]
+        sel_gs <- df[[1, "gs_description"]]
+        if (sel_gs_id %in% rvalues$mygenesets$gs_id) {
+          showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", sel_gs, sel_gs_id), type = "default")
+        } else {
           rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
-          showNotification(
-            sprintf(
-              "The selected geneset %s was added to the bookmarked gene sets.",
-              sel_gs
-            ),
-            type = "default"
-          )
+          showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", sel_gs, sel_gs_id, nrow(rvalues$mygenesets)), type = "message")
+        }
+      }
+    } else if(input$magnetique_tab == "tab-carnival") {
+      
+      sel_gene <- input$visnet_carnival_selected
+      annotation_obj <- rvalues$annotation_obj()
+      
+      if (sel_gene == "") {
+        showNotification("Select a node in the carnival graph to bookmark it", type = "warning")
+      } else {
+        sel_gene_id <- annotation_obj$gene_id[match(sel_gene, annotation_obj$gene_name)]
+        df <- data.frame(
+          gene_id = sel_gene_id,
+          gene_name = sel_gene
+        )
+        
+        if (sel_gene_id %in% rvalues$mygenes$gene_id) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", sel_gene, sel_gene_id), type = "default")
+        } else {
+          rvalues$mygenes <- rbind(rvalues$mygenes, df)
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", sel_gene, sel_gene_id, nrow(rvalues$mygenes)), type = "message")
         }
       }
     }
