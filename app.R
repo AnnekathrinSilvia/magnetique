@@ -93,7 +93,11 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 6,
-            includeMarkdown("www/overview.md")
+            includeMarkdown("www/overview.md"),
+            actionButton(inputId = "popup_about_us",
+                         label = "More about the development team",
+                         icon = icon("users"), style = .actionbutton_biocstyle
+            )
           ),
           column(
             width = 6,
@@ -1174,6 +1178,16 @@ magnetique_server <- function(input, output, session) {
     introjs(session, options = list(steps = tour))
   })
 
-  .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
+  observeEvent(input$popup_about_us, {
+    showModal(
+      modalDialog(
+        title = "Project members (alphabetical order)",
+        size = "l",
+        tableOutput("team_list"), 
+        easyClose = TRUE,
+        footer = ""
+      )
+    )
+  })
 }
 shinyApp(magnetique_ui, magnetique_server)

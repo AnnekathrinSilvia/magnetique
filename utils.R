@@ -99,7 +99,7 @@ createLinkGO <- function(val) {
 }
 
 .helpbutton_biocstyle <- "color: #0092AC; background-color: #FFFFFF; border-color: #FFFFFF"
-
+.actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
 
 # Launching magnetique! --------------------------------------------------------
 #' Build up a GeneTonicList, from the magnetique DB 
