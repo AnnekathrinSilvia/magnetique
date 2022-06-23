@@ -1065,23 +1065,50 @@ magnetique_server <- function(input, output, session) {
         }
       }
     } else if (input$magnetique_tab == "tab-geneset-view") {
-      i <- getReactableState("enrich_table", "selected")    
+      # handling bookmarks from the table
+      i <- getReactableState("enrich_table", "selected")
+      # as well as from the interactive graph
+      cur_em <- input$visnet_em_selected
       
-      if (is.null(i)) {
-        showNotification("Select a node in the enrichment table to bookmark it", type = "warning")
+      if (is.null(i) & (cur_em == "")) {
+        showNotification("Select a row in the enrichment table or a node from the enrichment map to bookmark it", type = "warning")
       } else {
-        df <- rvalues$res_enrich() %>%
-          slice(i) %>%
-          select(gs_id, gs_description)
-        sel_gs_id <- df[[1, "gs_id"]]
-        sel_gs <- df[[1, "gs_description"]]
-        if (sel_gs_id %in% rvalues$mygenesets$gs_id) {
-          showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", sel_gs, sel_gs_id), type = "default")
-        } else {
-          rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
-          showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", sel_gs, sel_gs_id, nrow(rvalues$mygenesets)), type = "message")
+        # handling bookmarks from the table
+        if (!is.null(i)) {
+          df <- rvalues$res_enrich() %>%
+            slice(i) %>%
+            select(gs_id, gs_description)
+          
+          sel_gs_id <- df[[1, "gs_id"]]
+          sel_gs <- df[[1, "gs_description"]]
+          
+          if (sel_gs_id %in% rvalues$mygenesets$gs_id) {
+            showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", sel_gs, sel_gs_id), type = "default")
+          } else {
+            rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
+            showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", sel_gs, sel_gs_id, nrow(rvalues$mygenesets)), type = "message")
+          }
+        }
+        
+        # as well as from the interactive graph
+        if (cur_em != "") {
+          re <- rvalues$res_enrich()
+          cur_em_id <- re$gs_id[match(cur_em, re$gs_description)]
+          
+          df <- data.frame(
+            gs_id = cur_em_id,
+            gs_description = cur_em
+          )
+
+          if (cur_em_id %in% rvalues$mygenesets$gs_id) {
+            showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", cur_em, cur_em_id), type = "default")
+          } else {
+            rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
+            showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", cur_em, cur_em_id, nrow(rvalues$mygenesets)), type = "message")
+          }
         }
       }
+      
     } else if(input$magnetique_tab == "tab-carnival") {
       
       sel_gene <- input$visnet_carnival_selected
