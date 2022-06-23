@@ -5,6 +5,7 @@
 *Magnetique* can be used to identify novel molecular mechanisms associated with cardiomyopathies with potential diagnostics, prognosis and therapeutics values.
 
 *Magnetique* offers:
+
  - **Gene View**. Explore gene expression, differentially expressed genes, and genes with differential transcript usage for three different contrasts.
  - **Gene Set View**. Explore enriched gene sets accross three different contrasts for three ontologies.
  - **Carnival View**. Explore regulatory networks leading to transcription factor activity for three different contrasts.
@@ -19,6 +20,6 @@ whole-transcriptomes of left ventricle (LV) tissues from end-stage heart failure
 
 ---
 
-The app is developed and maintained by the [Dieterich Lab](https://www.klinikum.uni-heidelberg.de/zentrum-fuer-innere-medizin-medizin-klinik/innere-medizin-iii-kardiologie-angiologie-und-pneumologie/forschung/forschung/klaus-tschira-institut-for-computational-cardiology) and the [Core Facility Bioinformatics of the University Medical Center Mainz](http://www.bium-mz.de/index-en.html).
+The app is developed and maintained by the [Dieterich Lab](https://www.klinikum.uni-heidelberg.de/zentrum-fuer-innere-medizin-medizin-klinik/innere-medizin-iii-kardiologie-angiologie-und-pneumologie/forschung/forschung/klaus-tschira-institut-for-computational-cardiology) and the [ Bioinformatics Group at the IMBEI (University Medical Center Mainz)](https://www.unimedizin-mainz.de/imbei).
 
 Source code is available on [GitHub](https://github.com/AnnekathrinSilvia/magnetique). To address questions, bugs or feedback, please use the GitHub bug tracker.
