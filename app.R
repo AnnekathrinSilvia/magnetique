@@ -276,18 +276,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
         uiOutput("ui_bookmarks")
-      ),
-      tabPanel(
-        title = "About us", icon = icon("users"), value = "tab-aboutus",
-        fluidRow(
-          column(
-            width = 12,
-            h2("Project members (alphabetical order)"),
-            withSpinner(
-              tableOutput("team_list")
-            )
-          )
-        )
       )
     )
     ) ## end of the scrollbox
