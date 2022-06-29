@@ -89,6 +89,90 @@ plot_gene_structure <- function(gtf) {
     return(p)
 }
 
+rbp_results <- "MAGNetApp/data/RBP/mirna_mrna_revgt_interactions.csv"
+create_graph_rbp <- function(rbp_results, filter_adj_pval = 0.03) {
+  tbl_rbp <- read.csv(rbp_results)
+  
+  table(tbl_rbp$gene_name_regulator)
+  
+  # find out what is connected with what
+  all_rbps <- sort(unique(tbl_rbp$gene_name_regulator))
+  all_mrnas <- sort(unique(tbl_rbp$gene_name))
+  
+  table(tbl_rbp$gene_name_regulator == tbl_rbp$gene_name, useNA = "always")
+  sum(is.na(tbl_rbp$gene_name_regulator == tbl_rbp$gene_name))
+  
+  tbl_rbp$adj_pval <- NA
+  
+  # adjusting the p-value, "by RBPs"
+  for (i in all_rbps) {
+    interactors_with_rbp <- (tbl_rbp$gene_name_regulator == i)
+    this_rbp <- tbl_rbp[interactors_with_rbp, ]
+    # message(nrow(this_rbp))
+    tbl_rbp$adj_pval[interactors_with_rbp] <- p.adjust(this_rbp$Pvalue, method = "BH")
+  }
+  
+  # plot(tbl_rbp$Pvalue, tbl_rbp$adj_pval)
+  # might need all p-values to correct adequately? i.e. before filtering?
+  
+  # there are some NAs, removing them
+  tbl_rbp <- na.omit(tbl_rbp)
+  
+  # all rbps are also mrnas
+  intersect(all_rbps, all_mrnas)
+  # some rbps act also on themselves?
+  sum(tbl_rbp$gene_name_regulator == tbl_rbp$gene_name)
+  
+  # enhancing the info encoding in the table
+  tbl_rbp$Association[tbl_rbp$Association == 1] <- "pos"
+  tbl_rbp$Association[tbl_rbp$Association == 0] <- "neg"
+  
+  
+  # filtering the interactions 
+  tbl_rbp <- tbl_rbp[tbl_rbp$adj_pval <= filter_adj_pval, ]
+  
+  tbl_rbp <- dplyr::select(tbl_rbp, gene_name_regulator, gene_name, everything())
+  
+  g <- graph.data.frame(tbl_rbp, directed = FALSE)
+  
+  nodeIDs_rbps <- which(names(V(g)) %in% all_rbps)
+  nodeIDs_genes <- which((names(V(g)) %in% setdiff(all_mrnas, all_rbps)))
+  
+  V(g)$nodetype <- NA
+  V(g)$nodetype[nodeIDs_rbps] <- "RBP"
+  V(g)$nodetype[nodeIDs_genes] <- "mRNA"
+  
+  rbp_graph_color = "gold"
+  
+  V(g)$shape <- c("box", "ellipse")[factor(V(g)$nodetype, levels = c("RBP", "mRNA"))]
+  
+    
+  # to be reused if we want tooltips
+  # V(g)$title <- NA
+  # V(g)$title[nodeIDs_rbps] <- paste0(
+  #   "<h4>",
+  #   sprintf('<a href="http://amigo.geneontology.org/amigo/term/%s" target="_blank">%s</a>', enriched_gsids[nodeIDs_rbps], enriched_gsids[nodeIDs_rbps]), "</h4><br>",
+  #   V(g)$name[nodeIDs_rbps], "<br><br>",
+  #   paste0(strwrap(enriched_gsdescs[nodeIDs_rbps], 50), collapse = "<br>")
+  # )
+  # V(g)$title[nodeIDs_genes] <- paste0(
+  #   "<h4>", V(g)$name[nodeIDs_genes], "</h4><br>",
+  #   "logFC = ", format(round(fcs_genes, 2), nsmall = 2)
+  # )
+  
+  
+  V(g)$color[nodeIDs_genes] <- "#EBECF0"
+  V(g)$color[nodeIDs_rbps] <- "#E5C494"
+  
+  # re-sorting the vertices alphabetically
+  rank_rbps <- rank(V(g)$name[V(g)$nodetype == "RBP"])
+  rank_mrnas <- rank(V(g)$name[V(g)$nodetype == "mRNA"]) +
+    length(rank_rbps) # to keep the RBPs first
+  g <- permute.vertices(g, c(rank_rbps, rank_mrnas))
+  
+  return(g)
+}
+
 
 
 createLinkGO <- function(val) {
