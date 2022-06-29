@@ -34,7 +34,7 @@ make_team_df <- data.frame(
       NA,
       "https://twitter.com/e_ni_o",
       NA,
-      "https://twitter.com/fedebioinfo",
+      "https://twitter.com/FedeBioinfo",
       "https://twitter.com/tbrittoborges"),
     orcid = c(
       "https://orcid.org/0000-0002-2475-4945",
@@ -99,7 +99,7 @@ createLinkGO <- function(val) {
 }
 
 .helpbutton_biocstyle <- "color: #0092AC; background-color: #FFFFFF; border-color: #FFFFFF"
-
+.actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
 
 # Launching magnetique! --------------------------------------------------------
 #' Build up a GeneTonicList, from the magnetique DB 
