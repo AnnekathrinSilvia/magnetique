@@ -21,7 +21,8 @@ get_gid2name <- function(gtf) {
 
 
 #' Produce table with team info
-make_team_df <- data.frame(
+make_team_df <- function() {
+  df <- data.frame(
     name = c(
       "Annekathrin Ludt",
       "Christoph Dieterich",
@@ -31,9 +32,9 @@ make_team_df <- data.frame(
       "Thiago Britto-Borges"),
     twitter = c(
       "https://twitter.com/AnnekathrinLudt",
-      NA,
+      "",
       "https://twitter.com/e_ni_o",
-      NA,
+      "",
       "https://twitter.com/FedeBioinfo",
       "https://twitter.com/tbrittoborges"),
     orcid = c(
@@ -44,6 +45,12 @@ make_team_df <- data.frame(
       "https://orcid.org/0000-0003-3252-7758",
       "https://orcid.org/0000-0002-8984-9084")
   )
+  df$twitter <- paste0("<a href='", df$twitter, "' target='_blank'>", df$twitter, "</a>")
+  df$orcid <- paste0("<a href='", df$orcid, "' target='_blank'>", df$orcid, "</a>")
+  return(df)
+  
+  }
+
 
 
 #' Compute the mean proportion difference between groups

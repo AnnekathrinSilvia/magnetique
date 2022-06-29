@@ -31,7 +31,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
   # sidebar definition ------------------------------------------------------
   sidebar = dashboardSidebar(
     img(src = "magnetique_logo.png", class="img-responsive"),
-    h1("Magnetique", align='center'),
     hidden(h2("Options:", style = 'margin: 15px', id='options')),
     uiOutput("ui_sidebar")
   ),
@@ -41,11 +40,15 @@ magnetique_ui <- shinydashboard::dashboardPage(
     introjsUI(),
     ## handling the overflow in vertical direction for the tabBox
     shiny::tags$head(
-      tags$link(rel="shortcut icon", href="favicon.ico"),
       shiny::tags$style(
-        HTML("#myScrollBox{
-                overflow-y: scroll;
-              }")
+        HTML("
+              /* fix overflow */
+              #myScrollBox{ overflow-y: scroll; }
+              /* side bar color */
+              .main-sidebar { background-color: white !important; }
+              .skin-blue .main-sidebar .sidebar{ color: black; }
+              /* body */
+              .content-wrapper, .right-side {background-color: #d3d3d3 ;}")
       )
     ),
     ## using shinyjs inside the app
@@ -1126,9 +1129,7 @@ magnetique_server <- function(input, output, session) {
   })
 
   # Other content --------------------------------------------------------------
-  output$team_list <- renderTable({
-    make_team_df
-  })
+
 
   # Tours observers
   observeEvent(input$tour_firststeps, {
@@ -1169,9 +1170,10 @@ magnetique_server <- function(input, output, session) {
   observeEvent(input$popup_about_us, {
     showModal(
       modalDialog(
-        title = "Project members (alphabetical order)",
+        title = "Project members",
         size = "l",
-        tableOutput("team_list"), 
+        renderTable(make_team_df(), 
+          sanitize.text.function = function(x) x),
         easyClose = TRUE,
         footer = ""
       )
