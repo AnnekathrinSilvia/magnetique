@@ -164,6 +164,12 @@ create_graph_rbp <- function(rbp_results, filter_adj_pval = 0.03) {
   V(g)$color[nodeIDs_genes] <- "#EBECF0"
   V(g)$color[nodeIDs_rbps] <- "#E5C494"
   
+  E(g)$association_sign <- tbl_rbp$Association
+  
+  E(g)$color[E(g)$association_sign == "pos"] <- "#F67C4A66"
+  E(g)$color[E(g)$association_sign == "neg"] <- "#76AED166"
+  E(g)$width <- 4
+  
   # re-sorting the vertices alphabetically
   rank_rbps <- rank(V(g)$name[V(g)$nodetype == "RBP"])
   rank_mrnas <- rank(V(g)$name[V(g)$nodetype == "mRNA"]) +
