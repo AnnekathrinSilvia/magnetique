@@ -93,7 +93,11 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 6,
-            includeMarkdown("www/overview.md")
+            includeMarkdown("www/overview.md"),
+            actionButton(inputId = "popup_about_us",
+                         label = "More about the development team",
+                         icon = icon("users"), style = .actionbutton_biocstyle
+            )
           ),
           column(
             width = 6,
@@ -246,7 +250,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
             ),
           column(
             width = 9,
-            visNetworkOutput("visnet_igraph", height = "500px")
+            visNetworkOutput("visnet_carnival", height = "500px")
             )
           )
       ),
@@ -272,18 +276,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
         ),
         uiOutput("ui_bookmarks")
-      ),
-      tabPanel(
-        title = "About us", icon = icon("users"), value = "tab-aboutus",
-        fluidRow(
-          column(
-            width = 12,
-            h2("Project members (alphabetical order)"),
-            withSpinner(
-              tableOutput("team_list")
-            )
-          )
-        )
       )
     )
     ) ## end of the scrollbox
@@ -673,10 +665,10 @@ magnetique_server <- function(input, output, session) {
       ggplot() +
       geom_jitter(aes(x = transcript_id, y = proportion, color = Etiology),
         position = position_jitterdodge( jitter.width = 0.2 ),
-        alpha = 0.9, size = 2, show.legend = T, na.rm = TRUE
+        alpha = 0.9, size = 2, show.legend = TRUE, na.rm = TRUE
       ) +
       geom_boxplot(aes(x = transcript_id, y = proportion, fill = Etiology),
-        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = F
+        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = FALSE
       ) +
       scale_fill_manual(name = "Etiology", values = group_colors) +
       scale_colour_manual(name = "Etiology", values = group_colors) +
@@ -950,7 +942,7 @@ magnetique_server <- function(input, output, session) {
 
 
   # Carnival related content ---------------------------------------------------
-  output$visnet_igraph <- renderVisNetwork({
+  output$visnet_carnival <- renderVisNetwork({
     con %>%
       tbl("carnival") %>%
       filter(contrast == local(input$selected_contrast)) %>%
@@ -967,7 +959,7 @@ magnetique_server <- function(input, output, session) {
         ),
         nodesIdSelection = TRUE
       ) %>%
-      visInteraction(navigationButtons = T) %>%
+      visInteraction(navigationButtons = TRUE) %>%
       visExport(
         name = "igraph",
         type = "png",
@@ -1047,40 +1039,87 @@ magnetique_server <- function(input, output, session) {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
     } else if (input$magnetique_tab == "tab-gene-view") {
       i <- getReactableState("de_table", "selected")
-      if (!is.null(i)) {
+      
+      if (is.null(i)) {
+        showNotification("Select a row in the main table to bookmark it", type = "warning")
+      } else {
         key <- rvalues$key()
         df <- key[i, c("gene_id", "SYMBOL")] %>%
           rename(gene_name=SYMBOL)
 
-        sel_gene <- df[[1, "gene_id"]]
-        if (!sel_gene %in% rvalues$mygenes$gene_id) {
+        sel_gene_id <- df[[1, "gene_id"]]
+        sel_gene <- df[[1, "gene_name"]]
+        if (sel_gene_id %in% rvalues$mygenes$gene_id) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", sel_gene, sel_gene_id), type = "default")
+        } else {
           rvalues$mygenes <- rbind(rvalues$mygenes, df)
-          showNotification(
-            sprintf(
-              "The selected gene %s was added to the bookmarked genes.",
-              sel_gene
-            ),
-            type = "default"
-          )
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", sel_gene, sel_gene_id, nrow(rvalues$mygenes)), type = "message")
         }
       }
     } else if (input$magnetique_tab == "tab-geneset-view") {
-      i <- getReactableState("enrich_table", "selected")    
-      if (!is.null(i)) {
+      # handling bookmarks from the table
+      i <- getReactableState("enrich_table", "selected")
+      # as well as from the interactive graph
+      cur_em <- input$visnet_em_selected
+      
+      if (is.null(i) & (cur_em == "")) {
+        showNotification("Select a row in the enrichment table or a node from the enrichment map to bookmark it", type = "warning")
+      } else {
+        # handling bookmarks from the table
+        if (!is.null(i)) {
+          df <- rvalues$res_enrich() %>%
+            slice(i) %>%
+            select(gs_id, gs_description)
+          
+          sel_gs_id <- df[[1, "gs_id"]]
+          sel_gs <- df[[1, "gs_description"]]
+          
+          if (sel_gs_id %in% rvalues$mygenesets$gs_id) {
+            showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", sel_gs, sel_gs_id), type = "default")
+          } else {
+            rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
+            showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", sel_gs, sel_gs_id, nrow(rvalues$mygenesets)), type = "message")
+          }
+        }
         
-        df <- rvalues$res_enrich() %>%
-          slice(i) %>%
-          select(gs_id, gs_description)
-        sel_gs <- df[[1, 1]]
-        if (!sel_gs %in% rvalues$mygenesets$gs_id) {
-          rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
-          showNotification(
-            sprintf(
-              "The selected geneset %s was added to the bookmarked gene sets.",
-              sel_gs
-            ),
-            type = "default"
+        # as well as from the interactive graph
+        if (cur_em != "") {
+          re <- rvalues$res_enrich()
+          cur_em_id <- re$gs_id[match(cur_em, re$gs_description)]
+          
+          df <- data.frame(
+            gs_id = cur_em_id,
+            gs_description = cur_em
           )
+
+          if (cur_em_id %in% rvalues$mygenesets$gs_id) {
+            showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", cur_em, cur_em_id), type = "default")
+          } else {
+            rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
+            showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", cur_em, cur_em_id, nrow(rvalues$mygenesets)), type = "message")
+          }
+        }
+      }
+      
+    } else if(input$magnetique_tab == "tab-carnival") {
+      
+      sel_gene <- input$visnet_carnival_selected
+      annotation_obj <- rvalues$annotation_obj()
+      
+      if (sel_gene == "") {
+        showNotification("Select a node in the carnival graph to bookmark it", type = "warning")
+      } else {
+        sel_gene_id <- annotation_obj$gene_id[match(sel_gene, annotation_obj$gene_name)]
+        df <- data.frame(
+          gene_id = sel_gene_id,
+          gene_name = sel_gene
+        )
+        
+        if (sel_gene_id %in% rvalues$mygenes$gene_id) {
+          showNotification(sprintf("The selected gene %s (%s) is already in the set of the bookmarked genes.", sel_gene, sel_gene_id), type = "default")
+        } else {
+          rvalues$mygenes <- rbind(rvalues$mygenes, df)
+          showNotification(sprintf("Added %s (%s) to the bookmarked genes. The list contains now %d elements", sel_gene, sel_gene_id, nrow(rvalues$mygenes)), type = "message")
         }
       }
     }
@@ -1127,6 +1166,16 @@ magnetique_server <- function(input, output, session) {
     introjs(session, options = list(steps = tour))
   })
 
-  .actionbutton_biocstyle <- "color: #ffffff; background-color: #0092AC"
+  observeEvent(input$popup_about_us, {
+    showModal(
+      modalDialog(
+        title = "Project members (alphabetical order)",
+        size = "l",
+        tableOutput("team_list"), 
+        easyClose = TRUE,
+        footer = ""
+      )
+    )
+  })
 }
 shinyApp(magnetique_ui, magnetique_server)
