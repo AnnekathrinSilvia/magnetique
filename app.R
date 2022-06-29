@@ -1021,6 +1021,82 @@ magnetique_server <- function(input, output, session) {
       )
   })
   
+  # RBP related content --------------------------------------------------------
+  
+  rvalues$rbp_graph <- reactive({
+    rbp_results <- "MAGNetApp/data/RBP/mirna_mrna_revgt_interactions.csv"
+    FDR <- 0.03
+    g <- create_graph_rbp(rbp_results, filter_adj_pval = FDR)
+  })
+  
+  output$rbp_network <- renderVisNetwork({
+    g <- rvalues$rbp_graph()
+    
+    g %>% visIgraph() %>%
+      visOptions(highlightNearest = list(enabled = TRUE,
+                                         degree = 1,
+                                         hover = TRUE),
+                 nodesIdSelection = TRUE)
+  })
+  
+  output$ui_rbp_gene <- renderUI({
+    tagList(
+      p("Something on the selected gene"),
+      plotOutput("rbp_gene"),
+      p("Something on that gene, DTU-wise"),
+      verbatimTextOutput("rbp_dtu")
+    )
+  })
+  
+  output$rbp_gene <- renderPlot({
+    validate(
+      need(input$rbp_network_selected != "", message = "Select a node in the RBP graph")
+    )
+    
+    g <- rvalues$rbp_graph()
+    cur_sel <- input$rbp_network_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    
+    # validate(need(cur_nodetype == "Feature",
+    #               message = "" # "Please select a gene/feature."
+    # ))
+    
+    annotation_obj <- rvalues$annotation_obj()
+    cur_geneid <- [match(cur_sel, annotation_obj$gene_name)]
+    
+    # TODO: here, put something like the counts for the DE
+    ## This will simply use cur_geneid to select the right gene
+    
+    # plot(1,1, main = paste(cur_sel, cur_node, cur_nodetype))
+  })
+
+  output$rbp_dtu <- renderPrint({
+    validate(
+      need(input$rbp_network_selected != "", message = "Select a node in the RBP graph")
+    )
+    
+    g <- rvalues$rbp_graph()
+    cur_sel <- input$rbp_network_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    
+    # validate(need(cur_nodetype == "Feature",
+    #               message = "" # "Please select a gene/feature."
+    # ))
+    
+    annotation_obj <- rvalues$annotation_obj()
+    cur_geneid <- [match(cur_sel, annotation_obj$gene_name)]
+    
+    paste("Select some DTU-centered content for", cur_sel, cur_node, cur_nodetype)
+    
+  })  
+  
+  output$rbp_table <- renderReactable({
+    rbp_results <- "MAGNetApp/data/RBP/mirna_mrna_revgt_interactions.csv"
+    tbl_rbp <- read.csv(rbp_results)
+    reactable(tbl_rbp)
+  })
   
   # Bookmarker -----------------------------------------------------------------
   output$ui_bookmarks <- renderUI({
@@ -1208,6 +1284,13 @@ magnetique_server <- function(input, output, session) {
   
   observeEvent(input$tour_carnivalview, {
     tour <- read.delim("tours/intro_carnivalview.txt",
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
+  
+  observeEvent(input$tour_rbpview, {
+    tour <- read.delim("tours/intro_rbpview.txt",
                        sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
