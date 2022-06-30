@@ -1,16 +1,13 @@
 element;intro
-#welcome;Welcome to the <b>Geneset view tour</b> for <code>magnetique</code>
-#Step1;The tour will take you 
-#tour_genesetview; For the welcome page, you can (re)start it with this button
-#magnetique_tab;You can navigate to the content of the different tabs by clicking...
-#selected_contrast + .selectize-control;selected_contrast info
-#selected_ontology + .selectize-control;selected_ontology info
-#number_genesets;number_genesets info
-#color_by + .selectize-control;color_by info
-#enrich_table;enrich_table content
-#enriched_funcres;enriched_funcres content
-#visnet_em;visnet_em content
-#emap_signature;emap_signature content
-#visnet_em;visnet_em content2
-#emap_signature;emap_signature content2
-#Thanks;Thank you for taking the <b>Geneset view tour</b> of <code>magnetique</code>!
+#welcome;Welcome to the <b>Gene set View</b> tour for <code>magnetique</code>.
+#Step1;The tour will take you through the relevant elements of the <b> Gene Set Analysis</b>.
+#selected_contrast + .selectize-control; You can choose between paris of conditions you wish to compare: DCMvsHCM, DCMvsNFD and HCMvsNFD.
+#selected_ontology + .selectize-control; You can choose between sub-ontologies to show on the Gene Set View: BP for Biolocigal Process, MF for Molecular Function and CC for Cellular Component.
+#number_genesets; You can select the number of most significant gene sets to show on the Gene Set View.
+#color_by + .selectize-control; You can choose how to show the strenght of the regulation of a gene set based on the z-normalized enrichment score (z_score) or their significance scores (gs_pvalue).
+#enrich_table; Table of gene sets indicating the enrichment scores (expected), significance scores (pvalue), and the number of observed genes that are associated to the gene ontology term (observed).
+#enriched_funcres; Plot showing the gene expression (log2-fold-change) of genes associated to each gene ontology term. You can hover over each dot in the plot in order to visualize the gene ID symbol as well as its regulation value (log2-fold-change).
+#visnet_em; Network showing the gene set enrichment map which is used to visualize the results of the gene-set enrichment as a network. The size of the circles will be defined by the number of observed genes for each gene ontology term while the thickness of the edge defines the number of overlapping genes between the gene ontology terms. On the <i> select by id </i> drop down menu, you can select the gene set to be highlighted.
+#nodeSelectvisnet_em; Here you can select the gene ontology term to visualize.
+#emap_signature; Heatmap showing the expression of the genes associated to the selected gene ontology ID across all the experiments. Experiments have been clustered based on the gene expression values and each of the experiments has been labeled with their corresponding labels (Etiology, Race, Sex, Age, SV1 and SV2).
+#Thanks;Thank you for taking the <b>Gene set view</b> tour of <code>magnetique</code>!

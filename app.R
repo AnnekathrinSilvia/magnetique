@@ -181,12 +181,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
             width = 12,
             div(
               actionButton(
-                "tour_view",
+                "tour_genesetview",
                 label = "", icon = icon("question-circle"),
                 style = .helpbutton_biocstyle
               ),
               shinyBS::bsTooltip(
-                "tour_view",
+                "tour_genesetview",
                 "Click me to start a tour of this section!",
                 "bottom",
                 options = list(container = "body")

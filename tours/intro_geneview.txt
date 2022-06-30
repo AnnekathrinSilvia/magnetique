@@ -1,18 +1,14 @@
 element;intro
-#welcome;Welcome to the <b>Gene view tour</b> for <code>magnetique</code>
-#Step1;The tour will take you 
-#tour_geneview; For the welcome page, you can (re)start it with this button
-#magnetique_tab;You can navigate to the content of the different tabs by clicking...
-#selected_contrast + .selectize-control;selected_contrast info
-#selected_ontology + .selectize-control;selected_ontology info
+#welcome;Welcome to the <b>Gene View</b> tour for <code>magnetique</code>.
+#Step1;The tour will take you through the relevant elements of the <b>Gene Expression Analysis</b>.
+#tour_geneview; For the Gene View page, you can (re)start it with this button.
+#selected_contrast + .selectize-control; You can choose between pairs of conditions you wish to compare: DCMvsHCM, DCMvsNFD and HCMvsNFD.
+#bookmarker; Here you can bookmark your selected gene and add it to the <b>Bookmarks</b> section.
 #de_table;Genes with fold change and significance (p-value) for differential gene expression (DGE) and differential transcript usage (DTU), co-expression module and rank (how connected a gene is within a module). Click on a gene to view the DTU results. Click on a gene ID to get more information.
-#geneview_row1;whole row 1
-#de_volcano;text2
-#dtu_volcano;text3
-#de_table;now go back to the table
-#geneview_row2;whole row 2
-#gene_counts;gene counts content
-#transcript_proportion;transcript_proportion text
-#gene_structure;gene_structure text
+#de_volcano; Volcano plot showing the statistical significance (-log10 of p-values) versus magnitude of change (log2-fold-change) of each qunatified gene for the selected contrast.
+#dtu_volcano; Volcano plot showing the statistical significance (-log10 of adjusted p-values) versus magnitude of change (log2-fold-change) of transcript usage values. 
+#gene_counts; Boxplots showing the distribution of quntified counts for the selected gene at each etiology (DCM, HCM and NFD).
+#transcript_proportion; Boxplots showing the transcript proportions over each etiology (DCM, HCM and NFD) for each quantified transcript of the selected gene.
+#gene_structure; Plots showing the organization of the sequence for each quantified transcript of the selected gene. 
 #wgcn_heatmap;Heatmap of the correlation of WGCNA modules (co-expressed gene clusters) with covariates and traits. Significant correlations are indicated with a p-value. Biweight midcorrelation is used (Pearson for binary/discrete variables). Hover over cells to view the correlation. To find the genes that belong to a given module, use the table above (column "module", or search bar).
-#Thanks;Thank you for taking the <b>Gene view tour</b> of <code>magnetique</code>!
+#Thanks;Thank you for taking the <b>Gene view</b> tour of <code>magnetique</code>!

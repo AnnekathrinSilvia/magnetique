@@ -1,8 +1,9 @@
 element;intro
-#welcome;Welcome to the <b>Introduction tour</b> for <code>magnetique</code>
+#welcome;Welcome to the <b>Introduction</b> tour for <code>magnetique</code>.
 #Step1;The tour will take you through the relevant elements of the UI. You can start the tour in each section by clicking on the dedicated button.
 #tour_firststeps; For the welcome page, you can (re)start it with this button, and each tab will have a similar one, consistently placed in the upper right section of the page.
 #Exiting;You can at any time exit this guided introduction by clicking outside of the highlighted portion.
-#magnetique_tab;You can navigate to the content of the different tabs by clicking...
-#ui_sidebar;options explained a little
-#Thanks;Thank you for taking the <b>Introduction tour</b> of <code>magnetique</code>!
+#magnetique_tab;You can navigate to the content of the different tabs by clicking on the upper bar of the page.
+#ui_sidebar; You can choose between different options about which or how to show the different plots available. 
+#ui_sidebar; Here users can set various options for visualization. The options to use and the role they play have been documented in the tours of each section.
+#Thanks;Thank you for taking the <b>Introduction</b> tour of <code>magnetique</code>!
