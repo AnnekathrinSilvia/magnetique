@@ -1063,12 +1063,12 @@ magnetique_server <- function(input, output, session) {
     # ))
     
     annotation_obj <- rvalues$annotation_obj()
-    cur_geneid <- [match(cur_sel, annotation_obj$gene_name)]
+    # cur_geneid <- annotation_obj$gene_id[match(cur_sel, annotation_obj$gene_name)]
     
     # TODO: here, put something like the counts for the DE
     ## This will simply use cur_geneid to select the right gene
     
-    # plot(1,1, main = paste(cur_sel, cur_node, cur_nodetype))
+    plot(1,1, main = paste(cur_sel, cur_node, cur_nodetype))
   })
 
   output$rbp_dtu <- renderPrint({
@@ -1086,7 +1086,7 @@ magnetique_server <- function(input, output, session) {
     # ))
     
     annotation_obj <- rvalues$annotation_obj()
-    cur_geneid <- [match(cur_sel, annotation_obj$gene_name)]
+    # cur_geneid <- annotation_obj$gene_id[match(cur_sel, annotation_obj$gene_name)]
     
     paste("Select some DTU-centered content for", cur_sel, cur_node, cur_nodetype)
     
