@@ -1,6 +1,6 @@
 #! /usr/bin/env Rscript
 
-# Generate sqlite DB to match app.R (speedup/wgcn branch)
+# Generate sqlite DB to match app.R 
 # See CHANGELOG.
 
 # NOTE: The nomenclature was changed in some branches. I follow recent changes to avoid breaking the app, but 
@@ -43,49 +43,6 @@ get_names <- function(files) {
 }
 names(carnival) <- get_names(dir(cdir, "*.RData"))
 
-# WGCNA 
-wgcn.gene <- read.csv(file.path(dirloc, "WGCN", "MAGNetWGCNgene-info.csv.gz", fsep=.Platform$file.sep))
-wgcn.heatmap <- read.csv(file.path(dirloc, "WGCN", "MAGNetWGCNmodule-trait-cor.csv.gz", fsep=.Platform$file.sep))
-
-# map assigned color to modules - the order is from clustering but otherwise arbitrary
-modules <- c("MEred",
-             "MEdarkgrey",      
-             "MEblue",
-             "MEturquoise",
-             "MEgreen",
-             "MEyellow",
-             "MEgrey60",
-             "MEdarkred", 
-             "MEcyan",
-             "MEdarkgreen",     
-             "MEpink",
-             "MElightyellow", 
-             "MEpurple",
-             "MElightgreen",   
-             "MEblack",
-             "MElightcyan",   
-             "MEroyalblue",
-             "MEdarkturquoise", 
-             "MEsalmon")
-mcolours <- gsub("ME", "", modules)
-new_modules <- paste('M', 1:length(modules), sep="")
-wgcn.gene$module <- plyr::mapvalues(wgcn.gene$color, 
-                                    from=mcolours, 
-                                    to=new_modules)
-wgcn.gene <- wgcn.gene[,c("gene_id", "module", "rank")]
-
-wgcn.heatmap$module <- plyr::mapvalues(wgcn.heatmap$X, 
-                                       from=modules, 
-                                       to=new_modules)
-rownames(wgcn.heatmap) <- wgcn.heatmap$module
-wgcn.heatmap$module <- NULL
-wgcn.heatmap$X <- NULL
-
-wgcn.heatmap <- wgcn.heatmap[new_modules,]
-wgcn.heatmap.c <- wgcn.heatmap[,grepl("^cor.", colnames(wgcn.heatmap))]
-colnames(wgcn.heatmap.c) <- gsub("^cor.", "", colnames(wgcn.heatmap.c))
-wgcn.heatmap.p <- wgcn.heatmap[,grepl("^p.", colnames(wgcn.heatmap))]
-colnames(wgcn.heatmap.p) <- gsub("^p.", "", colnames(wgcn.heatmap.p))
 
 # colData.txt
 coldata <- read.csv(file.path(dirloc, "colData.txt", fsep=.Platform$file.sep))
@@ -121,7 +78,7 @@ vst <- SummarizedExperiment::assay(transformed)
 vst <- as_tibble(vst, rownames='row_names')
 dbWriteTable(db, "vst",vst , overwrite=TRUE)
 
-# write DGE results, but first add DTU and WGCN
+# write DGE results, but first add DTU
 
 # DRIMSeq can generate a single p-value per gene, which tests whether there is any differential transcript usage within the gene, but
 # I don't know how this differs from the stageR procedure. Anyway, Thiago advised to use the min. transcript p-value per gene, and the 
@@ -156,7 +113,6 @@ wrt <- purrr::map(contrasts, function(.x) {
   res_de <- dge[[paste(contrast, collapse='vs')]]$res_de %>% as.data.frame() %>%
     dplyr::select(log2FoldChange, padj, SYMBOL) %>% tibble::rownames_to_column("gene_id")
   res_de <- merge(res_de, res_dtu, all.x=T, by='gene_id')
-  res_de <- merge(res_de, wgcn.gene, all.x=T, by='gene_id')
   res_de
 })
 names(wrt) <- get_names(contrasts)
@@ -224,9 +180,8 @@ gtf %>% data.frame() %>% dbWriteTable(db, 'gtf', ., overwrite=TRUE, row.names=FA
 # annotation_obj - pick one
 dge$DCMvsNFD$annotation_obj %>%  dbWriteTable(db, "annotation_obj", ., overwrite=TRUE, row.names=TRUE)
 
-# heatmap data
-dbWriteTable(db, "wgcn_hcor", wgcn.heatmap.c, overwrite=TRUE, row.names=TRUE)
-dbWriteTable(db, "wgcn_hp", wgcn.heatmap.p, overwrite=TRUE, row.names=TRUE)
+# RBPs
+rbp <- read.csv(file.path(dirloc, "RBP", "mirna_mrna_revgt_interactions.csv", fsep=.Platform$file.sep))
 
 # Carnival data
 carnival <- list()
@@ -246,6 +201,8 @@ carnival <- data.frame(
 )
 
 dbWriteTable(db, "carnival", carnival, overwrite=TRUE)
+
+dbWriteTable(db, "rbp", rbp, overwrite=TRUE)
 
 dbDisconnect(db)
 
