@@ -260,7 +260,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
       ),
             tabPanel(
-        title = "RBP View", icon = icon("wind"), value = "tab-rbp-view",
+        title = "RBP:RNA View", icon = icon("arrows-h"), value = "tab-rbp-view",
         fluidRow(
           column(
             width = 12,
@@ -288,12 +288,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
               visNetworkOutput("rbp_network")
             )
           ),
-          column(
-            width = 4,
-            withSpinner(
-              uiOutput("ui_rbp_gene")
-            )
-          )
+          # column(
+          #   width = 4,
+          #   withSpinner(
+          #     uiOutput("ui_rbp_gene")
+          #   )
+          # )
         )
         ,
         fluidRow(
@@ -304,13 +304,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
               reactableOutput("rbp_table")
             )
           ),
-          column(
-            width = 4
+            # column(
+            #   width = 4
             # ,
             # withSpinner(
             #   # plotlyOutput("rbp_something")
             # )
-          )
+          # )
         )
       ),
       tabPanel(
@@ -1014,6 +1014,176 @@ magnetique_server <- function(input, output, session) {
         )
       )
     )
+  })
+
+  # RBP related content --------------------------------------------------------
+  rvalues$rbp_table <- reactive({
+  message('Loading RBP table...')
+
+  con %>%
+    tbl("rbp") %>%
+    collect() %>% 
+    group_by(gene_id_regulator) %>%
+    mutate(FDR = p.adjust(Pvalue, method = 'fdr')) %>%
+    filter(FDR <= 0.005) %>%
+    ungroup()  
+
+  })
+  
+  output$rbp_network <- renderVisNetwork({
+    g <- rvalues$rbp_table() %>%
+      create_graph_rbp(.)
+    
+    g %>% visIgraph() %>%
+      visIgraphLayout() %>%
+      visEdges(smooth = FALSE) %>%
+      visPhysics(stabilization = FALSE)
+      # visOptions(
+      #   highlightNearest = list(
+      #     enabled = TRUE,
+      #     degree = 1,
+      #     hover = TRUE),
+      #     nodesIdSelection = TRUE)
+  })
+  
+  # output$ui_rbp_gene <- renderUI({
+  #   tagList(
+  #     p("Something on the selected gene"),
+  #     plotOutput("rbp_gene"),
+  #     p("Something on that gene, DTU-wise"),
+  #     verbatimTextOutput("rbp_dtu")
+  #   )
+  # })
+  
+  output$rbp_gene <- renderPlot({
+    validate(
+      need(input$rbp_network_selected != "", message = "Select a node in the RBP graph")
+    )
+    
+    g <- rvalues$rbp_graph()
+    cur_sel <- input$rbp_network_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    
+    # validate(need(cur_nodetype == "Feature",
+    #               message = "" # "Please select a gene/feature."
+    # ))
+    
+    annotation_obj <- rvalues$annotation_obj()
+    # cur_geneid <- annotation_obj$gene_id[match(cur_sel, annotation_obj$gene_name)]
+    
+    # TODO: here, put something like the counts for the DE
+    ## This will simply use cur_geneid to select the right gene
+    
+    plot(1,1, main = paste(cur_sel, cur_node, cur_nodetype))
+  })
+
+  output$rbp_dtu <- renderPrint({
+    validate(
+      need(input$rbp_network_selected != "", message = "Select a node in the RBP graph")
+    )
+    
+    g <- rvalues$rbp_graph()
+    cur_sel <- input$rbp_network_selected
+    cur_node <- match(cur_sel, V(g)$name)
+    cur_nodetype <- V(g)$nodetype[cur_node]
+    
+    # validate(need(cur_nodetype == "Feature",
+    #               message = "" # "Please select a gene/feature."
+    # ))
+
+    annotation_obj <- rvalues$annotation_obj()
+
+
+    paste("Select some DTU-centered content for", cur_sel, cur_node, cur_nodetype)
+    
+  })  
+  
+  output$rbp_table <- renderReactable({
+    rvalues$rbp_table() %>%
+    mutate(
+        FDR = round(FDR, 4),
+        Association = ifelse(Association  == 1, 'positive', 'negative')) %>%
+    select(
+      gene_name_regulator,
+      gene_id_regulator,
+      transcript_name,
+      transcript_id,
+      transcript_biotype,
+      FDR,
+      Association) %>%
+      reactable(
+        .,
+        filterable = TRUE,
+        striped = TRUE,
+        defaultPageSize = 10,
+        highlight = TRUE,
+        selection = "single",
+        onClick = "select",
+        wrap = FALSE,
+        rowStyle = list(cursor = "pointer"),
+        theme = reactableTheme(
+          stripedColor = "#f6f8fa",
+          highlightColor = "#f0f5f9",
+          cellPadding = "8px 12px",
+          rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #FF0000")
+        ),
+        columnGroups = list(
+          colGroup(name = "Regulator", columns = c("gene_name_regulator", "gene_id_regulator")),
+          colGroup(name = "Target", columns = c("transcript_name", "transcript_biotype"))
+          ),
+        columns = list(
+          gene_name_regulator = colDef(
+            name = "gene_name",
+            html = TRUE,
+            header = with_tooltip("gene_name", "Regulator gene name"
+            )
+          ),
+          gene_id_regulator = colDef(
+            name = "gene_id",
+            html = TRUE,
+            cell = JS("function(cellInfo) {
+              const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
+              return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
+            }"),
+            minWidth = 140,
+            header = with_tooltip("gene_id", "Link to Ensembl gene page"
+            )
+          ),
+          transcript_id = colDef(
+            name = "transcript_id",
+            html = TRUE,
+            cell = JS("function(cellInfo) {
+              const url = 'https://www.ensembl.org/Homo_sapiens/Transcript/Summary?t=' + cellInfo.value
+              return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
+            }"),
+            minWidth = 140,
+            header = with_tooltip("transcript_id", "Link to Ensembl transcript page"
+            )
+          ),
+          transcript_name = colDef(
+            name = "transcript_name",
+            header = with_tooltip("transcript_name", "Target transcript name"
+            )
+          ),
+          transcript_biotype = colDef(
+            name = "transcript_biotype",
+            header = with_tooltip("transcript_biotype", "Biotype of the target transcript"
+            )
+          ),
+          FDR = colDef(
+            name = "FDR",
+            header = with_tooltip("FDR", "FDR adjusted p-value for the reverse global test"),
+            filterable = FALSE,
+          ),
+          Association = colDef(
+            name = "association",
+            header = with_tooltip("association", "Direction of change in transcript expression."
+            )
+          )
+        ),
+        defaultColDef = colDef(sortNALast = TRUE)
+      )
   })
   
   output$ui_bookmarks_genes <- renderUI({
