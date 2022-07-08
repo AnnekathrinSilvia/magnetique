@@ -1,9 +1,6 @@
 element;intro
 #welcome;Welcome to the <b>Carnival view tour</b> for <code>magnetique</code>
-#Step1;The tour will take you 
-#tour_carnivalview; For the welcome page, you can (re)start it with this button
-#magnetique_tab;You can navigate to the content of the different tabs by clicking...
-#selected_contrast + .selectize-control;selected_contrast info
-#selected_ontology + .selectize-control;selected_ontology info
-#visnet_igraph;The green node is a perturbation node. Circles are inferred proteins, and squares transcription factors. Activatory interactions are represented by black lines, and inhibitory interactions by red lines. Activities are colored from -1 (blue, down-regulated) to +1 (red, up-regulated).
-#Thanks;Thank you for taking the <b>Carnival view tour</b> of <code>magnetique</code>!
+#selected_contrast + .selectize-control; Here you can choose Carnival views for each pair of conditions you wish to compare.
+#welcome; When comparing two experimental conditions, CARNIVAL networks provide a mechanistic overview of regulated interactions between proteins. CARNIVAL uses causal reasoning principles to infer upstream protein signaling interactions that regulate the activities of downstream transcription factors based on the DGE analysis results. The network's nodes represent signaling proteins, and the edges represent their interactions. CARNIVAL interactions (activatory/suppressive interactions) and nodes (inferred up-regulation/down-regulation of a protein's activity) are both signed.
+#carnival_network; Use the <code>select by id</code> button to choose a protein to highlight on the network. The items are listed alphabetically.
+#carnival_legend;The green node is a node of perturbation. The circles represent inferred proteins, and the squares represent transcription factors. Black lines represent activatory interactions, while red lines represent inhibitory interactions. The activities are colored from -1 (blue, down-regulated) to +1 (up-regulated) (red, up-regulated).

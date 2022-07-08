@@ -1,18 +1,10 @@
 element;intro
-#welcome;Welcome to the <b>Gene view tour</b> for <code>magnetique</code>
-#Step1;The tour will take you 
-#tour_geneview; For the welcome page, you can (re)start it with this button
-#magnetique_tab;You can navigate to the content of the different tabs by clicking...
-#selected_contrast + .selectize-control;selected_contrast info
-#selected_ontology + .selectize-control;selected_ontology info
-#de_table;Genes with fold change and significance (p-value) for differential gene expression (DGE) and differential transcript usage (DTU), co-expression module and rank (how connected a gene is within a module). Click on a gene to view the DTU results. Click on a gene ID to get more information.
-#geneview_row1;whole row 1
-#de_volcano;text2
-#dtu_volcano;text3
-#de_table;now go back to the table
-#geneview_row2;whole row 2
-#gene_counts;gene counts content
-#transcript_proportion;transcript_proportion text
-#gene_structure;gene_structure text
-#wgcn_heatmap;Heatmap of the correlation of WGCNA modules (co-expressed gene clusters) with covariates and traits. Significant correlations are indicated with a p-value. Biweight midcorrelation is used (Pearson for binary/discrete variables). Hover over cells to view the correlation. To find the genes that belong to a given module, use the table above (column "module", or search bar).
-#Thanks;Thank you for taking the <b>Gene view tour</b> of <code>magnetique</code>!
+#welcome;The tour will take you through the relevant elements of the Differential Gene Expression (DGE) and Differential Transcript Usage (DTU) analysis.
+#selected_contrast + .selectize-control;You can choose between pairs of conditions you wish to compare: DCMvsHCM, DCMvsNFD and HCMvsNFD.
+#de_table;Genes with fold change and significance (*p*-value) for differential gene expression (DGE) and differential transcript usage (DTU). Gene ID links to the Ensembl website. The table header shows details for each column. Select a row to see more information. 
+#bookmarker;After selecting a row on the table, bookmark it here to add it to the Bookmarks Section.
+#de_volcano;The first volcano plot summarizes the DGE analysis, showing the test statistic (-log10 of *p*-values) versus the magnitude of change (log2-fold-change) of each quantified gene.
+#dtu_volcano;The second volcano plot compares the statistical significance (-log10 of adjusted p-values) to the difference in transcript usage.
+#gene_counts;Boxplots depicting the distribution of read counts per etiology for the selected gene.
+#transcript_proportion;A boxplot showing the fitted transcript proportions of transcripts that were tested for DTU on the selected gene.
+#gene_structure;Plots comparing the transcript structure for each selected gene. 

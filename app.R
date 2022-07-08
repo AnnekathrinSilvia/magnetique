@@ -248,10 +248,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
         ),
         fluidRow(
           column(
+            id = "carnival_legend",
             width = 3,
             img(src = "https://user-images.githubusercontent.com/4517913/166660064-8b171940-b2ce-46e5-bfc6-c2c6685a5bd0.jpeg", class="img-responsive")
             ),
           column(
+            id = "carnival_network",
             width = 9,
             visNetworkOutput("visnet_carnival", height = "500px")
             )
@@ -969,7 +971,7 @@ magnetique_server <- function(input, output, session) {
         label = "Save igraph graph"
       )
   })
-  
+
   
   # Bookmarker -----------------------------------------------------------------
   output$ui_bookmarks <- renderUI({
@@ -978,12 +980,14 @@ magnetique_server <- function(input, output, session) {
         column(
           width = 6,
           h5("Bookmarked genes"),
-          uiOutput("ui_bookmarks_genes")
+          uiOutput("ui_bookmarks_genes"),
+          id = 'bookmarks_genes'
         ),
         column(
           width = 6,
           h5("Bookmarked gene sets"),
-          uiOutput("ui_bookmarks_genesets")
+          uiOutput("ui_bookmarks_genesets"),
+          id = 'bookmarks_genesets'
         )
       )
     )
