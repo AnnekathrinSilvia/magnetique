@@ -259,6 +259,60 @@ magnetique_ui <- shinydashboard::dashboardPage(
             )
           )
       ),
+            tabPanel(
+        title = "RBP View", icon = icon("wind"), value = "tab-rbp-view",
+        fluidRow(
+          column(
+            width = 12,
+            div(
+              actionButton(
+                "tour_rbpview",
+                label = "", icon = icon("question-circle"),
+                style = .helpbutton_biocstyle
+              ),
+              shinyBS::bsTooltip(
+                "tour_rbpview",
+                "Click me to start a tour of this section!",
+                "bottom",
+                options = list(container = "body")
+              ),
+              style = "float:right"
+            )
+          )
+        ),
+        fluidRow(
+          id = "rbpview_row1",
+          column(
+            width = 8,
+            withSpinner(
+              visNetworkOutput("rbp_network")
+            )
+          ),
+          column(
+            width = 4,
+            withSpinner(
+              uiOutput("ui_rbp_gene")
+            )
+          )
+        )
+        ,
+        fluidRow(
+          id = "rbpview_row2",
+          column(
+            width = 8,
+            withSpinner(
+              reactableOutput("rbp_table")
+            )
+          ),
+          column(
+            width = 4
+            # ,
+            # withSpinner(
+            #   # plotlyOutput("rbp_something")
+            # )
+          )
+        )
+      ),
       tabPanel(
         title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
         fluidRow(
