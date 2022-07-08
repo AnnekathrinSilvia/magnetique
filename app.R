@@ -1072,6 +1072,10 @@ magnetique_server <- function(input, output, session) {
     
     
     subg <- induced.subgraph(g, vids = which(V(g)$name %in% nodes_to_include))
+    
+    # delete edges NOT coming out of the main regulator selected
+    regu_edges <- incident(subg, selected_regulator)
+    subg <- subgraph.edges(subg, eids = regu_edges)
 
     subg %>% visIgraph() %>%
       visOptions(highlightNearest = list(enabled = TRUE,
