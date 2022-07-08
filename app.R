@@ -1029,10 +1029,43 @@ magnetique_server <- function(input, output, session) {
     g <- create_graph_rbp(rbp_results, filter_adj_pval = FDR)
   })
   
+  rvalues$full_graph <- reactive({
+    rbp_results <- "MAGNetApp/data/RBP/mirna_mrna_revgt_interactions.csv"
+    FDR <- 1
+    g <- create_graph_rbp(rbp_results, filter_adj_pval = FDR)
+  })
+  
   output$rbp_network <- renderVisNetwork({
     g <- rvalues$rbp_graph()
     
     g %>% visIgraph() %>%
+      visOptions(highlightNearest = list(enabled = TRUE,
+                                         degree = 1,
+                                         hover = TRUE),
+                 nodesIdSelection = TRUE)
+  })
+  
+  output$rbp_subgraph <- renderVisNetwork({
+    i <- getReactableState("rbp_table", "selected")
+    validate(
+      need(!is.na(i),
+           message = "Please select an entry from the table to display the regulator subgraph.")
+    )
+    
+    g <- rvalues$full_graph()
+    
+    message(i)
+    
+    selected_regulator <- tbl_rbp[i, "gene_name_regulator"]
+    regulator_neighbors <- neighbors(g, v = which(V(g)$name %in% selected_regulator))
+    
+    nodes_to_include <- c(selected_regulator, unique(names(regulator_neighbors)))
+    
+    
+    
+    subg <- induced.subgraph(g, vids = which(V(g)$name %in% nodes_to_include))
+
+    subg %>% visIgraph() %>%
       visOptions(highlightNearest = list(enabled = TRUE,
                                          degree = 1,
                                          hover = TRUE),
@@ -1093,9 +1126,15 @@ magnetique_server <- function(input, output, session) {
   })  
   
   output$rbp_table <- renderReactable({
-    rbp_results <- "MAGNetApp/data/RBP/mirna_mrna_revgt_interactions.csv"
-    tbl_rbp <- read.csv(rbp_results)
-    reactable(tbl_rbp)
+    
+    reactable(tbl_rbp,
+              searchable = TRUE,
+              striped = TRUE,
+              defaultPageSize = 5,
+              highlight = TRUE,
+              selection = "single",
+              onClick = "select",
+              wrap = FALSE)
   })
   
   # Bookmarker -----------------------------------------------------------------
