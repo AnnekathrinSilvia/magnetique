@@ -133,6 +133,13 @@ magnetique_ui <- shinydashboard::dashboardPage(
             width = 6,
             withSpinner(
               reactableOutput("de_table")
+            ),
+            shinydashboard::box(
+              width = 12,
+              h1("Hi there"),
+              title = "gene info box", 
+              collapsible = TRUE,
+              collapsed = TRUE
             )
           ),
           column(
