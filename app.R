@@ -300,11 +300,10 @@ magnetique_ui <- shinydashboard::dashboardPage(
             )
           ),
           column(
-            width = 4
-            # ,
-            # withSpinner(
-            #   # plotlyOutput("rbp_something")
-            # )
+            width = 4,
+            withSpinner(
+              visNetworkOutput("rbp_subgraph")
+            )
           )
         )
       ),
