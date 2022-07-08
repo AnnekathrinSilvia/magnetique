@@ -346,7 +346,7 @@ magnetique_server <- function(input, output, session) {
     port = Sys.getenv("PGPORT"),
     password = Sys.getenv("PGPASSWORD"),
     user = Sys.getenv("PGUSER")
-  ) 
+  )
   session$onSessionEnded(function() DBI::dbDisconnect(con))
   removeNotification(id = "db_connect")
 
@@ -355,8 +355,10 @@ magnetique_server <- function(input, output, session) {
   rvalues <- reactiveValues()
   rvalues$mygenes <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gene_id", "gene_name"))))
   rvalues$mygenesets <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gs_id", "gs_description"))))
-
-
+  
+  
+  rbp_results <- "MAGNetApp/data/RBP/mirna_mrna_revgt_interactions.csv"
+  tbl_rbp <- read.csv(rbp_results)
   # sidebar server-side -----------------------------------------------------
   output$ui_sidebar <- renderUI({
     tagList(
