@@ -686,37 +686,6 @@ magnetique_server <- function(input, output, session) {
       )
   })
 
-
-  # wgcn related content ---------------------------------------------
-  output$wgcn_heatmap <- renderPlotly({
-    y <- con %>%
-      tbl("wgcn_hp") %>%
-      data.frame() %>%
-      tibble::column_to_rownames("row_names") %>%
-      as.matrix()
-
-    textMatrix <- ifelse(y < 0.01, signif(y, 1), "")
-    x <- con %>%
-      tbl("wgcn_hcor") %>%
-      data.frame() %>%
-      tibble::column_to_rownames("row_names") %>%
-      as.matrix()
-    a <- rep(0:(ncol(x) - 1), each = nrow(x))
-    b <- rep(c(0:(nrow(x) - 1)), ncol(x))
-    plot_ly(
-      x = colnames(x),
-      y = rownames(x),
-      z = x,
-      colors = colorRampPalette(rev(RColorBrewer::brewer.pal(10, "RdYlBu")))(256),
-      zmin = -1, zmax = 1,
-      type = "heatmap",
-    ) %>%
-      add_annotations(x = a, y = b, text = textMatrix, xref = "x", yref = "y", showarrow = FALSE, font = list(color = "black")) %>%
-      config(displayModeBar = FALSE) %>%
-      layout(title = "Module-trait correlation")
-  })
-
-
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({
     rvalues$res_enrich() %>%
