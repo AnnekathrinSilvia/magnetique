@@ -1,0 +1,5 @@
+element;intro
+#welcome;The RBP:RNA view shows the interaction between RNA-binding proteins and mRNA as defined by the oRNAment database.
+#rbp_table;Here is the complete list of RBP: RNA interactions with an FDR-adjusted *p*-value <= 0.05 (reverse global test).
+#rbp_network;Here you can quickly transverse the interactions for mRNA of genes hosting DTU events. The complete network is omitted due to the high number of interactions.
+#selected_contrast + .selectize-control;The results for the reverse global test don't depend on the construct selection, but the DTU result does. Changing the contrast changes the genes that were tested for DTU.
