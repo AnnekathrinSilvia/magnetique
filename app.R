@@ -492,7 +492,7 @@ magnetique_server <- function(input, output, session) {
         vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), ~round(., 2)) %>%
       reactable(
         .,
-        searchable = TRUE,
+        searchable = FALSE,
         striped = TRUE,
         defaultPageSize = 5,
         highlight = TRUE,
@@ -509,6 +509,7 @@ magnetique_server <- function(input, output, session) {
         columns = list(
           gene_id = colDef(
             name = "gene_id",
+            filterable = TRUE,
             html = TRUE,
             cell = JS("function(cellInfo) {
               const url = 'https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + cellInfo.value
@@ -519,6 +520,7 @@ magnetique_server <- function(input, output, session) {
           ),
           SYMBOL = colDef(
             name = "Gene name",
+            filterable = TRUE,
             header = with_tooltip("gene_name", "Gene symbol")
           ),
           log2FoldChange = colDef(
@@ -757,7 +759,7 @@ magnetique_server <- function(input, output, session) {
         arrange(pval) %>%
       reactable(
         .,
-        searchable = TRUE,
+        searchable = FALSE,
         striped = TRUE,
         rownames = FALSE,
         defaultPageSize = 5,
@@ -776,6 +778,7 @@ magnetique_server <- function(input, output, session) {
         columns = list(
           id = colDef(
             html = TRUE,
+            filterable = TRUE,
             cell = JS("function(cellInfo) {
               const url = 'http://amigo.geneontology.org/amigo/term/' + cellInfo.value
               return '<a href=\"' + url + '\" target=\"_blank\">' + cellInfo.value + '</a>'
@@ -786,6 +789,7 @@ magnetique_server <- function(input, output, session) {
             ),
           description = colDef(
             width = 250,
+            filterable = TRUE,
             header = with_tooltip("gs_description", "Description for the gene set")),
           pval = colDef(
             header = with_tooltip("pvalue", "p-value for the TopGO enrichment test")),
