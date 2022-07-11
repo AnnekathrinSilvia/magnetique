@@ -1070,7 +1070,21 @@ magnetique_server <- function(input, output, session) {
       visLegend(
         width = 0.1, 
         position = "right", 
-        main = "Group")
+        main = "") %>% 
+      visOptions(
+        highlightNearest = list(
+          enabled = TRUE,
+          degree = 1
+        ),
+        nodesIdSelection = TRUE
+      ) %>%
+      visInteraction(navigationButtons = TRUE) %>%
+      visExport(
+        name = "rbp_network",
+        type = "png",
+        label = "Save graph"
+      )
+
   })
   
   # output$ui_rbp_gene <- renderUI({
