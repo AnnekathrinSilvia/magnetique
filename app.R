@@ -260,7 +260,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           )
       ),
             tabPanel(
-        title = "RBP:RNA View", icon = icon("arrows-h"), value = "tab-rbp-view",
+        title = "RBP:RNA View", icon = icon("arrows-alt-h"), value = "tab-rbp-view",
         fluidRow(
           column(
             width = 12,
@@ -427,6 +427,8 @@ magnetique_server <- function(input, output, session) {
       shinyjs::hide("color_by")
       shinyjs::show("bookmarker")
       shinyjs::show("options")
+    } else if (input$magnetique_tab == "tab-rbp-view") {
+      shinyjs::show("selected_contrast")
     } else {
       shinyjs::hide("selected_contrast")
       shinyjs::hide("selected_ontology")
@@ -1018,32 +1020,53 @@ magnetique_server <- function(input, output, session) {
 
   # RBP related content --------------------------------------------------------
   rvalues$rbp_table <- reactive({
-  message('Loading RBP table...')
+    dtu_sig <- rvalues$key() %>% 
+      filter(dtu_pvadj < 0.05) %>% 
+      pull(SYMBOL)
 
-  con %>%
-    tbl("rbp") %>%
-    collect() %>% 
-    group_by(gene_id_regulator) %>%
-    mutate(FDR = p.adjust(Pvalue, method = 'fdr')) %>%
-    filter(FDR <= 0.005) %>%
-    ungroup()  
+
+    con %>%
+      tbl("rbp") %>%
+      collect() %>% 
+      group_by(gene_id_regulator) %>%
+      mutate(FDR = p.adjust(Pvalue, method = 'fdr')) %>%
+      filter(FDR <= 0.05 & gene_name %in% dtu_sig) %>%
+      ungroup()  
 
   })
   
   output$rbp_network <- renderVisNetwork({
-    g <- rvalues$rbp_table() %>%
-      create_graph_rbp(.)
-    
-    g %>% visIgraph() %>%
+
+    i <- getReactableState("rbp_table", "selected")
+    validate(
+      need(!is.na(i),
+           message = "Please select an entry from the table to display the regulator subgraph.")
+    )
+
+    df <- rvalues$rbp_table()
+    g <- create_graph_rbp(df)
+
+    g %>%
+      make_ego_graph(
+        .,
+        order = 2, 
+        nodes = which(V(g)$name == df[[i, "gene_name_regulator"]])
+      ) %>% 
+      magrittr::extract2(1)  %>% 
+      visIgraph() %>% 
       visIgraphLayout() %>%
-      visEdges(smooth = FALSE) %>%
-      visPhysics(stabilization = FALSE)
-      # visOptions(
-      #   highlightNearest = list(
-      #     enabled = TRUE,
-      #     degree = 1,
-      #     hover = TRUE),
-      #     nodesIdSelection = TRUE)
+      visGroups( 
+        groupname = "regulator",  
+        color = "#EBECF0", 
+        shape = "square") %>% 
+      visGroups(
+        groupname = "target",
+        color = "#E5C494", 
+        shape = "ellipse") %>% 
+      visLegend(
+        width = 0.1, 
+        position = "right", 
+        main = "Group")
   })
   
   # output$ui_rbp_gene <- renderUI({
@@ -1116,7 +1139,7 @@ magnetique_server <- function(input, output, session) {
         .,
         filterable = TRUE,
         striped = TRUE,
-        defaultPageSize = 10,
+        defaultPageSize = 5,
         highlight = TRUE,
         selection = "single",
         onClick = "select",
@@ -1352,6 +1375,13 @@ magnetique_server <- function(input, output, session) {
   
   observeEvent(input$tour_carnivalview, {
     tour <- read.delim("tours/intro_carnivalview.txt",
+      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+    )
+    introjs(session, options = list(steps = tour))
+  })
+
+  observeEvent(input$tour_rbpview, {
+    tour <- read.delim("tours/intro_rbpview.txt",
       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))

@@ -9,6 +9,7 @@
  - **Gene View**. Explore gene expression, differentially expressed genes, and genes with differential transcript usage for three different contrasts.
  - **Gene Set View**. Explore enriched gene sets accross three different contrasts for three ontologies.
  - **Carnival View**. Explore regulatory networks leading to transcription factor activity for three different contrasts.
+ - **RBP:RNA View**. Explore interactions between RNA-binding proteins (RBPs) and RNA species that undergo different transcript usages.
  - **Bookmarks**. Save and download genes of interests.
 
 **Study Overview**. Sample information, phenotype, technical covariates, and summary statistics are shown on the right.

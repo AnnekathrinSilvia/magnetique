@@ -96,7 +96,17 @@ plot_gene_structure <- function(gtf) {
     return(p)
 }
 
+create_graph_rbp <- function(tbl_rbp) {
+    
+  df <- tbl_rbp %>%
+   select(gene_name_regulator, transcript_name, everything())
 
+  g <- graph.data.frame(df, directed = TRUE) 
+  
+  rbp_graph_color <- "gold"
+  V(g)$group <- ifelse(grepl("-", names(V(g))), 'target', 'regulator')
+  return(g)
+}
 
 createLinkGO <- function(val) {
   sprintf(
@@ -184,16 +194,8 @@ counts <- tbl(con, "counts") %>%
   return(gtl)
 } 
 
-ledges <- data.frame(
-  color = c("black", "red"),
-  label = c("\nActivatory Interaction", "\nInhibitory Interaction"), 
-  arrows =c("to", "to"))
 
-lnodes <- data.frame(
-  label = c("Down-regulation", "Up-regulation", "Pertubation", "Inferred Protein", "Transcription Factor"),
-  shape = c("ellipse", "ellipse", "ellipse", "circle", 'square'), 
-  color = c("#0000FF", "#FF0000",  "#00FF00", "lightgrey", "lightgrey"),
-  id = 1:5)
+
 
 highlight_selected <- function(selected, nelements) {     
     if(!is.null(selected)){
