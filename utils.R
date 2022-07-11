@@ -102,7 +102,7 @@ create_graph_rbp <- function(tbl_rbp) {
    select(gene_name_regulator, transcript_name, everything())
 
   g <- graph.data.frame(df, directed = TRUE) 
-  
+  g <- permute.vertices(g, Matrix::invPerm(order(V(g)$name)))
   rbp_graph_color <- "gold"
   V(g)$group <- ifelse(grepl("-", names(V(g))), 'target', 'regulator')
   return(g)
