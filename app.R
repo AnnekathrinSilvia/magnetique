@@ -665,7 +665,10 @@ magnetique_server <- function(input, output, session) {
         colors = c(I("steelblue"), I("gold"), I("forestgreen"))
       ) %>%
       config(displayModeBar = FALSE) %>%
-      layout(title = "Gene counts", xaxis = list(title = ""))
+      layout(
+        title = "Gene counts", 
+        xaxis = list(title = ""), 
+        yaxis = list(title = "log10(raw read counts)"))
   })
 
   output$gene_structure <- renderPlot({
