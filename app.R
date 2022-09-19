@@ -255,7 +255,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             id = "carnival_network",
             width = 9,
-            visNetworkOutput("visnet_carnival", height = "500px")
+            visNetworkOutput("visnet_carnival", height = "750px")
             )
           )
       ),
