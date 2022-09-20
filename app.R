@@ -1014,7 +1014,11 @@ magnetique_server <- function(input, output, session) {
       pull(igraph) %>%
       jsonlite::unserializeJSON() %>%
       igraph::upgrade_graph(.) %>%
-      permute.vertices(., Matrix::invPerm(order(V(.)$name))) %>%
+      permute.vertices(., Matrix::invPerm(order(V(.)$name))) -> g
+    
+    V(g)$title <- V(g)$name
+    
+    g %>% 
       visNetwork::visIgraph() %>%
       visNodes(font = list(background = "white"))  %>%
       visOptions(
