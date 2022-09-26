@@ -657,6 +657,7 @@ magnetique_server <- function(input, output, session) {
         type = "box",
         x = ~Etiology,
         y = ~ log10(value),
+        jitter = 0.8,
         color = ~factor(Etiology, levels = c("NFD",  "DCM", "HCM")),
         colors = c(I("steelblue"), I("gold"), I("forestgreen"))
       ) %>%
@@ -753,7 +754,6 @@ magnetique_server <- function(input, output, session) {
             "expected" = "Expected", 
             "observed"= "gs_de_count", 
             "pval" = "gs_pvalue"))  %>%
-#        mutate_at(vars(pval), ~round(., 2)) %>%
         mutate(pval = round(-log10(pval), 2)) %>%
         select(id, description, pval, expected, observed) %>%
         arrange(pval) %>%
