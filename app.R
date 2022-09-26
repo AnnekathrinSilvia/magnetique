@@ -166,7 +166,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
             )
           ),
           column(
-            width = 5,
+            width = 6,
             withSpinner(
               plotOutput("gene_structure")
             )
@@ -551,6 +551,7 @@ magnetique_server <- function(input, output, session) {
         x = ~log2FoldChange,
         y = ~ -log10(padj),
         type = "scatter",
+        marker = list(opacity = 0.2),
         text = ~ paste0(
           "<b>", SYMBOL, "</b>",
           "<br><i>GeneID</i>: ", gene_id,
@@ -559,7 +560,19 @@ magnetique_server <- function(input, output, session) {
         ),
         hoverinfo = "text"
       ) %>%
-      config(modeBarButtonsToRemove = c(displaylogo = FALSE, "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d")) %>%
+      config(   
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d", 
+          "hoverCompareCartesian", "hoverClosestCartesian", 
+          "select2d", "lasso2d", "zoom2d"),
+        toImageButtonOptions = list(
+         format = "png",
+         width = 700,
+         height = 500,
+        filename = stringr::str_glue("magnetique_dge_volcano_{input$selected_contrast}")
+        )
+      ) %>%
       toWebGL %>%
       layout(
         title = "Differentially expressed genes",
@@ -592,6 +605,7 @@ magnetique_server <- function(input, output, session) {
         x = ~dtu_dif,
         y = ~ -log10(dtu_pvadj),
         type = "scatter",
+        marker = list(opacity = 0.2),
         text = ~ paste0(
           "<b>", SYMBOL, "</b>",
           "<br><i>GeneID</i>: ", gene_id,
@@ -600,7 +614,18 @@ magnetique_server <- function(input, output, session) {
         ),
         hoverinfo = "text"
       ) %>%
-      config(displayModeBar = FALSE) %>%
+      config(   
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d", 
+          "hoverCompareCartesian", "hoverClosestCartesian", 
+          "select2d", "lasso2d", "zoom2d"),
+        toImageButtonOptions = list(
+         format = "png",
+         width = 700,
+         height = 500,
+        filename = stringr::str_glue("magnetique_dge_volcano_{input$selected_contrast}")
+        )) %>%
       toWebGL %>%
       layout(
         title = "Genes with differential transcript usage",
@@ -685,7 +710,7 @@ magnetique_server <- function(input, output, session) {
          width = 700,
          height = 500,
          
-        filename = stringr::str_glue("magnetique_gene_counts_{i}.png")
+        filename = stringr::str_glue("magnetique_gene_counts_{i}")
         )
       ) %>%
       layout(
@@ -774,7 +799,7 @@ magnetique_server <- function(input, output, session) {
         marker = list(opacity = 0.3)) %>%
         layout(boxmode = "group",
                title = "Transcript proportion",
-               xaxis = list(title = ""),
+               yaxis = list(title = ""),
                showlegend = FALSE) %>%
         config(
           displaylogo = FALSE,
@@ -786,7 +811,7 @@ magnetique_server <- function(input, output, session) {
          format = "png",
          width = 700,
          height = 500,
-        filename = stringr::str_glue("magnetique_transcript_proportion_{i}.png")
+        filename = stringr::str_glue("magnetique_transcript_proportion_{i}")
         )
       )
   })
