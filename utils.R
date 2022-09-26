@@ -43,7 +43,7 @@ make_team_df <- function() {
       "https://orcid.org/0000-0001-8042-0395",
       "https://orcid.org/0000-0001-9355-0973",
       "https://orcid.org/0000-0003-3252-7758",
-      "https://orcid.org/0000-0002-8984-9084")
+      "https://orcid.org/0000-0002-6218-4429")
   )
   df$twitter <- paste0("<a href='", df$twitter, "' target='_blank'>", df$twitter, "</a>")
   df$orcid <- paste0("<a href='", df$orcid, "' target='_blank'>", df$orcid, "</a>")
