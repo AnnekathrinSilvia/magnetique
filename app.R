@@ -377,14 +377,14 @@ magnetique_server <- function(input, output, session) {
         shinyjs::hidden(
           tagList(
             selectInput("selected_ontology",
-                        label = "Ontology",
+                        label = "Gene Ontology (GO)",
                         choices = c("BP", "MF", "CC"),
                         selected = "BP"
             ),
             numericInput("number_genesets",
                          "Number of genesets",
                          value = 15,
-                         min = 0
+                         min = 1
             ),
             selectInput("color_by",
                         "Color by",
