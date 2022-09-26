@@ -213,7 +213,16 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             width = 6,
             withSpinner(
-              visNetworkOutput("visnet_em")
+              tagList(
+                visNetworkOutput("visnet_em"),
+                shinydashboard::box(
+                  title = "About this enrichment map",
+                  width = 12,
+                  collapsible = TRUE,
+                  collapsed = TRUE,
+                  htmlOutput("visnet_explanation")
+                )  
+              )
             )
           ),
           column(
@@ -255,7 +264,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             id = "carnival_network",
             width = 9,
-            visNetworkOutput("visnet_carnival", height = "500px")
+            visNetworkOutput("visnet_carnival", height = "750px")
             )
           )
       ),
@@ -860,6 +869,25 @@ magnetique_server <- function(input, output, session) {
       )
   })
 
+    output$visnet_explanation <- renderUI({
+    validate(
+      need({ecount(emap_graph()) > 0}, 
+           message = ""
+      )
+    )
+    
+    HTML(
+      paste0(
+        "If selecting <b>color</b> by <em>z_score</em>, red nodes display genesets with positive values, ",
+        "while blue nodes represent genesets with negative values. ",
+        "If showing the geneset <em>p-value</em>, darker colors represent genesets with smaller ",
+        "p-values, indicating a more significant enrichment.",
+        "<br>The <b>size</b> of the node is representing the size of the geneset (number of genes ",
+        "assigned to it)."
+      )
+    )  
+  })
+
   output$emap_signature <- renderPlot({
     i <- getReactableState("enrich_table", "selected")    
     validate(
@@ -980,14 +1008,17 @@ magnetique_server <- function(input, output, session) {
 
   # Carnival related content ---------------------------------------------------
   output$visnet_carnival <- renderVisNetwork({
-    con %>%
+    g <- con %>%
       tbl("carnival") %>%
       filter(contrast == local(input$selected_contrast)) %>%
       pull(igraph) %>%
       jsonlite::unserializeJSON() %>%
       igraph::upgrade_graph(.) %>%
-      permute.vertices(., Matrix::invPerm(order(V(.)$name))) %>%
-      visNetwork::visIgraph() %>%
+      permute.vertices(., Matrix::invPerm(order(V(.)$name)))
+      V(g)$title <- V(g)$name
+
+
+    visNetwork::visIgraph(g) %>%
       visNodes(font = list(background = "white"))  %>%
       visOptions(
         highlightNearest = list(

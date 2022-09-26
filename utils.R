@@ -105,6 +105,8 @@ create_graph_rbp <- function(tbl_rbp) {
   g <- permute.vertices(g, Matrix::invPerm(order(V(g)$name)))
   rbp_graph_color <- "gold"
   V(g)$group <- ifelse(grepl("-", names(V(g))), 'target', 'regulator')
+  V(g)$title <- V(g)$name
+    
   return(g)
 }
 
