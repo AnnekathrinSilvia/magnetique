@@ -297,12 +297,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
               visNetworkOutput("rbp_network")
             )
           ),
-          # column(
-          #   width = 4,
-          #   withSpinner(
-          #     uiOutput("ui_rbp_gene")
-          #   )
-          # )
         )
         ,
         fluidRow(
@@ -313,13 +307,6 @@ magnetique_ui <- shinydashboard::dashboardPage(
               reactableOutput("rbp_table")
             )
           ),
-            # column(
-            #   width = 4
-            # ,
-            # withSpinner(
-            #   # plotlyOutput("rbp_something")
-            # )
-          # )
         )
       ),
       tabPanel(
@@ -1120,16 +1107,7 @@ magnetique_server <- function(input, output, session) {
       )
 
   })
-  
-  # output$ui_rbp_gene <- renderUI({
-  #   tagList(
-  #     p("Something on the selected gene"),
-  #     plotOutput("rbp_gene"),
-  #     p("Something on that gene, DTU-wise"),
-  #     verbatimTextOutput("rbp_dtu")
-  #   )
-  # })
-  
+   
   output$rbp_gene <- renderPlot({
     validate(
       need(input$rbp_network_selected != "", message = "Select a node in the RBP graph")
@@ -1140,15 +1118,9 @@ magnetique_server <- function(input, output, session) {
     cur_node <- match(cur_sel, V(g)$name)
     cur_nodetype <- V(g)$nodetype[cur_node]
     
-    # validate(need(cur_nodetype == "Feature",
-    #               message = "" # "Please select a gene/feature."
-    # ))
     
     annotation_obj <- rvalues$annotation_obj()
-    # cur_geneid <- annotation_obj$gene_id[match(cur_sel, annotation_obj$gene_name)]
     
-    # TODO: here, put something like the counts for the DE
-    ## This will simply use cur_geneid to select the right gene
     
     plot(1,1, main = paste(cur_sel, cur_node, cur_nodetype))
   })
@@ -1163,10 +1135,7 @@ magnetique_server <- function(input, output, session) {
     cur_node <- match(cur_sel, V(g)$name)
     cur_nodetype <- V(g)$nodetype[cur_node]
     
-    # validate(need(cur_nodetype == "Feature",
-    #               message = "" # "Please select a gene/feature."
-    # ))
-
+  
     annotation_obj <- rvalues$annotation_obj()
 
 
