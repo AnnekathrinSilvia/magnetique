@@ -484,8 +484,8 @@ magnetique_server <- function(input, output, session) {
   # DE related content ---------------------------------------------------------
   output$de_table <- renderReactable({
     rvalues$key() %>%
-      mutate_at(
-        vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), ~round(., 2)) %>%
+      mutate_at(vars(log2FoldChange, dtu_dif), ~round(., 2)) %>%
+      mutate_at(vars(padj, dtu_pvadj), ~round(-log10(.), 2)) %>%
       reactable(
         .,
         searchable = FALSE,
@@ -525,11 +525,11 @@ magnetique_server <- function(input, output, session) {
           ),
           padj = colDef(
             name = "dge_padj",
-            header = with_tooltip("dge_padj", "Adjusted p-value for the DESeq2 analysis")
+            header = with_tooltip("dge_padj", "Adjusted p-value for the DESeq2 analysis (-log10 transformed)")
           ),
           dtu_pvadj = colDef(
             name = "dtu_padj",
-            header = with_tooltip("dtu_padj", "Adjusted p-value for the DRIMseq analysis")
+            header = with_tooltip("dtu_padj", "Adjusted p-value for the DRIMseq analysis (-log10 transformed)")
           ),
           dtu_dif = colDef(
             name = "dtu_dif",
@@ -753,7 +753,8 @@ magnetique_server <- function(input, output, session) {
             "expected" = "Expected", 
             "observed"= "gs_de_count", 
             "pval" = "gs_pvalue"))  %>%
-        mutate_at(vars(pval), ~round(., 2)) %>%
+#        mutate_at(vars(pval), ~round(., 2)) %>%
+        mutate(pval = round(-log10(pval), 2)) %>%
         select(id, description, pval, expected, observed) %>%
         arrange(pval) %>%
       reactable(
@@ -791,7 +792,7 @@ magnetique_server <- function(input, output, session) {
             filterable = TRUE,
             header = with_tooltip("gs_description", "Description for the gene set")),
           pval = colDef(
-            header = with_tooltip("pvalue", "p-value for the TopGO enrichment test")),
+            header = with_tooltip("pval", "-log10(p-value) for the TopGO enrichment test")),
           expected = colDef(
             header = with_tooltip("expec.", "Expected number of genes in the gene set")),
           observed = colDef(
@@ -1146,7 +1147,7 @@ magnetique_server <- function(input, output, session) {
   output$rbp_table <- renderReactable({
     rvalues$rbp_table() %>%
     mutate(
-        FDR = round(FDR, 4),
+        FDR = round(FDR, 2),
         Association = ifelse(Association  == 1, 'positive', 'negative')) %>%
     select(
       gene_name_regulator,
