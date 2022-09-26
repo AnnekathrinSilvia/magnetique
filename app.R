@@ -154,7 +154,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           id = "geneview_row2",
           column(
-            width = 4,
+            width = 2,
             withSpinner(
               plotlyOutput("gene_counts")
             )
@@ -162,11 +162,11 @@ magnetique_ui <- shinydashboard::dashboardPage(
           column(
             width = 4,
             withSpinner(
-              plotOutput("transcript_proportion")
+              plotlyOutput("transcript_proportion")
             )
           ),
           column(
-            width = 4,
+            width = 5,
             withSpinner(
               plotOutput("gene_structure")
             )
@@ -559,7 +559,7 @@ magnetique_server <- function(input, output, session) {
         ),
         hoverinfo = "text"
       ) %>%
-      config(displayModeBar = FALSE) %>%
+      config(modeBarButtonsToRemove = c(displaylogo = FALSE, "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d")) %>%
       toWebGL %>%
       layout(
         title = "Differentially expressed genes",
@@ -651,7 +651,7 @@ magnetique_server <- function(input, output, session) {
       pivot_longer(-n)
 
     metadata <- rvalues$metadata() %>%
-      select(row_names, Etiology)
+      select(row_names, Etiology, Race, Age, Sex, SV1, SV2)
 
     left_join(counts, metadata, by = c("name" = "row_names")) %>%
       plot_ly(
@@ -659,15 +659,41 @@ magnetique_server <- function(input, output, session) {
         type = "box",
         x = ~Etiology,
         y = ~ log10(value),
+        boxpoints = "all",
         jitter = 0.8,
+        pointpos = 0,
+        hoverinfo = 'text',
+        marker = list(opacity = 0.3),
+        text = ~ paste0(
+          "<br><i>Sex</i>: ", Sex,
+          "<br><i>Race</i> = ", Race,
+          "<br><i>Age</i> = ", Age,
+          "<br><i>SV1</i> = ", round(SV1, 2),
+          "<br><i>SV2</i> = ", round(SV2, 2)
+        ),
         color = ~factor(Etiology, levels = c("NFD",  "DCM", "HCM")),
         colors = c(I("steelblue"), I("gold"), I("forestgreen"))
       ) %>%
-      config(displayModeBar = FALSE) %>%
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c(
+          "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d", 
+          "hoverCompareCartesian", "hoverClosestCartesian", 
+          "select2d", "lasso2d", "zoom2d"),
+        toImageButtonOptions = list(
+         format = "png",
+         width = 700,
+         height = 500,
+         
+        filename = stringr::str_glue("magnetique_gene_counts_{i}.png")
+        )
+      ) %>%
       layout(
         title = "Gene counts", 
-        xaxis = list(title = ""), 
-        yaxis = list(title = "log10(raw read counts)"))
+        xaxis = list(title = "", showticklabels = FALSE), 
+        yaxis = list(title = "log10(raw read counts)"),
+        legend = list(orientation = "h")
+        )
   })
 
   output$gene_structure <- renderPlot({
@@ -696,7 +722,7 @@ magnetique_server <- function(input, output, session) {
     
   })
 
-  output$transcript_proportion <- renderPlot({
+  output$transcript_proportion <- renderPlotly({
     i <- getReactableState("de_table", "selected")
     validate(
       need(!is.na(i),
@@ -727,22 +753,41 @@ magnetique_server <- function(input, output, session) {
       collect()
 
     left_join(x, metadata, by = c("Run" = "Run")) %>%
-      ggplot() +
-      geom_jitter(aes(x = transcript_id, y = proportion, color = Etiology),
-        position = position_jitterdodge( jitter.width = 0.2 ),
-        alpha = 0.9, size = 2, show.legend = TRUE, na.rm = TRUE
-      ) +
-      geom_boxplot(aes(x = transcript_id, y = proportion, fill = Etiology),
-        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = FALSE
-      ) +
-      scale_fill_manual(name = "Etiology", values = group_colors) +
-      scale_colour_manual(name = "Etiology", values = group_colors) +
-      coord_flip() +
-      labs(y = "Transcript proportion", title = 'Transcript usage') +
-      theme_minimal(20) +
-      theme(
-        axis.title.y = element_blank(),
-        plot.title = element_text(size=18)
+      plot_ly(
+        type = "box",
+        boxpoints = "all",
+        jitter = 1,
+        pointpos = 0,
+        y = ~transcript_id,
+        x = ~proportion,
+        color = ~Etiology,
+        hoverinfo = 'text',
+        text = ~ paste0(
+          "<br><i>Sex</i>: ", Sex,
+          "<br><i>Race</i> = ", Race,
+          "<br><i>Age</i> = ", Age,
+          "<br><i>SV1</i> = ", round(SV1, 2),
+          "<br><i>SV2</i> = ", round(SV2, 2)
+        ),
+        colors = c(I("steelblue"), I("gold"), I("forestgreen")),
+        orientation = 'h',
+        marker = list(opacity = 0.3)) %>%
+        layout(boxmode = "group",
+               title = "Transcript proportion",
+               xaxis = list(title = ""),
+               showlegend = FALSE) %>%
+        config(
+          displaylogo = FALSE,
+          modeBarButtonsToRemove = c(
+            "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d", 
+            "hoverCompareCartesian", "hoverClosestCartesian", 
+            "select2d", "lasso2d", "zoom2d"),
+        toImageButtonOptions = list(
+         format = "png",
+         width = 700,
+         height = 500,
+        filename = stringr::str_glue("magnetique_transcript_proportion_{i}.png")
+        )
       )
   })
 
@@ -962,7 +1007,7 @@ magnetique_server <- function(input, output, session) {
     } else {
       res_enrich <- rvalues$res_enrich()
 
-      plot_title <- "Enrichment overview for top genesets 
+      plot_title <- "Enrichment overview 
           ({input$selected_ontology} and {input$selected_contrast})"
     }
         
@@ -994,7 +1039,18 @@ magnetique_server <- function(input, output, session) {
         chars_limit = 50,
         plot_title = stringr::str_glue(plot_title)
       ) 
-    )
+    ) %>% config(
+      displaylogo = FALSE,
+      modeBarButtonsToRemove = c(
+        "zoomIn2d", "zoomOut2d", "pan2d", "resetScale2d", 
+        "hoverCompareCartesian", "hoverClosestCartesian", 
+        "select2d", "lasso2d", "zoom2d"),
+     toImageButtonOptions = list(
+      format = "png",
+      width = 700,
+      height = 500,
+      filename = gsub(x=stringr::str_glue(plot_title), " ", "_")
+    )) 
   })
 
 
