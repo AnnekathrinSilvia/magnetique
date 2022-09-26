@@ -27,14 +27,14 @@ source("utils.R")
 magnetique_ui <- shinydashboard::dashboardPage(
   title = "magnetique",
   header = shinydashboard::dashboardHeader(disable = TRUE),
-
+  
   # sidebar definition ------------------------------------------------------
   sidebar = dashboardSidebar(
     img(src = "magnetique_logo.png", class="img-responsive"),
     hidden(h2("Options:", style = 'margin: 15px', id='options')),
     uiOutput("ui_sidebar")
   ),
-
+  
   # body definition ---------------------------------------------------------
   body = dashboardBody(
     introjsUI(),
@@ -69,283 +69,292 @@ magnetique_ui <- shinydashboard::dashboardPage(
     div(
       id = "myScrollBox",
       ## will adjust indentation later ##
-    tabBox(
-      width = 12,
-      id = "magnetique_tab",
-      tabPanel(
-        title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_firststeps",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_firststeps",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            width = 6,
-            includeMarkdown("www/overview.md"),
-            actionButton(inputId = "popup_about_us",
-                         label = "More about the development team",
-                         icon = icon("users"), style = .actionbutton_biocstyle
-            )
-          ),
-          column(
-            width = 6,
-            h2("Patient characteristics and technical covariates"),
-            includeHTML("www/metadata_table.html")
-          )
-        ),
-      ),
-      tabPanel(
-        title = "Gene View", icon = icon("dna"), value = "tab-gene-view",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_geneview",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_geneview",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
-            )
-          )
-        ),
-        fluidRow(
-          id = "geneview_row1",
-          column(
-            width = 6,
-            withSpinner(
-              reactableOutput("de_table")
-            )
-          ),
-          column(
-            width = 3,
-            withSpinner(
-              plotlyOutput("de_volcano")
-            )
-          ),
-          column(
-            width = 3,
-            withSpinner(
-              plotlyOutput("dtu_volcano")
-            )
-          )
-        ),
-        fluidRow(
-          id = "geneview_row2",
-          column(
-            width = 4,
-            withSpinner(
-              plotlyOutput("gene_counts")
-            )
-          ),
-          column(
-            width = 4,
-            withSpinner(
-              plotOutput("transcript_proportion")
-            )
-          ),
-          column(
-            width = 4,
-            withSpinner(
-              plotOutput("gene_structure")
-            )
-          )
-        ),
-      ),
-      tabPanel(
-        id = "tab-geneset-view",
-        title = "Gene set View", icon = icon("project-diagram"), value = "tab-geneset-view",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_genesetview",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_genesetview",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            width = 5,
-            withSpinner(
-              reactableOutput("enrich_table")
-            )
-          ),
-          column(
-            width = 7,
-            withSpinner(
-              plotlyOutput("enriched_funcres")
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            width = 6,
-            withSpinner(
-              tagList(
-                visNetworkOutput("visnet_em"),
-                shinydashboard::box(
-                  title = "About this enrichment map",
-                  width = 12,
-                  collapsible = TRUE,
-                  collapsed = TRUE,
-                  htmlOutput("visnet_explanation")
-                )  
+      tabBox(
+        width = 12,
+        id = "magnetique_tab",
+        tabPanel(
+          title = "Welcome!", icon = icon("magnet"), value = "tab-welcome",
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                actionButton(
+                  "tour_firststeps",
+                  label = "", icon = icon("question-circle"),
+                  style = .helpbutton_biocstyle
+                ),
+                shinyBS::bsTooltip(
+                  "tour_firststeps",
+                  "Click me to start a tour of this section!",
+                  "bottom",
+                  options = list(container = "body")
+                ),
+                style = "float:right"
               )
             )
           ),
-          column(
-            width = 6,
-            withSpinner(
-              plotOutput("emap_signature")
-            )
-          )
-        )
-      ),
-      tabPanel(
-        id = "tab-carnival",
-        title = "Carnival View", icon = icon("network-wired"), value = "tab-carnival",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_carnivalview",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_carnivalview",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            id = "carnival_legend",
-            width = 3,
-            img(src = "https://user-images.githubusercontent.com/4517913/166660064-8b171940-b2ce-46e5-bfc6-c2c6685a5bd0.jpeg", class="img-responsive")
+          fluidRow(
+            column(
+              width = 6,
+              includeMarkdown("www/overview.md"),
+              actionButton(inputId = "popup_about_us",
+                           label = "More about the development team",
+                           icon = icon("users"), style = .actionbutton_biocstyle
+              )
             ),
-          column(
-            id = "carnival_network",
-            width = 9,
-            visNetworkOutput("visnet_carnival", height = "750px")
+            column(
+              width = 6,
+              h2("Patient characteristics and technical covariates"),
+              includeHTML("www/metadata_table.html")
             )
-          )
-      ),
-            tabPanel(
-        title = "RBP:RNA View", icon = icon("arrows-alt-h"), value = "tab-rbp-view",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_rbpview",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_rbpview",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
+          ),
+        ),
+        tabPanel(
+          title = "Gene View", icon = icon("dna"), value = "tab-gene-view",
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                actionButton(
+                  "tour_geneview",
+                  label = "", icon = icon("question-circle"),
+                  style = .helpbutton_biocstyle
+                ),
+                shinyBS::bsTooltip(
+                  "tour_geneview",
+                  "Click me to start a tour of this section!",
+                  "bottom",
+                  options = list(container = "body")
+                ),
+                style = "float:right"
+              )
+            )
+          ),
+          fluidRow(
+            id = "geneview_row1",
+            column(
+              width = 6,
+              tagList(
+                tags$button("Download as CSV", onclick = "Reactable.downloadDataCSV('de_table', 'de_table.csv')"),
+                withSpinner(
+                  reactableOutput("de_table")
+                )
+              )
+            ),
+            column(
+              width = 3,
+              withSpinner(
+                plotlyOutput("de_volcano")
+              )
+            ),
+            column(
+              width = 3,
+              withSpinner(
+                plotlyOutput("dtu_volcano")
+              )
+            )
+          ),
+          fluidRow(
+            id = "geneview_row2",
+            column(
+              width = 4,
+              withSpinner(
+                plotlyOutput("gene_counts")
+              )
+            ),
+            column(
+              width = 4,
+              withSpinner(
+                plotOutput("transcript_proportion")
+              )
+            ),
+            column(
+              width = 4,
+              withSpinner(
+                plotOutput("gene_structure")
+              )
+            )
+          ),
+        ),
+        tabPanel(
+          id = "tab-geneset-view",
+          title = "Gene set View", icon = icon("project-diagram"), value = "tab-geneset-view",
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                actionButton(
+                  "tour_genesetview",
+                  label = "", icon = icon("question-circle"),
+                  style = .helpbutton_biocstyle
+                ),
+                shinyBS::bsTooltip(
+                  "tour_genesetview",
+                  "Click me to start a tour of this section!",
+                  "bottom",
+                  options = list(container = "body")
+                ),
+                style = "float:right"
+              )
+            )
+          ),
+          fluidRow(
+            column(
+              width = 5,
+              tagList(
+                tags$button("Download as CSV", onclick = "Reactable.downloadDataCSV('enrich_table', 'enrich_table.csv')"),
+                withSpinner(
+                  reactableOutput("enrich_table")
+                )
+              )
+            ),
+            column(
+              width = 7,
+              withSpinner(
+                plotlyOutput("enriched_funcres")
+              )
+            )
+          ),
+          fluidRow(
+            column(
+              width = 6,
+              withSpinner(
+                tagList(
+                  visNetworkOutput("visnet_em"),
+                  shinydashboard::box(
+                    title = "About this enrichment map",
+                    width = 12,
+                    collapsible = TRUE,
+                    collapsed = TRUE,
+                    htmlOutput("visnet_explanation")
+                  )  
+                )
+              )
+            ),
+            column(
+              width = 6,
+              withSpinner(
+                plotOutput("emap_signature")
+              )
             )
           )
         ),
-        fluidRow(
-          id = "rbpview_row1",
-          column(
-            width = 8,
-            withSpinner(
-              visNetworkOutput("rbp_network")
+        tabPanel(
+          id = "tab-carnival",
+          title = "Carnival View", icon = icon("network-wired"), value = "tab-carnival",
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                actionButton(
+                  "tour_carnivalview",
+                  label = "", icon = icon("question-circle"),
+                  style = .helpbutton_biocstyle
+                ),
+                shinyBS::bsTooltip(
+                  "tour_carnivalview",
+                  "Click me to start a tour of this section!",
+                  "bottom",
+                  options = list(container = "body")
+                ),
+                style = "float:right"
+              )
             )
           ),
-          # column(
-          #   width = 4,
-          #   withSpinner(
-          #     uiOutput("ui_rbp_gene")
-          #   )
-          # )
-        )
-        ,
-        fluidRow(
-          id = "rbpview_row2",
-          column(
-            width = 8,
-            withSpinner(
-              reactableOutput("rbp_table")
+          fluidRow(
+            column(
+              id = "carnival_legend",
+              width = 3,
+              img(src = "https://user-images.githubusercontent.com/4517913/166660064-8b171940-b2ce-46e5-bfc6-c2c6685a5bd0.jpeg", class="img-responsive")
+            ),
+            column(
+              id = "carnival_network",
+              width = 9,
+              visNetworkOutput("visnet_carnival", height = "750px")
+            )
+          )
+        ),
+        tabPanel(
+          title = "RBP:RNA View", icon = icon("arrows-alt-h"), value = "tab-rbp-view",
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                actionButton(
+                  "tour_rbpview",
+                  label = "", icon = icon("question-circle"),
+                  style = .helpbutton_biocstyle
+                ),
+                shinyBS::bsTooltip(
+                  "tour_rbpview",
+                  "Click me to start a tour of this section!",
+                  "bottom",
+                  options = list(container = "body")
+                ),
+                style = "float:right"
+              )
             )
           ),
+          fluidRow(
+            id = "rbpview_row1",
+            column(
+              width = 8,
+              withSpinner(
+                visNetworkOutput("rbp_network")
+              )
+            ),
+            # column(
+            #   width = 4,
+            #   withSpinner(
+            #     uiOutput("ui_rbp_gene")
+            #   )
+            # )
+          )
+          ,
+          fluidRow(
+            id = "rbpview_row2",
+            column(
+              width = 8,
+              tagList(
+                tags$button("Download as CSV", onclick = "Reactable.downloadDataCSV('rbp_table', 'rbp_table.csv')"),
+                withSpinner(
+                  reactableOutput("rbp_table")
+                )
+              )
+            ),
             # column(
             #   width = 4
             # ,
             # withSpinner(
             #   # plotlyOutput("rbp_something")
             # )
-          # )
-        )
-      ),
-      tabPanel(
-        title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
-        fluidRow(
-          column(
-            width = 12,
-            div(
-              actionButton(
-                "tour_bookmarks",
-                label = "", icon = icon("question-circle"),
-                style = .helpbutton_biocstyle
-              ),
-              shinyBS::bsTooltip(
-                "tour_bookmarks",
-                "Click me to start a tour of this section!",
-                "bottom",
-                options = list(container = "body")
-              ),
-              style = "float:right"
-            )
+            # )
           )
         ),
-        uiOutput("ui_bookmarks")
+        tabPanel(
+          title = "Bookmarks", icon = icon("bookmark"), value = "tab-bookmark",
+          fluidRow(
+            column(
+              width = 12,
+              div(
+                actionButton(
+                  "tour_bookmarks",
+                  label = "", icon = icon("question-circle"),
+                  style = .helpbutton_biocstyle
+                ),
+                shinyBS::bsTooltip(
+                  "tour_bookmarks",
+                  "Click me to start a tour of this section!",
+                  "bottom",
+                  options = list(container = "body")
+                ),
+                style = "float:right"
+              )
+            )
+          ),
+          uiOutput("ui_bookmarks")
+        )
       )
-    )
     ) ## end of the scrollbox
   )
 )
@@ -353,7 +362,7 @@ magnetique_ui <- shinydashboard::dashboardPage(
 # server definition -------------------------------------------------------
 magnetique_server <- function(input, output, session) {
   showNotification("Connecting to the db.", id = "db_connect", duration=NULL)  
-
+  
   con <- DBI::dbConnect(
     RPostgres::Postgres(),
     dbname = "magnetique",
@@ -361,30 +370,31 @@ magnetique_server <- function(input, output, session) {
     port = Sys.getenv("PGPORT"),
     password = Sys.getenv("PGPASSWORD"),
     user = Sys.getenv("PGUSER")
-  ) 
+  )
+  
   session$onSessionEnded(function() DBI::dbDisconnect(con))
   removeNotification(id = "db_connect")
-
-
+  
+  
   # reactive objects and setup commands -------------------------------------
   rvalues <- reactiveValues()
   rvalues$mygenes <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gene_id", "gene_name"))))
   rvalues$mygenesets <- data.frame(matrix(ncol=2,nrow=0, dimnames=list(NULL, c("gs_id", "gs_description"))))
-
-
+  
+  
   # sidebar server-side -----------------------------------------------------
   output$ui_sidebar <- renderUI({
     tagList(
       sidebarMenu(
         hidden(
           selectInput("selected_contrast",
-            label = "Contrast id",
-            choices = c(
-              "DCMvsHCM",
-              "DCMvsNFD",
-              "HCMvsNFD"
-            ),
-            selected = "DCMvsHCM"
+                      label = "Contrast id",
+                      choices = c(
+                        "DCMvsHCM",
+                        "DCMvsNFD",
+                        "HCMvsNFD"
+                      ),
+                      selected = "DCMvsHCM"
           )
         ),
         shinyjs::hidden(
@@ -411,8 +421,8 @@ magnetique_server <- function(input, output, session) {
         ),
         hidden(
           actionButton("bookmarker",
-          label = "Bookmark", icon = icon("heart"),
-          style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
+                       label = "Bookmark", icon = icon("heart"),
+                       style = "color: #ffffff; background-color: #ac0000; border-color: #ffffff"
           )
         )
       )
@@ -468,13 +478,13 @@ magnetique_server <- function(input, output, session) {
       tbl("metadata") %>%
       collect()
   })
-
+  
   rvalues$counts <- reactive({
     con %>%
       tbl(paste0("counts_", local(input$selected_contrast))) %>% 
       collect() 
   })
-
+  
   rvalues$vst <- reactive({
     con %>% tbl("vst")
   })
@@ -485,15 +495,15 @@ magnetique_server <- function(input, output, session) {
       collect() %>% 
       as.data.frame(.) %>%
       `rownames<-`(.$gs_id)
-    })
-
+  })
+  
   rvalues$annotation_obj <- reactive({
-     tbl(con, "annotation_obj") %>%
+    tbl(con, "annotation_obj") %>%
       collect() %>%
       as.data.frame() %>% 
       `rownames<-`(.$gene_id)
   })
-
+  
   # DE related content ---------------------------------------------------------
   output$de_table <- renderReactable({
     rvalues$key() %>%
@@ -501,6 +511,7 @@ magnetique_server <- function(input, output, session) {
         vars(padj, log2FoldChange, dtu_pvadj, dtu_dif), ~round(., 2)) %>%
       reactable(
         .,
+        elementId = "de_table",
         searchable = FALSE,
         striped = TRUE,
         defaultPageSize = 5,
@@ -552,9 +563,9 @@ magnetique_server <- function(input, output, session) {
         defaultColDef = colDef(sortNALast = TRUE)
       )
   })
-
+  
   prev_selected <- reactive(getReactableState("de_table", "selected"))
-
+  
   output$de_volcano <- renderPlotly({
     p <- rvalues$key() %>%
       plot_ly(., color=I('black'), showlegend = FALSE) %>%
@@ -581,7 +592,7 @@ magnetique_server <- function(input, output, session) {
     if(length(prev_selected()) == 1) {
       df <- rvalues$key() %>%
         slice(prev_selected())
-
+      
       p <- add_trace(
         p, 
         x = df[[1, "log2FoldChange"]],
@@ -594,8 +605,8 @@ magnetique_server <- function(input, output, session) {
     p
     
   })
-
-
+  
+  
   output$dtu_volcano <- renderPlotly({  
     p <- rvalues$key() %>%
       plot_ly(., color=I('black'), showlegend = FALSE) %>%
@@ -618,52 +629,52 @@ magnetique_server <- function(input, output, session) {
         yaxis = list(title = '-log10(dtu_padj)'), 
         xaxis = list(title = 'dtu_dif')
       )
-
-
-  if(length(prev_selected()) == 1) {
-    df <- rvalues$key() %>%
-      slice(prev_selected())
-
-    p <- add_trace(
-      p, 
-      x = df[[1, "dtu_dif"]],
-      y = -log10(df[[1, "dtu_pvadj"]]),
-      type = "scatter",
-      mode = "markers", 
-      color = I("red"), 
-      inherit = FALSE)
-  }
-  p
- 
+    
+    
+    if(length(prev_selected()) == 1) {
+      df <- rvalues$key() %>%
+        slice(prev_selected())
+      
+      p <- add_trace(
+        p, 
+        x = df[[1, "dtu_dif"]],
+        y = -log10(df[[1, "dtu_pvadj"]]),
+        type = "scatter",
+        mode = "markers", 
+        color = I("red"), 
+        inherit = FALSE)
+    }
+    p
+    
   })
-
+  
   observeEvent(prev_selected(), {
-
+    
     plotlyProxy("de_volcano", session) %>%
       plotlyProxyInvoke("restyle", "marker.color", list('rgba(0,0,0,.10)'), 0)
     
     plotlyProxy("dtu_volcano", session) %>%
       plotlyProxyInvoke("restyle", "marker.color", list('rgba(0,0,0,.10)'), 0)        
-        
+    
   })
-
+  
   output$gene_counts <- renderPlotly({
     i <- getReactableState("de_table", "selected")
     validate(need(!is.na(i),
-      message = "Please select an entry from the table."
+                  message = "Please select an entry from the table."
     ))
     i <- rvalues$key()[[i, "gene_id"]]
-
+    
     counts <- rvalues$counts() %>%
       filter(row_names == !!i) %>%
       select(-row_names) %>%
       mutate(n = n()) %>%
       collect() %>%
       pivot_longer(-n)
-
+    
     metadata <- rvalues$metadata() %>%
       select(row_names, Etiology)
-
+    
     left_join(counts, metadata, by = c("name" = "row_names")) %>%
       plot_ly(
         .,
@@ -679,18 +690,18 @@ magnetique_server <- function(input, output, session) {
         xaxis = list(title = ""), 
         yaxis = list(title = "log10(raw read counts)"))
   })
-
+  
   output$gene_structure <- renderPlot({
     i <- getReactableState("de_table", "selected")
     validate(
       need(!is.na(i),
-        message = "Please select an entry from the table."
+           message = "Please select an entry from the table."
       )
     )
     dtu_tested <- rvalues$key()[[i, "dtu_pvadj"]]
     validate(
       need(!is.na(dtu_tested),
-        message = "Entry not tested for DTU."
+           message = "Entry not tested for DTU."
       )
     )
     i <- rvalues$key()[[i, "gene_id"]]
@@ -705,18 +716,18 @@ magnetique_server <- function(input, output, session) {
     })
     
   })
-
+  
   output$transcript_proportion <- renderPlot({
     i <- getReactableState("de_table", "selected")
     validate(
       need(!is.na(i),
-        message = "Please select an entry from the table."
+           message = "Please select an entry from the table."
       )
     )
     dtu_tested <- rvalues$key()[[i, "dtu_pvadj"]]
     validate(
       need(!is.na(dtu_tested),
-        message = "Entry not tested for DTU."
+           message = "Entry not tested for DTU."
       )
     )
     i <- rvalues$key()[[i, "gene_id"]]
@@ -735,15 +746,15 @@ magnetique_server <- function(input, output, session) {
     )
     metadata <- rvalues$metadata() %>%
       collect()
-
+    
     left_join(x, metadata, by = c("Run" = "Run")) %>%
       ggplot() +
       geom_jitter(aes(x = transcript_id, y = proportion, color = Etiology),
-        position = position_jitterdodge( jitter.width = 0.2 ),
-        alpha = 0.9, size = 2, show.legend = TRUE, na.rm = TRUE
+                  position = position_jitterdodge( jitter.width = 0.2 ),
+                  alpha = 0.9, size = 2, show.legend = TRUE, na.rm = TRUE
       ) +
       geom_boxplot(aes(x = transcript_id, y = proportion, fill = Etiology),
-        outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = FALSE
+                   outlier.size = 0, alpha = 0.4, lwd = 0.5, show.legend = FALSE
       ) +
       scale_fill_manual(name = "Etiology", values = group_colors) +
       scale_colour_manual(name = "Etiology", values = group_colors) +
@@ -755,22 +766,23 @@ magnetique_server <- function(input, output, session) {
         plot.title = element_text(size=18)
       )
   })
-
+  
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({
     rvalues$res_enrich() %>%
-        rename(
-          c(
-            "id" = "gs_id",
-            "description" = "gs_description", 
-            "expected" = "Expected", 
-            "observed"= "gs_de_count", 
-            "pval" = "gs_pvalue"))  %>%
-        mutate_at(vars(pval), ~round(., 2)) %>%
-        select(id, description, pval, expected, observed) %>%
-        arrange(pval) %>%
+      rename(
+        c(
+          "id" = "gs_id",
+          "description" = "gs_description", 
+          "expected" = "Expected", 
+          "observed"= "gs_de_count", 
+          "pval" = "gs_pvalue"))  %>%
+      mutate_at(vars(pval), ~round(., 2)) %>%
+      select(id, description, pval, expected, observed) %>%
+      arrange(pval) %>%
       reactable(
         .,
+        elementId = "enrich_table",
         searchable = FALSE,
         striped = TRUE,
         rownames = FALSE,
@@ -798,7 +810,7 @@ magnetique_server <- function(input, output, session) {
             minWidth = 100,
             width = 120,
             header = with_tooltip("gs_id", "Gene set ID and link to AMIGO db")
-            ),
+          ),
           description = colDef(
             width = 250,
             filterable = TRUE,
@@ -809,31 +821,31 @@ magnetique_server <- function(input, output, session) {
             header = with_tooltip("expec.", "Expected number of genes in the gene set")),
           observed = colDef(
             header = with_tooltip("obser.", "Number of genes observed in the gene set"))
-          )
         )
-      })
-
+      )
+  })
+  
   emap_graph <- reactive({
-
+    
     res_enrich <- rvalues$res_enrich() %>% as.data.frame(.)
     rownames(res_enrich) <- res_enrich$gs_id
-
+    
     res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
       collect()
     res_de <- res_de %>% 
       filter(!is.na(SYMBOL)) %>% 
       arrange(-desc(padj)) %>% 
       select(gene_id, log2FoldChange, padj, SYMBOL)
-      
+    
     res_de <- DESeq2::DESeqResults(
       S4Vectors::DataFrame(res_de))
-
+    
     rownames(res_de) <- res_de$gene_id
     res_de$pvalue <- res_de$padj
     res_de$description <- ''
-
+    
     annotation_obj <- rvalues$annotation_obj()
-
+    
     emg <- GeneTonic::enrichment_map(
       res_enrich,
       res_de,
@@ -845,7 +857,7 @@ magnetique_server <- function(input, output, session) {
     )
     return(emg)
   })
-
+  
   output$visnet_em <- renderVisNetwork({
     validate(
       need({ecount(emap_graph()) > 0}, 
@@ -868,8 +880,8 @@ magnetique_server <- function(input, output, session) {
         label = "Save enrichment map"
       )
   })
-
-    output$visnet_explanation <- renderUI({
+  
+  output$visnet_explanation <- renderUI({
     validate(
       need({ecount(emap_graph()) > 0}, 
            message = ""
@@ -887,56 +899,56 @@ magnetique_server <- function(input, output, session) {
       )
     )  
   })
-
+  
   output$emap_signature <- renderPlot({
     i <- getReactableState("enrich_table", "selected")    
     validate(
       need(!is.na(i),
-        message = "Please select a gene set from the table."
+           message = "Please select a gene set from the table."
       )
     )
-
+    
     res_enrich <- rvalues$res_enrich() %>% as.data.frame(.)
     sel_gs <- res_enrich[[i, "gs_id"]]
     gs_description <- res_enrich[[i, "gs_description"]]
-
+    
     res_de <- con %>%
       tbl(paste0("res_", local(input$selected_contrast))) %>%
       collect()
-
+    
     res_de <- res_de %>% 
       filter(!is.na(SYMBOL)) %>% 
       arrange(-desc(padj)) %>% 
       select(gene_id, log2FoldChange, padj, SYMBOL)
-      
+    
     res_de <- DESeq2::DESeqResults(
       S4Vectors::DataFrame(res_de))
-
+    
     rownames(res_de) <- res_de$gene_id
     res_de$pvalue <- res_de$padj
     res_de$description <- ''
-
+    
     annotation_obj <- rvalues$annotation_obj()
     genes <- res_enrich[i, 'gs_genes']
     genes <- unlist(strsplit(genes, ","))
     genes <- annotation_obj[
       match(genes, annotation_obj$gene_name), ]$gene_id
-
+    
     metadata <- rvalues$metadata()
-
+    
     counts <- rvalues$vst() %>% 
       filter(row_names %in% local(genes)) %>% 
       collect() %>% 
       as.data.frame(.)
-
+    
     rownames(counts) <- counts[, 1]
     counts[, 1] <- NULL
-
+    
     se <- SummarizedExperiment::SummarizedExperiment(
       counts,
       colData = metadata,
       rowData = rownames(counts))
-
+    
     show_row_names <- ifelse(nrow(se) > 30, FALSE, TRUE)  
     GeneTonic::gs_heatmap(
       se,
@@ -957,7 +969,7 @@ magnetique_server <- function(input, output, session) {
       show_column_names = FALSE
     )
   })
-
+  
   output$enriched_funcres <- renderPlotly({
     
     i <- getReactableState("enrich_table", "selected")    
@@ -966,33 +978,33 @@ magnetique_server <- function(input, output, session) {
         slice(i)
       plot_title <- "Enrichment for genes comprising  
         {res_enrich[1, 'gs_id']} geneset \n ({input$selected_contrast})"
-
+      
     } else {
       res_enrich <- rvalues$res_enrich()
-
+      
       plot_title <- "Enrichment overview for top genesets 
           ({input$selected_ontology} and {input$selected_contrast})"
     }
-        
+    
     res_enrich <- as.data.frame(res_enrich)
     rownames(res_enrich) <- res_enrich$gs_id
-
+    
     res_de <- tbl(con, paste0("res_", local(input$selected_contrast))) %>%
       collect()
     res_de <- res_de %>% 
       filter(!is.na(SYMBOL)) %>% 
       arrange(-desc(padj)) %>% 
       select(gene_id, log2FoldChange, padj, SYMBOL)
-      
+    
     res_de <- DESeq2::DESeqResults(
       S4Vectors::DataFrame(res_de))
-
+    
     rownames(res_de) <- res_de$gene_id
     res_de$pvalue <- res_de$padj
     res_de$description <- ''
-
+    
     annotation_obj <- rvalues$annotation_obj()
-
+    
     ggplotly(
       GeneTonic::enhance_table(
         res_enrich,
@@ -1004,8 +1016,8 @@ magnetique_server <- function(input, output, session) {
       ) 
     )
   })
-
-
+  
+  
   # Carnival related content ---------------------------------------------------
   output$visnet_carnival <- renderVisNetwork({
     g <- con %>%
@@ -1015,9 +1027,9 @@ magnetique_server <- function(input, output, session) {
       jsonlite::unserializeJSON() %>%
       igraph::upgrade_graph(.) %>%
       permute.vertices(., Matrix::invPerm(order(V(.)$name)))
-      V(g)$title <- V(g)$name
-
-
+    V(g)$title <- V(g)$name
+    
+    
     visNetwork::visIgraph(g) %>%
       visNodes(font = list(background = "white"))  %>%
       visOptions(
@@ -1034,7 +1046,7 @@ magnetique_server <- function(input, output, session) {
         label = "Save igraph graph"
       )
   })
-
+  
   
   # Bookmarker -----------------------------------------------------------------
   output$ui_bookmarks <- renderUI({
@@ -1055,14 +1067,14 @@ magnetique_server <- function(input, output, session) {
       )
     )
   })
-
+  
   # RBP related content --------------------------------------------------------
   rvalues$rbp_table <- reactive({
     dtu_sig <- rvalues$key() %>% 
       filter(dtu_pvadj < 0.05) %>% 
       pull(SYMBOL)
-
-
+    
+    
     con %>%
       tbl("rbp") %>%
       collect() %>% 
@@ -1070,20 +1082,20 @@ magnetique_server <- function(input, output, session) {
       mutate(FDR = p.adjust(Pvalue, method = 'fdr')) %>%
       filter(FDR <= 0.05 & gene_name %in% dtu_sig) %>%
       ungroup()  
-
+    
   })
   
   output$rbp_network <- renderVisNetwork({
-
+    
     i <- getReactableState("rbp_table", "selected")
     validate(
       need(!is.na(i),
            message = "Please select an entry from the table to display the regulator subgraph.")
     )
-
+    
     df <- rvalues$rbp_table()
     g <- create_graph_rbp(df)
-
+    
     g %>%
       make_ego_graph(
         .,
@@ -1118,7 +1130,7 @@ magnetique_server <- function(input, output, session) {
         type = "png",
         label = "Save graph"
       )
-
+    
   })
   
   # output$ui_rbp_gene <- renderUI({
@@ -1152,7 +1164,7 @@ magnetique_server <- function(input, output, session) {
     
     plot(1,1, main = paste(cur_sel, cur_node, cur_nodetype))
   })
-
+  
   output$rbp_dtu <- renderPrint({
     validate(
       need(input$rbp_network_selected != "", message = "Select a node in the RBP graph")
@@ -1166,29 +1178,30 @@ magnetique_server <- function(input, output, session) {
     # validate(need(cur_nodetype == "Feature",
     #               message = "" # "Please select a gene/feature."
     # ))
-
+    
     annotation_obj <- rvalues$annotation_obj()
-
-
+    
+    
     paste("Select some DTU-centered content for", cur_sel, cur_node, cur_nodetype)
     
   })  
   
   output$rbp_table <- renderReactable({
     rvalues$rbp_table() %>%
-    mutate(
+      mutate(
         FDR = round(FDR, 4),
         Association = ifelse(Association  == 1, 'positive', 'negative')) %>%
-    select(
-      gene_name_regulator,
-      gene_id_regulator,
-      transcript_name,
-      transcript_id,
-      transcript_biotype,
-      FDR,
-      Association) %>%
+      select(
+        gene_name_regulator,
+        gene_id_regulator,
+        transcript_name,
+        transcript_id,
+        transcript_biotype,
+        FDR,
+        Association) %>%
       reactable(
         .,
+        elementId = "rbp_table",
         filterable = TRUE,
         striped = TRUE,
         defaultPageSize = 5,
@@ -1206,7 +1219,7 @@ magnetique_server <- function(input, output, session) {
         columnGroups = list(
           colGroup(name = "Regulator", columns = c("gene_name_regulator", "gene_id_regulator")),
           colGroup(name = "Target", columns = c("transcript_name", "transcript_biotype"))
-          ),
+        ),
         columns = list(
           gene_name_regulator = colDef(
             name = "gene_name",
@@ -1273,7 +1286,7 @@ magnetique_server <- function(input, output, session) {
       downloadButton("download_bookmarks_genes", "Download as csv")
     )
   })
-
+  
   output$ui_bookmarks_genesets <- renderUI({
     validate(
       need(
@@ -1294,21 +1307,21 @@ magnetique_server <- function(input, output, session) {
   output$bookmarks_genesets <- renderReactable({
     reactable(rvalues$mygenesets, rownames = FALSE)
   })
-
+  
   output$download_bookmarks_genes <- downloadHandler(
     filename = "magnetique_genes_bookmark.csv",
     content = function(file){
       write.csv(rvalues$mygenes, file=file)
-      }
+    }
   )
-
+  
   output$download_bookmarks_genesets <- downloadHandler(
     filename = "magnetique_genesets_bookmark.csv",
     content = function(file){
       write.csv(rvalues$mygenesets, file=file)
-      }
+    }
   )
-
+  
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
       showNotification("Welcome to magnetique! Navigate to the main tabs of the application to use the Bookmarks functionality.")
@@ -1321,7 +1334,7 @@ magnetique_server <- function(input, output, session) {
         key <- rvalues$key()
         df <- key[i, c("gene_id", "SYMBOL")] %>%
           rename(gene_name=SYMBOL)
-
+        
         sel_gene_id <- df[[1, "gene_id"]]
         sel_gene <- df[[1, "gene_name"]]
         if (sel_gene_id %in% rvalues$mygenes$gene_id) {
@@ -1366,7 +1379,7 @@ magnetique_server <- function(input, output, session) {
             gs_id = cur_em_id,
             gs_description = cur_em
           )
-
+          
           if (cur_em_id %in% rvalues$mygenesets$gs_id) {
             showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", cur_em, cur_em_id), type = "default")
           } else {
@@ -1399,60 +1412,60 @@ magnetique_server <- function(input, output, session) {
       }
     }
   })
-
+  
   # Other content --------------------------------------------------------------
-
-
+  
+  
   # Tours observers
   observeEvent(input$tour_firststeps, {
     tour <- read.delim("tours/intro_firststeps.txt",
-      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-
+  
   observeEvent(input$tour_geneview, {
     tour <- read.delim("tours/intro_geneview.txt",
-      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-
+  
   observeEvent(input$tour_genesetview, {
     tour <- read.delim("tours/intro_genesetview.txt",
-      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
   
   observeEvent(input$tour_carnivalview, {
     tour <- read.delim("tours/intro_carnivalview.txt",
-      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-
+  
   observeEvent(input$tour_rbpview, {
     tour <- read.delim("tours/intro_rbpview.txt",
-      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-
+  
   observeEvent(input$tour_bookmarks, {
     tour <- read.delim("tours/intro_bookmarks.txt",
-      sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
+                       sep = ";", stringsAsFactors = FALSE, row.names = NULL, quote = ""
     )
     introjs(session, options = list(steps = tour))
   })
-
+  
   observeEvent(input$popup_about_us, {
     showModal(
       modalDialog(
         title = "Project members",
         size = "l",
         renderTable(make_team_df(), 
-          sanitize.text.function = function(x) x),
+                    sanitize.text.function = function(x) x),
         easyClose = TRUE,
         footer = ""
       )
