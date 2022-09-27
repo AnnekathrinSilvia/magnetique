@@ -134,9 +134,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
           id = "geneview_row1",
           column(
             width = 6,
-            withSpinner(
-              reactableOutput("de_table")
-            )
+              tagList(
+                tags$button("Download as CSV", onclick = "Reactable.downloadDataCSV('de_table', 'de_table.csv')"),
+                withSpinner(
+                  reactableOutput("de_table")
+                )
+              )
           ),
           column(
             width = 3,
@@ -198,9 +201,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
         fluidRow(
           column(
             width = 5,
-            withSpinner(
-              reactableOutput("enrich_table")
-            )
+            tagList(
+                tags$button("Download as CSV", onclick = "Reactable.downloadDataCSV('enrich_table', 'enrich_table.csv')"),
+                withSpinner(
+                  reactableOutput("enrich_table")
+                )
+              )
           ),
           column(
             width = 7,
@@ -303,9 +309,12 @@ magnetique_ui <- shinydashboard::dashboardPage(
           id = "rbpview_row2",
           column(
             width = 8,
-            withSpinner(
-              reactableOutput("rbp_table")
-            )
+              tagList(
+                tags$button("Download as CSV", onclick = "Reactable.downloadDataCSV('rbp_table', 'rbp_table.csv')"),
+                withSpinner(
+                  reactableOutput("rbp_table")
+                )
+              )
           ),
         )
       ),
