@@ -536,10 +536,22 @@ magnetique_server <- function(input, output, session) {
           ),
           padj = colDef(
             name = "dge_padj",
+            filterable = TRUE,
+            filterMethod = JS("function(rows, columnId, filterValue) {
+              return rows.filter(function(row) {
+                return row.values[columnId] >= filterValue
+                })
+                }"),
             header = with_tooltip("dge_padj", "Adjusted p-value for the DESeq2 analysis (-log10 transformed)")
           ),
           dtu_pvadj = colDef(
             name = "dtu_padj",
+            filterable = TRUE,
+            filterMethod = JS("function(rows, columnId, filterValue) {
+              return rows.filter(function(row) {
+                return row.values[columnId] >= filterValue
+                })
+                }"),
             header = with_tooltip("dtu_padj", "Adjusted p-value for the DRIMseq analysis (-log10 transformed)")
           ),
           dtu_dif = colDef(
@@ -547,7 +559,8 @@ magnetique_server <- function(input, output, session) {
             header = with_tooltip("dtu_dif", "Difference in isoform usage for the DRIMseq analysis")
           )
         ),
-        defaultColDef = colDef(sortNALast = TRUE)
+      defaultColDef = colDef(sortNALast = TRUE),
+      elementId = "de_table"
       )
   })
 
@@ -840,6 +853,7 @@ magnetique_server <- function(input, output, session) {
         arrange(pval) %>%
       reactable(
         .,
+        elementId = "enrich_table",
         showPageSizeOptions = TRUE, 
         defaultPageSize = 5,
         pageSizeOptions = c(5, 10, 25, 50),
@@ -868,13 +882,18 @@ magnetique_server <- function(input, output, session) {
             }"),
             minWidth = 100,
             width = 120,
-            header = with_tooltip("gs_id", "Gene set ID and link to AMIGO db")
-            ),
+            header = with_tooltip("gs_id", "Gene set ID and link to AMIGO db")),
           description = colDef(
             width = 250,
             filterable = TRUE,
             header = with_tooltip("gs_description", "Description for the gene set")),
           pval = colDef(
+            filterable = TRUE,
+            filterMethod = JS("function(rows, columnId, filterValue) {
+              return rows.filter(function(row) {
+                return row.values[columnId] >= filterValue
+                })
+                }"),
             header = with_tooltip("pval", "-log10(p-value) for the TopGO enrichment test")),
           expected = colDef(
             header = with_tooltip("expec.", "Expected number of genes in the gene set")),
