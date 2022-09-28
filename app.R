@@ -589,7 +589,7 @@ magnetique_server <- function(input, output, session) {
           "hoverCompareCartesian", "hoverClosestCartesian", 
           "select2d", "lasso2d", "zoom2d"),
         toImageButtonOptions = list(
-         format = "png",
+         format = "svg",
          width = 700,
          height = 500,
         filename = stringr::str_glue("magnetique_dge_volcano_{input$selected_contrast}")
@@ -643,7 +643,7 @@ magnetique_server <- function(input, output, session) {
           "hoverCompareCartesian", "hoverClosestCartesian", 
           "select2d", "lasso2d", "zoom2d"),
         toImageButtonOptions = list(
-         format = "png",
+         format = "svg",
          width = 700,
          height = 500,
         filename = stringr::str_glue("magnetique_dge_volcano_{input$selected_contrast}")
@@ -728,7 +728,7 @@ magnetique_server <- function(input, output, session) {
           "hoverCompareCartesian", "hoverClosestCartesian", 
           "select2d", "lasso2d", "zoom2d"),
         toImageButtonOptions = list(
-         format = "png",
+         format = "svg",
          width = 700,
          height = 500,
          
@@ -830,7 +830,7 @@ magnetique_server <- function(input, output, session) {
             "hoverCompareCartesian", "hoverClosestCartesian", 
             "select2d", "lasso2d", "zoom2d"),
         toImageButtonOptions = list(
-         format = "png",
+         format = "svg",
          width = 700,
          height = 500,
         filename = stringr::str_glue("magnetique_transcript_proportion_{i}")
@@ -954,7 +954,7 @@ magnetique_server <- function(input, output, session) {
       ) %>%
       visExport(
         name = "emap_network",
-        type = "png",
+        type = "svg",
         label = "Save enrichment map"
       )
   })
@@ -1099,7 +1099,7 @@ magnetique_server <- function(input, output, session) {
         "hoverCompareCartesian", "hoverClosestCartesian", 
         "select2d", "lasso2d", "zoom2d"),
      toImageButtonOptions = list(
-      format = "png",
+      format = "svg",
       width = 700,
       height = 500,
       filename = gsub(x=stringr::str_glue(plot_title), " ", "_")
@@ -1131,7 +1131,7 @@ magnetique_server <- function(input, output, session) {
       visInteraction(navigationButtons = TRUE) %>%
       visExport(
         name = "igraph",
-        type = "png",
+        type = "svg",
         label = "Save igraph graph"
       )
   })
@@ -1216,7 +1216,7 @@ magnetique_server <- function(input, output, session) {
       visInteraction(navigationButtons = TRUE) %>%
       visExport(
         name = "rbp_network",
-        type = "png",
+        type = "svg",
         label = "Save graph"
       )
 
