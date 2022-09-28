@@ -393,7 +393,7 @@ magnetique_server <- function(input, output, session) {
             numericInput("number_genesets",
                          "Number of genesets",
                          value = 15,
-                         min = 1
+                         min = 0
             ),
             selectInput("color_by",
                         "Color by",
@@ -848,7 +848,6 @@ magnetique_server <- function(input, output, session) {
             "expected" = "Expected", 
             "observed"= "gs_de_count", 
             "pval" = "gs_pvalue"))  %>%
-        mutate(pval = round(-log10(pval), 2)) %>%
         select(id, description, pval, expected, observed) %>%
         arrange(pval) %>%
       reactable(
@@ -891,10 +890,10 @@ magnetique_server <- function(input, output, session) {
             filterable = TRUE,
             filterMethod = JS("function(rows, columnId, filterValue) {
               return rows.filter(function(row) {
-                return row.values[columnId] >= filterValue
+                return row.values[columnId] <= filterValue
                 })
                 }"),
-            header = with_tooltip("pval", "-log10(p-value) for the TopGO enrichment test")),
+            header = with_tooltip("pval", "p-value for the TopGO enrichment test")),
           expected = colDef(
             header = with_tooltip("expec.", "Expected number of genes in the gene set")),
           observed = colDef(
@@ -1054,8 +1053,8 @@ magnetique_server <- function(input, output, session) {
     if(!is.null(i)) {
       res_enrich <- rvalues$res_enrich() %>% 
         slice(i)
-      plot_title <- "Enrichment for genes comprising  
-        {res_enrich[1, 'gs_id']} geneset \n ({input$selected_contrast})"
+      plot_title <- "Enrichment for genes comprising
+      {res_enrich[1, 'gs_id']} geneset ({input$selected_contrast})"
 
     } else {
       res_enrich <- rvalues$res_enrich()
