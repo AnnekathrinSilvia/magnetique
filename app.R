@@ -497,6 +497,8 @@ magnetique_server <- function(input, output, session) {
       mutate_at(vars(padj, dtu_pvadj), ~round(-log10(.), 2)) %>%
       reactable(
         .,
+        language = reactableLang(
+            filterPlaceholder = 'Filter'),
         searchable = FALSE,
         striped = TRUE,
         showPageSizeOptions = TRUE, 
@@ -871,6 +873,8 @@ magnetique_server <- function(input, output, session) {
           rowSelectedStyle = list(backgroundColor = "#eee", boxShadow = "inset 2px 0 0 0 #FF0000")
         ),
         defaultColDef = colDef(width = 70),
+        language = reactableLang(
+            filterPlaceholder = 'Filter'),
         columns = list(
           id = colDef(
             html = TRUE,
@@ -1271,6 +1275,8 @@ magnetique_server <- function(input, output, session) {
       Association) %>%
       reactable(
         .,
+        language = reactableLang(
+            filterPlaceholder = 'Filter'),
         filterable = TRUE,
         striped = TRUE,
         showPageSizeOptions = TRUE, 
