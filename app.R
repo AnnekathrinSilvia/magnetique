@@ -954,7 +954,7 @@ magnetique_server <- function(input, output, session) {
       ) %>%
       visExport(
         name = "emap_network",
-        type = "svg",
+        type = "pdf",
         label = "Save enrichment map"
       )
   })
@@ -1131,7 +1131,7 @@ magnetique_server <- function(input, output, session) {
       visInteraction(navigationButtons = TRUE) %>%
       visExport(
         name = "igraph",
-        type = "svg",
+        type = "pdf",
         label = "Save igraph graph"
       )
   })
@@ -1216,7 +1216,7 @@ magnetique_server <- function(input, output, session) {
       visInteraction(navigationButtons = TRUE) %>%
       visExport(
         name = "rbp_network",
-        type = "svg",
+        type = "pdf",
         label = "Save graph"
       )
 
