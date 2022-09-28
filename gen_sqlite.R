@@ -58,7 +58,7 @@ db <- dbConnect(RSQLite::SQLite(), db_name)
 
 # write separate dds counts...
 wrt <- purrr::map2(dge, names(dge), function(.x, .y) {
-  DESeq2::counts(.x$dds) %>% 
+  DESeq2::counts(.x$dds, normalized=TRUE) %>% 
     data.frame() %>% 
     dbWriteTable(db, paste("counts", .y, sep="_"), ., overwrite=TRUE, row.names=TRUE)
 })

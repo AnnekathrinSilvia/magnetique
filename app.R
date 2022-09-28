@@ -595,7 +595,7 @@ magnetique_server <- function(input, output, session) {
         filename = stringr::str_glue("magnetique_dge_volcano_{input$selected_contrast}")
         )
       ) %>%
-      toWebGL %>%
+      toWebGL() %>%
       layout(
         title = "Differentially expressed genes",
         yaxis = list(title = '-log10(dge_padj)'), 
@@ -648,7 +648,7 @@ magnetique_server <- function(input, output, session) {
          height = 500,
         filename = stringr::str_glue("magnetique_dge_volcano_{input$selected_contrast}")
         )) %>%
-      toWebGL %>%
+      toWebGL() %>%
       layout(
         title = "Genes with differential transcript usage",
         yaxis = list(title = '-log10(dtu_padj)'), 
@@ -738,7 +738,7 @@ magnetique_server <- function(input, output, session) {
       layout(
         title = "Gene counts", 
         xaxis = list(title = "", showticklabels = FALSE), 
-        yaxis = list(title = "log10(raw read counts)"),
+        yaxis = list(title = "log10(normalized counts)"),
         legend = list(orientation = "h")
         )
   })
