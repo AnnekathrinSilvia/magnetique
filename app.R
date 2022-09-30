@@ -537,24 +537,26 @@ magnetique_server <- function(input, output, session) {
             header = with_tooltip("dge_log2fc", "Fold change for the DESeq2 analysis") 
           ),
           padj = colDef(
-            name = "dge_padj",
+            name = "-log10_dge_padj",
+            minWidth = 120,
             filterable = TRUE,
             filterMethod = JS("function(rows, columnId, filterValue) {
               return rows.filter(function(row) {
                 return row.values[columnId] >= filterValue
                 })
                 }"),
-            header = with_tooltip("dge_padj", "Adjusted p-value for the DESeq2 analysis (-log10 transformed)")
+            header = with_tooltip("-log10_dge_padj", "Adjusted p-value for the DESeq2 analysis (-log10 transformed)")
           ),
           dtu_pvadj = colDef(
-            name = "dtu_padj",
+            name = "-log10_dtu_padj",
             filterable = TRUE,
+            width = 130,
             filterMethod = JS("function(rows, columnId, filterValue) {
               return rows.filter(function(row) {
                 return row.values[columnId] >= filterValue
                 })
                 }"),
-            header = with_tooltip("dtu_padj", "Adjusted p-value for the DRIMseq analysis (-log10 transformed)")
+            header = with_tooltip("-log10_dtu_padj", "Adjusted p-value for the DRIMseq analysis (-log10 transformed)")
           ),
           dtu_dif = colDef(
             name = "dtu_dif",
@@ -1337,8 +1339,8 @@ magnetique_server <- function(input, output, session) {
             )
           ),
           FDR = colDef(
-            name = "FDR",
-            header = with_tooltip("FDR", "FDR adjusted p-value for the reverse global test"),
+            name = "-log10_FDR",
+            header = with_tooltip("-log10_FDR", "FDR adjusted p-value for the reverse global test"),
             filterable = FALSE,
           ),
           Association = colDef(
