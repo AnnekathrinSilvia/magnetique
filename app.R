@@ -1384,7 +1384,13 @@ magnetique_server <- function(input, output, session) {
   })
   
   output$bookmarks_genes <- renderReactable({
-    reactable(rvalues$mygenes)
+    genes_tbl <- rvalues$key() %>%
+      mutate_at(vars(log2FoldChange, dtu_dif), ~round(., 2)) %>%
+      mutate_at(vars(padj, dtu_pvadj), ~round(-log10(.), 2))
+    
+    bookmarked_genes_tbl <- genes_tbl[match(rvalues$mygenes$gene_id, genes_tbl$gene_id), ]
+    
+    reactable(bookmarked_genes_tbl)
   })
   
   output$bookmarks_genesets <- renderReactable({
