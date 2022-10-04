@@ -502,6 +502,7 @@ magnetique_server <- function(input, output, session) {
         searchable = FALSE,
         striped = TRUE,
         showPageSizeOptions = TRUE, 
+        defaultSorted = c("padj"),
         defaultPageSize = 5,
         pageSizeOptions = c(5, 10, 25, 50),
         highlight = TRUE,
@@ -538,6 +539,7 @@ magnetique_server <- function(input, output, session) {
           ),
           padj = colDef(
             name = "-log10_dge_padj",
+            defaultSortOrder = "desc",
             minWidth = 120,
             filterable = TRUE,
             filterMethod = JS("function(rows, columnId, filterValue) {
@@ -1265,7 +1267,7 @@ magnetique_server <- function(input, output, session) {
   output$rbp_table <- renderReactable({
     rvalues$rbp_table() %>%
     mutate(
-        FDR = round(FDR, 2),
+        FDR = round(-log10(FDR), 2),
         Association = ifelse(Association  == 1, 'positive', 'negative')) %>%
     select(
       gene_name_regulator,
@@ -1281,6 +1283,7 @@ magnetique_server <- function(input, output, session) {
             filterPlaceholder = 'Filter'),
         filterable = TRUE,
         striped = TRUE,
+        defaultSorted = c("FDR"),
         showPageSizeOptions = TRUE, 
         defaultPageSize = 5,
         pageSizeOptions = c(5, 10, 25, 50),
@@ -1340,6 +1343,7 @@ magnetique_server <- function(input, output, session) {
           ),
           FDR = colDef(
             name = "-log10_FDR",
+            defaultSortOrder = "desc",
             header = with_tooltip("-log10_FDR", "FDR adjusted p-value for the reverse global test"),
             filterable = FALSE,
           ),
