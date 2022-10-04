@@ -811,7 +811,6 @@ magnetique_server <- function(input, output, session) {
         pointpos = 0,
         y = ~transcript_id,
         x = ~proportion,
-        color = ~Etiology,
         hoverinfo = 'text',
         text = ~ paste0(
           "<br><i>Sex</i>: ", Sex,
@@ -820,6 +819,7 @@ magnetique_server <- function(input, output, session) {
           "<br><i>SV1</i> = ", round(SV1, 2),
           "<br><i>SV2</i> = ", round(SV2, 2)
         ),
+        color = ~factor(Etiology, levels = c("NFD",  "DCM", "HCM")),
         colors = c(I("steelblue"), I("gold"), I("forestgreen")),
         orientation = 'h',
         marker = list(opacity = 0.3)) %>%
