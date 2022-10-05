@@ -1384,11 +1384,42 @@ magnetique_server <- function(input, output, session) {
   })
   
   output$bookmarks_genes <- renderReactable({
-    reactable(rvalues$mygenes)
+    genes_tbl <- rvalues$key() %>%
+      mutate_at(vars(log2FoldChange, dtu_dif), ~round(., 2)) %>%
+      mutate_at(vars(padj, dtu_pvadj), ~round(-log10(.), 2))
+    
+    genes_tbl[match(rvalues$mygenes$gene_id, genes_tbl$gene_id), ] %>%
+    reactable(
+      .,
+      columns = list(
+          gene_id = colDef(
+            name = "gene_id",
+          ),
+          SYMBOL = colDef(
+            name = "gene_name",
+          ),
+          log2FoldChange = colDef(
+            name = "dge_log2fc",
+          ),
+          padj = colDef(
+            name = "-log10_dge_padj",
+          ),
+          dtu_pvadj = colDef(
+            name = "-log10_dtu_padj",
+          ),
+          dtu_dif = colDef(
+            name = "dtu_dif",
+          )
+        ),
+      defaultColDef = colDef(sortNALast = TRUE)) 
+      
   })
   
   output$bookmarks_genesets <- renderReactable({
-    reactable(rvalues$mygenesets, rownames = FALSE)
+
+    rvalues$res_enrich() %>%
+      filter(gs_id %in% rvalues$mygenesets$gs_id) %>%
+      reactable()
   })
 
   output$download_bookmarks_genes <- downloadHandler(
