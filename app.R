@@ -1372,7 +1372,10 @@ magnetique_server <- function(input, output, session) {
     )
     tagList(
       reactableOutput("bookmarks_genes"),
-      downloadButton("download_bookmarks_genes", "Download as csv")
+      tags$button(
+        "Download as CSV", 
+        onclick = "Reactable.downloadDataCSV('bookmarks_genes', 'bookmarks_genes.csv')"
+      )
     )
   })
   
@@ -1385,7 +1388,10 @@ magnetique_server <- function(input, output, session) {
     )
     tagList(
       reactableOutput("bookmarks_genesets"),
-      downloadButton("download_bookmarks_genesets", "Download as csv")
+      tags$button(
+        "Download as CSV", 
+        onclick = "Reactable.downloadDataCSV('bookmarks_genesets', 'bookmarks_genesets.csv')"
+      )
     )
   })
   
@@ -1425,22 +1431,9 @@ magnetique_server <- function(input, output, session) {
     
     rvalues$res_enrich() %>%
       filter(gs_id %in% rvalues$mygenesets$gs_id) %>%
-      reactable()
+      select(-row_names) %>%
+      reactable(rownames = FALSE)
   })
-  
-  output$download_bookmarks_genes <- downloadHandler(
-    filename = "magnetique_genes_bookmark.csv",
-    content = function(file){
-      write.csv(rvalues$mygenes, file=file)
-    }
-  )
-  
-  output$download_bookmarks_genesets <- downloadHandler(
-    filename = "magnetique_genesets_bookmark.csv",
-    content = function(file){
-      write.csv(rvalues$mygenesets, file=file)
-    }
-  )
   
   observeEvent(input$bookmarker, {
     if (input$magnetique_tab == "tab-welcome") {
