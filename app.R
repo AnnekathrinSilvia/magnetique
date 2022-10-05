@@ -975,11 +975,11 @@ magnetique_server <- function(input, output, session) {
     
     HTML(
       paste0(
-        "If selecting <b>color</b> by <em>z_score</em>, red nodes display genesets with positive values, ",
-        "while blue nodes represent genesets with negative values. ",
-        "If showing the geneset <em>p-value</em>, darker colors represent genesets with smaller ",
+        "If selecting <b>color</b> by <em>z_score</em>, red nodes display gene sets with positive values, ",
+        "while blue nodes represent gene sets with negative values. ",
+        "If showing the gene set <em>p-value</em>, darker colors represent gene sets with smaller ",
         "p-values, indicating a more significant enrichment.",
-        "<br>The <b>size</b> of the node is representing the size of the geneset (number of genes ",
+        "<br>The <b>size</b> of the node is representing the size of the gene set (number of genes ",
         "assigned to it)."
       )
     )  
@@ -1044,7 +1044,7 @@ magnetique_server <- function(input, output, session) {
       FDR = 0.05,
       de_only = FALSE,
       plot_title = stringr::str_glue(
-        "Gene signature for {gs_description} geneset"), 
+        "Gene signature for {gs_description} gene set"), 
       cluster_rows = TRUE,
       cluster_columns = TRUE,
       center_mean = TRUE,
@@ -1062,7 +1062,7 @@ magnetique_server <- function(input, output, session) {
       res_enrich <- rvalues$res_enrich() %>% 
         slice(i)
       plot_title <- "Enrichment for genes comprising
-      {res_enrich[1, 'gs_id']} geneset ({input$selected_contrast})"
+      {res_enrich[1, 'gs_id']} gene set ({input$selected_contrast})"
 
     } else {
       res_enrich <- rvalues$res_enrich()
@@ -1374,7 +1374,7 @@ magnetique_server <- function(input, output, session) {
     validate(
       need(
         nrow(rvalues$mygenesets) > 0,
-        "Please select at least one geneset with the Bookmark button"
+        "Please select at least one gene set with the Bookmark button"
       )
     )
     tagList(
@@ -1477,7 +1477,7 @@ magnetique_server <- function(input, output, session) {
           sel_gs <- df[[1, "gs_description"]]
           
           if (sel_gs_id %in% rvalues$mygenesets$gs_id) {
-            showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genesets.", sel_gs, sel_gs_id), type = "default")
+            showNotification(sprintf("The selected gene set, %s (%s), is already in the set of the bookmarked genes ets.", sel_gs, sel_gs_id), type = "default")
           } else {
             rvalues$mygenesets <- rbind(rvalues$mygenesets, df)
             showNotification(sprintf("Added %s (%s) to the bookmarked genesets. The list contains now %d elements", sel_gs, sel_gs_id, nrow(rvalues$mygenesets)), type = "message")
