@@ -434,6 +434,7 @@ magnetique_server <- function(input, output, session) {
       shinyjs::show("options")
     } else if (input$magnetique_tab == "tab-rbp-view") {
       shinyjs::show("selected_contrast")
+      shinyjs::hide("bookmarker")
     } else {
       shinyjs::hide("selected_contrast")
       shinyjs::hide("selected_ontology")
