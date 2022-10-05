@@ -1,6 +1,10 @@
-# magnetique
+# `magnetique`
 
-- Data is located at: https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb
+This repository contains the source for the `magnetique` application, presented in the work "Magnetique: An interactive web application to explore transcriptome signatures of heart failure".
+
+The data required for running this app is located at: https://data.dieterichlab.org/s/3gCTLGT4DaAqaqb.
+
+A separate repository (https://github.com/dieterich-lab/magnetiqueCode2022) contains the source codes for the analyses of the MAGNet RNA-seq dataset, as they are made available via the `magnetique` application.  
 
 ## Detailing files
 - `Dockerfile`: contains the instructions to create the docker image
