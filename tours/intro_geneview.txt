@@ -3,6 +3,7 @@ element;intro
 #welcome;Magnetique was designed to be easy to use. However, the first time the UI elements are loaded in the Gene View tab, they may take a few seconds to show due to the size of the dataset.
 #selected_contrast + .selectize-control;You can choose between pairs of conditions you wish to compare: DCMvsHCM, DCMvsNFD and HCMvsNFD.
 #de_table;Genes with fold change and significance (*p*-value) for differential gene expression (DGE) and differential transcript usage (DTU). Gene ID links to the Ensembl website. The table header shows details for each column. Select a row to see more information. 
+#de_table;Rows can be filtered by a partial word match or by `value <= filter` for the -log10_dge_padj and -log10_dtu_padj columns.
 #bookmarker;After selecting a row on the table, bookmark it here to add it to the Bookmarks Section.
 #de_volcano;The first volcano plot summarizes the DGE analysis, showing the test statistic (-log10 of *p*-values) versus the magnitude of change (log2-fold-change) of each quantified gene.
 #dtu_volcano;The second volcano plot compares the statistical significance (-log10 of adjusted p-values) to the difference in transcript usage.
