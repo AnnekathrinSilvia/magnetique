@@ -1346,7 +1346,12 @@ magnetique_server <- function(input, output, session) {
             name = "-log10_FDR",
             defaultSortOrder = "desc",
             header = with_tooltip("-log10_FDR", "FDR adjusted p-value for the reverse global test"),
-            filterable = FALSE,
+            filterable = TRUE,
+            filterMethod = JS("function(rows, columnId, filterValue) {
+              return rows.filter(function(row) {
+                return row.values[columnId] >= filterValue
+                })
+                }"),
           ),
           Association = colDef(
             name = "association",
