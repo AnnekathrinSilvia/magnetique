@@ -1372,7 +1372,10 @@ magnetique_server <- function(input, output, session) {
     )
     tagList(
       reactableOutput("bookmarks_genes"),
-      downloadButton("download_bookmarks_genes", "Download as csv")
+      tags$button(
+        "Download as CSV", 
+        onclick = "Reactable.downloadDataCSV('bookmarks_genes', 'bookmarks_genes.csv')"
+      )
     )
   })
   
@@ -1385,7 +1388,10 @@ magnetique_server <- function(input, output, session) {
     )
     tagList(
       reactableOutput("bookmarks_genesets"),
-      downloadButton("download_bookmarks_genesets", "Download as csv")
+      tags$button(
+        "Download as CSV", 
+        onclick = "Reactable.downloadDataCSV('bookmarks_genesets', 'bookmarks_genesets.csv')"
+      )
     )
   })
   
