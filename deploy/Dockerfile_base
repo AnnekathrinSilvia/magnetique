@@ -1,0 +1,37 @@
+FROM rocker/shiny-verse:4.2.2
+
+LABEL MAINTAINER Thiago Britto-Borges "thiago.brittoborges@uni-heidelberg.de"
+
+RUN apt-get update \
+    && apt-get install -y software-properties-common \
+    && add-apt-repository ppa:criu/ppa \
+    && apt-get update \
+    && apt-get install -y \
+    sudo \
+    criu \
+    pandoc \
+    pandoc-citeproc \
+    libcurl4-gnutls-dev \
+    libcairo2-dev \
+    libxt-dev \
+    libssl-dev \
+    libssh2-1-dev \
+    libfftw3-dev \
+    libpq-dev \
+    libbz2-dev \
+    liblzma-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
+RUN useradd docker \
+    && mkdir /home/docker \
+    && chown docker:docker /home/docker \
+    && addgroup docker staff
+
+# set options
+COPY Rprofile.site /usr/lib/R/etc/
+COPY renv.lock renv.lock
+
+ENV RENV_VERSION v1.0.0
+RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
+RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"

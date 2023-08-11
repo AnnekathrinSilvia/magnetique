@@ -1,9 +1,5 @@
 # loading libraries -------------------------------------------------------
 library(shiny)
-library(future)
-library(promises)
-plan(multisession)
-
 library(shinycssloaders)
 library(shinyjs)
 library(plotly, warn.conflicts = FALSE)
