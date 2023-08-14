@@ -129,7 +129,5 @@ carnival <- data.frame(
   igraph = as.character(carnival)
 )
 
-save.image('MAGNetApp.rdata')
-
 system("rm data.zip")
 system("rm -rf MAGNetApp/")

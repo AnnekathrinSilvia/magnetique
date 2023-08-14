@@ -1,5 +1,5 @@
-
 source("app.R")
+source("database.R")
 gc()
 
 while (! file.exists('/restore.marker')) {
