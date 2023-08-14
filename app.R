@@ -13,6 +13,7 @@ library(igraph)
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr, warn.conflicts = FALSE)
 library(ggplot2, warn.conflicts = FALSE)
+library(markdown)
 
 options(spinner.type = 6)
 
