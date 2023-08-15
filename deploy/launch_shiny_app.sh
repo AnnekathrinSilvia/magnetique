@@ -1,7 +1,6 @@
 #!/bin/bash
 
 R -e 'renv::restore()'
-R -e 'renv::install("markdown")'
 
 setsid R -f rstart.R &> /criu_dumps/rlogs.log 2>&1 &
 while ! grep -q -F 'Library loaded' /criu_dumps/rlogs.log

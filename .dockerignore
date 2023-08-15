@@ -2,3 +2,4 @@ Dockerfile
 .dockerignore
 settings.json
 .rdata
+MAGNetApp_cloud_data

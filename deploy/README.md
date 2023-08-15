@@ -9,3 +9,8 @@ To run the image:
 After updating a R package:
 
     docker cp $container:/root/magnetique/renv.lock renv.lock
+
+
+Logs location:
+    R log  logs: /criu_dumps/rlogs.log
+    restore log: /criu_dumps/restore.log
