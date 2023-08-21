@@ -31,15 +31,9 @@ names(carnival) <- get_names(dir(cdir, "*.RData"))
 metadata <- read.csv(file.path(dirloc, "colData.txt", fsep=.Platform$file.sep))
 
 ## Preparing tables ####
-
-
-
-counts <- purrr::map2(dge, names(dge), function(.x, .y) {
-  DESeq2::counts(.x$dds) %>% 
-    as_tibble(., rownames='row_names') %>% 
-    mutate(contrast=.y)
-}) %>%
-  bind_rows()
+counts <- dge$DCMvsHCM$dds %>%
+  DESeq2::counts(.) %>%
+  as_tibble(., rownames = "row_names")
 
 message('Loading VST-transformed')
 vst <- dge$DCMvsHCM$dds %>% 
@@ -63,12 +57,12 @@ res <- purrr::map(contrasts, function(.x) {
   res_dtu <- rowdata[[.x]] %>% 
     arrange(adj_pvalue) %>%
     group_by(gene_id) %>% 
-    mutate(dtu_dif=compute_usage_dif(feature_id, dtu, contrast)) %>%
+    mutate(dtu_dif = compute_usage_dif(feature_id, dtu, contrast)) %>%
     summarise(
-      n_transcript = n(), 
+      n_transcript = n(),
       adj_pvalue = dplyr::first(adj_pvalue),
       dtu_dif = dplyr::first(dtu_dif)) %>%
-    dplyr::rename(dtu_pvadj=adj_pvalue) %>%
+    dplyr::rename(dtu_pvadj = adj_pvalue) %>%
     dplyr::select(gene_id, n_transcript, dtu_pvadj, dtu_dif)
   
   res_de <- dge[[paste(contrast, collapse='vs')]]$res_de %>% as.data.frame() %>%
