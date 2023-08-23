@@ -1,13 +1,13 @@
 FROM shinyverse_criu_base:latest
 
-# setup app
-COPY . /root/magnetique/
 WORKDIR /root/magnetique/
-
-ENV PGPASSWORD=$PGPASSWORD
-ENV PGHOST=$PGHOST
-ENV PGUSER=$PGUSER
-ENV PGPORT=$PGPORT
+# setup app
+COPY MAGNetApp.rdata /root/magnetique/
+COPY app.R /root/magnetique/
+COPY utils.R /root/magnetique/
+COPY database.R /root/magnetique/
+COPY www/ /root/magnetique/www/
+COPY tours/ /root/magnetique/tours/
 
 COPY deploy/rstart.R rstart.R
 COPY deploy/restore.sh restore.sh

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-R -e 'renv::restore(rebuild=TRUE)'
+R -e 'renv::restore()'
 
 setsid R -f rstart.R &> /criu_dumps/rlogs.log 2>&1 &
 while ! grep -q -F 'Library loaded' /criu_dumps/rlogs.log
