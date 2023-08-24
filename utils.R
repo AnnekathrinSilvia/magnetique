@@ -138,22 +138,17 @@ buildup_gtl <- function(con,
                         ontology,
                         verbose = TRUE) {
   
-  coldata <- tbl(con, "metadata") %>% collect()
+  coldata <- metadata
 
   if(verbose) message("... building annotation...")
-  annotation <- tbl(con, "annotation_obj") %>% 
-    select(c("gene_id", "gene_name")) %>% collect() %>% as.data.frame()
+  annotation <- annotation_obj %>% 
+    select(c("gene_id", "gene_name")) %>% as.data.frame()
   rownames(annotation) <- annotation$gene_id 
 
   if(verbose) message("Done!")
   
   if(verbose) message("... building counts...")
   
-counts <- tbl(con, "counts") %>%
-  filter(contrast == contrast) %>% 
-  mutate(row_names = str_replace_all(row_names, 'DCMvsHCM.', "")) %>% 
-  collect()
-
   counts <- as.data.frame(counts)
   counts_rownames <- counts$row_names
   counts$row_names <- NULL
@@ -168,8 +163,7 @@ counts <- tbl(con, "counts") %>%
   if(verbose) message("Done!")
   
   if(verbose) message("... building DE table...")
-  tbl_de <- tbl(con, paste0("res_", local(contrast))) %>% 
-    collect()
+  tbl_de <- res[[contrast]]
   tbl_de <- S4Vectors::DataFrame(tbl_de)
   rownames(tbl_de) <- rownames(annotation)
   
@@ -177,10 +171,9 @@ counts <- tbl(con, "counts") %>%
   if(verbose) message("Done!")
   
   if(verbose) message("... building enrichment table...")
-  tbl_enrich <- tbl(con, paste0("res_enrich_", local(contrast))) %>%
+  tbl_enrich <- res_enrich[[contrast]] %>%
     filter(ontology == ontology) %>%
     select(-ontology) %>%
-    collect() %>%
     as.data.frame()
   rownames(tbl_enrich) <- tbl_enrich$gs_id
   
@@ -195,9 +188,6 @@ counts <- tbl(con, "counts") %>%
   )
   return(gtl)
 } 
-
-
-
 
 highlight_selected <- function(selected, nelements) {     
     if(!is.null(selected)){

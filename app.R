@@ -426,7 +426,7 @@ magnetique_server <- function(input, output, session) {
 
   rvalues$key <- reactive({
     res[[input$selected_contrast]] %>%
-      select(
+      dplyr::select(
         c(
           "gene_id",
           "SYMBOL",
@@ -671,14 +671,14 @@ magnetique_server <- function(input, output, session) {
     i <- rvalues$key()[[i, "gene_id"]]
 
     counts <- rvalues$counts() %>%
-      select(-contrast) %>%
+      dplyr::select(-contrast) %>%
       filter(row_names == !!i) %>%
       dplyr::select(-row_names) %>%
       mutate(n = n()) %>%
       pivot_longer(-n)
 
     metadata <- rvalues$metadata() %>%
-      select(row_names, Etiology, Race, Age, Sex, SV1, SV2) %>%
+      dplyr::select(row_names, Etiology, Race, Age, Sex, SV1, SV2) %>%
       tibble::rownames_to_column("name")
 
     left_join(counts, metadata, by = "name") %>%
@@ -829,7 +829,7 @@ magnetique_server <- function(input, output, session) {
           "pval" = "gs_pvalue"
         )
       ) %>%
-      select(id, description, pval, expected, observed) %>%
+      dplyr::select(id, description, pval, expected, observed) %>%
       arrange(pval) %>%
       reactable(
         .,
@@ -899,7 +899,7 @@ magnetique_server <- function(input, output, session) {
     res_de <- res_de %>%
       filter(!is.na(SYMBOL)) %>%
       arrange(-dplyr::desc(padj)) %>%
-      select(gene_id, log2FoldChange, padj, SYMBOL)
+      dplyr::select(gene_id, log2FoldChange, padj, SYMBOL)
 
     res_de <- DESeq2::DESeqResults(
       S4Vectors::DataFrame(res_de)
@@ -989,7 +989,7 @@ magnetique_server <- function(input, output, session) {
     res_de <- res_de %>%
       filter(!is.na(SYMBOL)) %>%
       arrange(-dplyr::desc(padj)) %>%
-      select(gene_id, log2FoldChange, padj, SYMBOL)
+      dplyr::select(gene_id, log2FoldChange, padj, SYMBOL)
 
     res_de <- DESeq2::DESeqResults(
       S4Vectors::DataFrame(res_de)
@@ -1061,7 +1061,7 @@ magnetique_server <- function(input, output, session) {
     res_de <- res_de %>%
       filter(!is.na(SYMBOL)) %>%
       arrange(-dplyr::desc(padj)) %>%
-      select(gene_id, log2FoldChange, padj, SYMBOL)
+      dplyr::select(gene_id, log2FoldChange, padj, SYMBOL)
 
     res_de <- DESeq2::DESeqResults(
       S4Vectors::DataFrame(res_de)
@@ -1252,7 +1252,7 @@ magnetique_server <- function(input, output, session) {
         FDR = round(-log10(FDR), 2),
         Association = ifelse(Association == 1, "positive", "negative")
       ) %>%
-      select(
+      dplyr::select(
         gene_name_regulator,
         gene_id_regulator,
         transcript_name,
@@ -1408,7 +1408,7 @@ magnetique_server <- function(input, output, session) {
   output$bookmarks_genesets <- renderReactable({
     rvalues$res_enrich() %>%
       filter(gs_id %in% rvalues$mygenesets$gs_id) %>%
-      select(-row_names) %>%
+      dplyr::select(-row_names) %>%
       reactable(rownames = FALSE)
   })
 
@@ -1447,7 +1447,7 @@ magnetique_server <- function(input, output, session) {
         if (!is.null(i)) {
           df <- rvalues$res_enrich() %>%
             slice(i) %>%
-            select(gs_id, gs_description)
+            dplyr::select(gs_id, gs_description)
 
           sel_gs_id <- df[[1, "gs_id"]]
           sel_gs <- df[[1, "gs_description"]]
