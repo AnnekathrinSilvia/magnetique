@@ -2,8 +2,8 @@
 
 R -e 'renv::restore()'
 
-setsid R -f rstart.R &> /criu_dumps/rlogs.log 2>&1 &
-while ! grep -q -F 'Library loaded' /criu_dumps/rlogs.log
+setsid R -f rstart.R &> /app/rlogs.log 2>&1 &
+while ! grep -q -F 'Library loaded' /app/rlogs.log
 do
   echo 'Waiting for library load ...'
   sleep 5

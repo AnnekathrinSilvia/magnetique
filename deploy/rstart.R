@@ -8,7 +8,7 @@ while (! file.exists('/restore.marker')) {
     Sys.sleep(0.5)
 }
 system(paste('mkdir -p', tempdir()))
-system('tail --follow=name /criu_dumps/rlogs.log > /criu_dumps/rlogs_container.log &')
+system('tail --follow=name /app/rlogs.log > /app/rlogs_container.log &')
 shiny_user  <- basename(readLines('/shiny_user.txt'));
 shiny_groups  <- basename(readLines('/shiny_usergroups.txt'));
 print(paste('User', shiny_user))
