@@ -3,10 +3,12 @@
 export RENV_PATHS_CACHE_HOST=~/renv/cache
 export RENV_PATHS_CACHE_CONTAINER=/renv/cache
 
+
 mkdir -p $RENV_PATHS_CACHE_HOST
 
 docker build -f deploy/Dockerfile_base --progress=plain -t shinyverse_criu_base .
 docker build -f deploy/Dockerfile --progress=plain -t magnetique_prefreeze:latest .
+
 container=$(docker run -d --rm -i --privileged \
     -e "RENV_PATHS_CACHE=${RENV_PATHS_CACHE_CONTAINER}" \
     -v "${RENV_PATHS_CACHE_HOST}:${RENV_PATHS_CACHE_CONTAINER}" \

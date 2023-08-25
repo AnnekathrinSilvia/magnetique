@@ -19,6 +19,7 @@ RUN apt-get update \
     libssh2-1-dev \
     libfftw3-dev \
     libpq-dev \
+    libglpk-dev \
     libbz2-dev \
     liblzma-dev \
     strace \
