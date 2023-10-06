@@ -13,7 +13,7 @@ container=$(docker run -d --rm -i --privileged \
     -e "RENV_PATHS_CACHE=${RENV_PATHS_CACHE_CONTAINER}" \
     -v "${RENV_PATHS_CACHE_HOST}:${RENV_PATHS_CACHE_CONTAINER}" \
     -v "$(pwd)/criu_dumps/:/criu_dumps/" \
-    -v "$(pwd)/database.RData:/data/database.RData" \
+    -v "$(pwd)/data/:/data/" \
     magnetique_prefreeze:latest /bin/bash launch_shiny_app.sh
 )
 dump_done=''
