@@ -672,15 +672,14 @@ magnetique_server <- function(input, output, session) {
     i <- rvalues$key()[[i, "gene_id"]]
 
     counts <- rvalues$counts() %>%
-      dplyr::select(-contrast) %>%
       filter(row_names == !!i) %>%
-      dplyr::select(-row_names) %>%
+      select(-row_names) %>% 
       mutate(n = n()) %>%
-      pivot_longer(-n)
+      pivot_longer(-n) 
 
     metadata <- rvalues$metadata() %>%
-      dplyr::select(row_names, Etiology, Race, Age, Sex, SV1, SV2) %>%
-      tibble::rownames_to_column("name")
+      tibble::rownames_to_column(var = 'name') %>% 
+      dplyr::select(name, Etiology, Race, Age, Sex, SV1, SV2) 
 
     left_join(counts, metadata, by = "name") %>%
       plot_ly(
@@ -764,8 +763,7 @@ magnetique_server <- function(input, output, session) {
     x <- gene2tx %>%
       filter(gene_id == !!i) %>%
       left_join(
-        dtu_fit_proportions,
-        by = (c("transcript_id" = "row_names"))
+        dtu_fit_proportions 
       )
 
     x <- x %>% pivot_longer(

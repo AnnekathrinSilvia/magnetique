@@ -74,7 +74,8 @@ names(res) <- get_names(contrasts)
 
 # DRIMSeq transcript proportions
 dtu_fit_proportions <- dtu@assays@data$fit_full %>%
-  data.frame() 
+  data.frame() %>% 
+  tibble::rownames_to_column(var = 'transcript_id')
 
 # Loads the gene ontology for Human
 library("org.Hs.eg.db")
@@ -122,6 +123,7 @@ carnival <- data.frame(
   contrast = names(carnival),
   igraph = as.character(carnival)
 )
-
+rm(dge)
+save.image('data/database.RData')
 system("rm data.zip")
 system("rm -rf MAGNetApp/")
