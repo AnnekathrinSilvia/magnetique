@@ -738,9 +738,9 @@ magnetique_server <- function(input, output, session) {
       )
     )
     i <- rvalues$key()[[i, "gene_id"]]
-    this_gtf <- gtf %>% subset(gene_id == i)
-
-    this_gtf <- GenomicRanges::split(this_gtf, gtf$transcript_id)
+    tx <-  filter(gene2tx, gene_id == i)$transcript_id
+    this_gtf <- gtf2 %>% subset(transcript_id %in% tx)
+    this_gtf <- GenomicRanges::split(this_gtf, this_gtf$transcript_id)
     suppressMessages({
       plot_gene_structure(this_gtf) + labs(title = "Gene structure") + theme(plot.title = element_text(size = 18))
     })

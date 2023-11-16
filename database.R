@@ -14,7 +14,7 @@ dtu <- readRDS(file.path(dirloc, "DTU", "summarized_experiment.RDS", fsep=.Platf
 
 # annotation
 gtf <- readRDS(file.path(dirloc, "DTU", "gtf.RDS", fsep=.Platform$file.sep))
-
+gtf <- subset(gtf, type == 'exon')
 # carnival
 cdir <- file.path(dirloc, "networks", fsep=.Platform$file.sep)
 carnival <- purrr::map(dir(cdir, "*.RData"), ~get(load(file.path(cdir, .x))))
@@ -123,7 +123,9 @@ carnival <- data.frame(
   contrast = names(carnival),
   igraph = as.character(carnival)
 )
+
 rm(dge)
+rm(dtu)
 save.image('data/database.RData')
 system("rm data.zip")
 system("rm -rf MAGNetApp/")
