@@ -586,7 +586,7 @@ magnetique_server <- function(input, output, session) {
 
     if (length(prev_selected()) == 1) {
       df <- rvalues$key() %>%
-        slice(prev_selected())
+        dplyr::slice(prev_selected())
 
       p <- add_trace(
         p,
@@ -642,7 +642,7 @@ magnetique_server <- function(input, output, session) {
 
     if (length(prev_selected()) == 1) {
       df <- rvalues$key() %>%
-        slice(prev_selected())
+        dplyr::slice(prev_selected())
 
       p <- add_trace(
         p,
@@ -673,13 +673,13 @@ magnetique_server <- function(input, output, session) {
 
     counts <- rvalues$counts() %>%
       filter(row_names == !!i) %>%
-      select(-row_names) %>% 
+      dplyr::select(-row_names) %>%
       mutate(n = n()) %>%
-      pivot_longer(-n) 
+      pivot_longer(-n)
 
     metadata <- rvalues$metadata() %>%
-      tibble::rownames_to_column(var = 'name') %>% 
-      dplyr::select(name, Etiology, Race, Age, Sex, SV1, SV2) 
+      tibble::rownames_to_column(var = "name") %>%
+      dplyr::select(name, Etiology, Race, Age, Sex, SV1, SV2)
 
     left_join(counts, metadata, by = "name") %>%
       plot_ly(
@@ -738,8 +738,8 @@ magnetique_server <- function(input, output, session) {
       )
     )
     i <- rvalues$key()[[i, "gene_id"]]
-    tx <-  filter(gene2tx, gene_id == i)$transcript_id
-    this_gtf <- gtf2 %>% subset(transcript_id %in% tx)
+    tx <- filter(gene2tx, gene_id == i)$transcript_id
+    this_gtf <- gtf %>% subset(transcript_id %in% tx)
     this_gtf <- GenomicRanges::split(this_gtf, this_gtf$transcript_id)
     suppressMessages({
       plot_gene_structure(this_gtf) + labs(title = "Gene structure") + theme(plot.title = element_text(size = 18))
@@ -763,7 +763,7 @@ magnetique_server <- function(input, output, session) {
     x <- gene2tx %>%
       filter(gene_id == !!i) %>%
       left_join(
-        dtu_fit_proportions 
+        dtu_fit_proportions
       )
 
     x <- x %>% pivot_longer(
@@ -819,7 +819,7 @@ magnetique_server <- function(input, output, session) {
   # enrichment map related content ---------------------------------------------
   output$enrich_table <- renderReactable({
     rvalues$res_enrich() %>%
-      rename(
+      dplyr::rename(
         c(
           "id" = "gs_id",
           "description" = "gs_description",
@@ -1042,7 +1042,7 @@ magnetique_server <- function(input, output, session) {
     i <- getReactableState("enrich_table", "selected")
     if (!is.null(i)) {
       res_enrich <- rvalues$res_enrich() %>%
-        slice(i)
+        dplyr::slice(i)
       plot_title <- "Enrichment for genes comprising
       {res_enrich[1, 'gs_id']} gene set ({input$selected_contrast})"
     } else {
@@ -1445,7 +1445,7 @@ magnetique_server <- function(input, output, session) {
         # handling bookmarks from the table
         if (!is.null(i)) {
           df <- rvalues$res_enrich() %>%
-            slice(i) %>%
+            dplyr::slice(i) %>%
             dplyr::select(gs_id, gs_description)
 
           sel_gs_id <- df[[1, "gs_id"]]
